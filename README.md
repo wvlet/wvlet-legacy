@@ -18,7 +18,7 @@ With wvlet, you can:
 
 | project      |                                         | version |
 | -------------- | --------------------------------------- | -------- |
-| wvlet-log      | Logging utility                          | [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.wvlet/wvlet-log_2.11/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.wvlet/wvlet-log_2.11) |
+| wvlet-log      | Logging utility                          | Moved to [wvlet-log](https://github.com/wvlet/log) |
 | wvlet-obj   |  Object schema inspection library   | [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.wvlet/wvlet-obj_2.11/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.wvlet/wvlet-obj_2.11) |
 | wvlet-inject      | Dependency injection library     | Moved to [Airframe](https://github.com/wvlet/airframe) |
 | wvlet-jmx   | JMX utility| [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.wvlet/wvlet-jmx_2.11/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.wvlet/wvlet-jmx_2.11) |

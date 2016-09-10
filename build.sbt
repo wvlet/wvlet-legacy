@@ -67,27 +67,19 @@ lazy val wvlet =
     publish := {},
     publishLocal := {},
     packExclude := Seq("wvlet")
-  ).aggregate(wvletCore, wvletObj, wvletOpts, wvletTest, wvletLog, wvletConfig, wvletJmx) //, wvletLens, wvletJdbc, wvletDataframe, wvletRest, wvletTest, wvletCui)
+  ).aggregate(wvletCore, wvletObj, wvletOpts, wvletTest, wvletConfig, wvletJmx) //, wvletLens, wvletJdbc, wvletDataframe, wvletRest, wvletTest, wvletCui)
 
-lazy val wvletLog =
-  Project(id = "wvlet-log", base = file("wvlet-log")).settings(
-    buildSettings,
-    description := "Handy logging wrapper for java.util.logging",
-    libraryDependencies ++= Seq(
-      "org.scala-lang" % "scala-reflect" % scalaVersion.value,
-      "ch.qos.logback" % "logback-core" % "1.1.7",
-      "org.scalatest" %% "scalatest" % "2.2.+" % "test"
-    )
-  )
+val wvletLog = "org.wvlet" %% "wvlet-log" % "1.0"
 
 lazy val wvletJmx =
   Project(id = "wvlet-jmx", base = file("wvlet-jmx")).settings(
     buildSettings,
     description := "wvlet handy logging wrapper for java.util.logging",
     libraryDependencies ++= Seq(
+      wvletLog,
       "org.scala-lang" % "scala-reflect" % scalaVersion.value
     )
-  ).dependsOn(wvletLog, wvletCore, wvletTest % "test->compile")
+  ).dependsOn(wvletCore, wvletTest % "test->compile")
 
 lazy val wvletConfig =
   Project(id = "wvlet-config", base = file("wvlet-config")).settings(
@@ -104,19 +96,21 @@ lazy val wvletCore =
     buildSettings,
     description := "wvlet core module",
     libraryDependencies ++= Seq(
+      wvletLog,
       "org.msgpack" % "msgpack-core" % "0.8.7"
     )
-  ).dependsOn(wvletLog, wvletObj, wvletTest % "test->compile")
+  ).dependsOn(wvletObj, wvletTest % "test->compile")
 
 lazy val wvletObj =
   Project(id = "wvlet-obj", base = file("wvlet-obj")).settings(
     buildSettings,
     description := "wvlet object schema inspector",
     libraryDependencies ++= Seq(
+      wvletLog,
       "org.scala-lang" % "scalap" % scalaVersion.value,
       "org.scala-lang" % "scala-reflect" % scalaVersion.value
     )
-  ).dependsOn(wvletLog, wvletTest % "test->compile")
+  ).dependsOn(wvletTest % "test->compile")
 
 lazy val wvletRest =
   Project(id = "wvlet-rest", base = file("wvlet-rest")).settings(
@@ -152,7 +146,8 @@ lazy val wvletTest =
     buildSettings,
     description := "wvlet testing module",
     libraryDependencies ++= Seq(
+      wvletLog,
       "org.scalatest" %% "scalatest" % "2.2.+",
       "org.scalacheck" %% "scalacheck" % "1.11.4"
     )
-  ) dependsOn(wvletLog)
+  )
