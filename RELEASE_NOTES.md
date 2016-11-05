@@ -1,5 +1,9 @@
 Release Notes
 ====
+0.27
+ * Support Scala 2.12.0
+ * Upgrade to wvlet-log 1.1
+
 0.26
  * Separated wvlet-log to another repository
  * Using wvlet-log 1.0
