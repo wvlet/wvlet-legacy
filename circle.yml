@@ -7,8 +7,6 @@ dependencies:
   cache_directories:
     - "~/.sbt"
     - "~/.ivy2"
-  pre:
-    - ./sbt sbt-version
   override:
     - ./sbt "+ compile"
 
