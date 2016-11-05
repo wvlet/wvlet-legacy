@@ -22,7 +22,7 @@
 package wvlet.opts
 
 import wvlet.log.LogSupport
-import wvlet.obj.{ObjectMethod, ObjectSchema, TypeUtil}
+import wvlet.obj._
 
 import scala.reflect.ClassTag
 

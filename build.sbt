@@ -2,7 +2,8 @@ import ReleaseTransformations._
 
 
 val buildSettings = Seq[Setting[_]](
-  scalaVersion := "2.11.8",
+  scalaVersion := "2.12.0",
+  crossScalaVersions := Seq("2.11.8", "2.12.0"),
   organization := "org.wvlet",
   description := "A framework for structured data mapping",
   crossPaths := true,
@@ -69,12 +70,12 @@ lazy val wvlet =
     packExclude := Seq("wvlet")
   ).aggregate(wvletCore, wvletObj, wvletOpts, wvletTest, wvletConfig, wvletJmx) //, wvletLens, wvletJdbc, wvletDataframe, wvletRest, wvletTest, wvletCui)
 
-val wvletLog = "org.wvlet" %% "wvlet-log" % "1.0"
+val wvletLog = "org.wvlet" %% "wvlet-log" % "1.1"
 
 lazy val wvletJmx =
   Project(id = "wvlet-jmx", base = file("wvlet-jmx")).settings(
     buildSettings,
-    description := "wvlet handy logging wrapper for java.util.logging",
+    description := "A library for exposing Scala object data through JMX",
     libraryDependencies ++= Seq(
       wvletLog,
       "org.scala-lang" % "scala-reflect" % scalaVersion.value
@@ -86,8 +87,8 @@ lazy val wvletConfig =
     buildSettings,
     description := "wvlet configuration module",
     libraryDependencies ++= Seq(
-      "org.yaml" % "snakeyaml" % "1.14",
-      "org.wvlet" %% "airframe" % "0.8-SNAPSHOT" % "test"
+      "org.yaml" % "snakeyaml" % "1.14"
+      //"org.wvlet" %% "airframe" % "0.8-SNAPSHOT" % "test"
     )
   ).dependsOn(wvletObj, wvletTest % "test->compile")
 
@@ -97,7 +98,8 @@ lazy val wvletCore =
     description := "wvlet core module",
     libraryDependencies ++= Seq(
       wvletLog,
-      "org.msgpack" % "msgpack-core" % "0.8.7"
+      "org.msgpack" % "msgpack-core" % "0.8.7",
+      "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.4"
     )
   ).dependsOn(wvletObj, wvletTest % "test->compile")
 
@@ -112,23 +114,24 @@ lazy val wvletObj =
     )
   ).dependsOn(wvletTest % "test->compile")
 
-lazy val wvletRest =
-  Project(id = "wvlet-rest", base = file("wvlet-rest")).settings(
-    buildSettings,
-    description := "wvlet for REST applications",
-    libraryDependencies ++= Seq(
-      "javax.ws.rs" % "javax.ws.rs-api" % "2.0.1",
-      "org.xerial" %% "xerial-lens" % "3.5.0",
-      "javax.servlet" % "javax.servlet-api" % "3.1.0",
-      "com.twitter" %% "finagle-http" % "6.34.0"
-    )
-  ).dependsOn(wvletCore, wvletTest % "test->compile")
+// Detached from the project since finagle doesn't support Scala 2.12
+//lazy val wvletRest =
+//  Project(id = "wvlet-rest", base = file("wvlet-rest")).settings(
+//    buildSettings,
+//    description := "wvlet for REST applications",
+//    libraryDependencies ++= Seq(
+//      "javax.ws.rs" % "javax.ws.rs-api" % "2.0.1",
+//      "javax.servlet" % "javax.servlet-api" % "3.1.0",
+//      "com.twitter" %% "finagle-http" % "6.34.0"
+//    )
+//  ).dependsOn(wvletCore, wvletObj, wvletTest % "test->compile")
 
 lazy val wvletOpts =
   Project(id = "wvlet-opts", base = file("wvlet-opts")).settings(
     buildSettings,
     description := "wvlet command-line option parser",
     libraryDependencies ++= Seq(
+      "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.4"
     )
   ) dependsOn(wvletObj, wvletTest % "test->compile")
 
@@ -137,7 +140,6 @@ lazy val wvletCui =
     buildSettings,
     description := "wvlet commandline tools",
     libraryDependencies ++= Seq(
-      "org.xerial" %% "xerial-lens" % "3.5.0"    
     )
   ) dependsOn(wvletCore, wvletTest % "test->compile")
 
@@ -147,7 +149,7 @@ lazy val wvletTest =
     description := "wvlet testing module",
     libraryDependencies ++= Seq(
       wvletLog,
-      "org.scalatest" %% "scalatest" % "2.2.+",
-      "org.scalacheck" %% "scalacheck" % "1.11.4"
+      "org.scalatest" %% "scalatest" % "3.0.0",
+      "org.scalacheck" %% "scalacheck" % "1.12.6"
     )
   )

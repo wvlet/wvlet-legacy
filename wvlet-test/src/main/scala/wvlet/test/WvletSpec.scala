@@ -22,7 +22,7 @@ import scala.language.implicitConversions
   *
   */
 trait WvletSpec extends WordSpec
-  with ShouldMatchers
+  with Matchers
   with GivenWhenThen
   with BeforeAndAfter
   with BeforeAndAfterAll
