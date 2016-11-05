@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 
-package wvlet.opts
+package wvlet.obj
 
 import java.util.regex.Pattern
 

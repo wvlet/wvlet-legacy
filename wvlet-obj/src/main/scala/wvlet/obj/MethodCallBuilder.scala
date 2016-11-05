@@ -12,10 +12,9 @@
  * limitations under the License.
  */
 
-package wvlet.opts
+package wvlet.obj
 
 import wvlet.log.LogSupport
-import wvlet.obj.{MethodParameter, ObjectMethod, StandardBuilder, TypeUtil}
 
 //--------------------------------------
 //

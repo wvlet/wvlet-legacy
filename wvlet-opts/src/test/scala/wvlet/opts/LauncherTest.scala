@@ -24,7 +24,6 @@ package wvlet.opts
 import java.io.ByteArrayOutputStream
 
 import wvlet.log.{LogLevel, LogSupport}
-import wvlet.opts.Launcher
 import wvlet.test.WvletSpec
 
 /**

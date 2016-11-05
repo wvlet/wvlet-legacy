@@ -14,11 +14,13 @@
 package wvlet.rest
 
 import javax.servlet._
-import xerial.core.log.Logger
-import javax.servlet.http.{HttpServletResponse, HttpServletRequest}
-import xerial.core.io.Resource
-import xerial.lens._
-import java.lang.reflect.{Modifier, Method}
+import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
+import java.lang.reflect.{Method, Modifier}
+
+import wvlet.log.LogSupport
+import wvlet.log.io.Resource
+import wvlet.obj._
+
 import scala.language.existentials
 
 object RequestDispatcher {
@@ -93,7 +95,7 @@ object RequestDispatcher {
 /**
   * @author Taro L. Saito
   */
-class RequestDispatcher extends Filter with Logger {
+class RequestDispatcher extends Filter with LogSupport {
 
   import RequestDispatcher._
 
@@ -143,7 +145,7 @@ class RequestDispatcher extends Filter with Logger {
           name
       }
       trace(s"app class: $cls")
-      val methodMappers = for(method <- ObjectSchema.methodsOf(cls) if isPublic(method.jMethod) && isVoid(method.jMethod) && method.name != "init") yield {
+      val methodMappers = for(method <- ObjectSchema.allMethodsOf(cls) if isPublic(method.jMethod) && isVoid(method.jMethod) && method.name != "init") yield {
         trace(s"found an action method: ${method}")
         val pathAnnotation = method.findAnnotationOf[Path]
         if(pathAnnotation.isDefined)  {
