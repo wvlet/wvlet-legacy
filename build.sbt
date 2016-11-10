@@ -62,14 +62,10 @@ val buildSettings = Seq[Setting[_]](
 lazy val wvlet =
   Project(id = "wvlet", base = file(".")).settings(
     buildSettings,
-    // For creaating target/pack with sbt-pack
-    packSettings,
-    packMain := Map("wv" -> "wvlet.cui.WvletMain"),
     publishArtifact := false,
     publish := {},
-    publishLocal := {},
-    packExclude := Seq("wvlet")
-  ).aggregate(wvletCore, wvletObj, wvletOpts, wvletTest, wvletConfig, wvletJmx) //, wvletLens, wvletJdbc, wvletDataframe, wvletRest, wvletTest, wvletCui)
+    publishLocal := {}
+  ).aggregate(wvletCore, wvletObj, wvletOpts, wvletTest, wvletConfig, wvletJmx)
 
 val wvletLog = "org.wvlet" %% "wvlet-log" % "1.1"
 
@@ -81,7 +77,7 @@ lazy val wvletJmx =
       wvletLog,
       "org.scala-lang" % "scala-reflect" % scalaVersion.value
     )
-  ).dependsOn(wvletCore, wvletTest % "test->compile")
+  ).dependsOn(wvletObj, wvletTest % "test->compile")
 
 lazy val wvletConfig =
   Project(id = "wvlet-config", base = file("wvlet-config")).settings(
@@ -115,18 +111,6 @@ lazy val wvletObj =
     )
   ).dependsOn(wvletTest % "test->compile")
 
-// Detached from the project since finagle doesn't support Scala 2.12
-//lazy val wvletRest =
-//  Project(id = "wvlet-rest", base = file("wvlet-rest")).settings(
-//    buildSettings,
-//    description := "wvlet for REST applications",
-//    libraryDependencies ++= Seq(
-//      "javax.ws.rs" % "javax.ws.rs-api" % "2.0.1",
-//      "javax.servlet" % "javax.servlet-api" % "3.1.0",
-//      "com.twitter" %% "finagle-http" % "6.34.0"
-//    )
-//  ).dependsOn(wvletCore, wvletObj, wvletTest % "test->compile")
-
 lazy val wvletOpts =
   Project(id = "wvlet-opts", base = file("wvlet-opts")).settings(
     buildSettings,
@@ -135,14 +119,6 @@ lazy val wvletOpts =
       "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.4"
     )
   ) dependsOn(wvletObj, wvletTest % "test->compile")
-
-lazy val wvletCui =
-  Project(id = "wvlet-cui", base = file("wvlet-cui")).settings(
-    buildSettings,
-    description := "wvlet commandline tools",
-    libraryDependencies ++= Seq(
-    )
-  ) dependsOn(wvletCore, wvletTest % "test->compile")
 
 lazy val wvletTest =
   Project(id = "wvlet-test", base = file("wvlet-test")).settings(
