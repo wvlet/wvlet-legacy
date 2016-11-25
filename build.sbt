@@ -65,29 +65,9 @@ lazy val wvlet =
     publishArtifact := false,
     publish := {},
     publishLocal := {}
-  ).aggregate(wvletCore, wvletObj, wvletOpts, wvletTest, wvletConfig, wvletJmx)
+  ).aggregate(wvletCore, wvletTest)
 
 val wvletLog = "org.wvlet" %% "wvlet-log" % "1.1"
-
-lazy val wvletJmx =
-  Project(id = "wvlet-jmx", base = file("wvlet-jmx")).settings(
-    buildSettings,
-    description := "A library for exposing Scala object data through JMX",
-    libraryDependencies ++= Seq(
-      wvletLog,
-      "org.scala-lang" % "scala-reflect" % scalaVersion.value
-    )
-  ).dependsOn(wvletObj, wvletTest % "test->compile")
-
-lazy val wvletConfig =
-  Project(id = "wvlet-config", base = file("wvlet-config")).settings(
-    buildSettings,
-    description := "wvlet configuration module",
-    libraryDependencies ++= Seq(
-      "org.yaml" % "snakeyaml" % "1.14"
-      //"org.wvlet" %% "airframe" % "0.8-SNAPSHOT" % "test"
-    )
-  ).dependsOn(wvletObj, wvletTest % "test->compile")
 
 lazy val wvletCore =
   Project(id = "wvlet-core", base = file("wvlet-core")).settings(
@@ -95,30 +75,11 @@ lazy val wvletCore =
     description := "wvlet core module",
     libraryDependencies ++= Seq(
       wvletLog,
+      "org.wvlet" %% "object-schema" % "1.0",
       "org.msgpack" % "msgpack-core" % "0.8.7",
       "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.4"
     )
-  ).dependsOn(wvletObj, wvletTest % "test->compile")
-
-lazy val wvletObj =
-  Project(id = "wvlet-obj", base = file("wvlet-obj")).settings(
-    buildSettings,
-    description := "wvlet object schema inspector",
-    libraryDependencies ++= Seq(
-      wvletLog,
-      "org.scala-lang" % "scalap" % scalaVersion.value,
-      "org.scala-lang" % "scala-reflect" % scalaVersion.value
-    )
   ).dependsOn(wvletTest % "test->compile")
-
-lazy val wvletOpts =
-  Project(id = "wvlet-opts", base = file("wvlet-opts")).settings(
-    buildSettings,
-    description := "wvlet command-line option parser",
-    libraryDependencies ++= Seq(
-      "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.4"
-    )
-  ) dependsOn(wvletObj, wvletTest % "test->compile")
 
 lazy val wvletTest =
   Project(id = "wvlet-test", base = file("wvlet-test")).settings(
