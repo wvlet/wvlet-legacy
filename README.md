@@ -14,13 +14,13 @@ With wvlet, you can:
  - etc.
 
 
-## projects
+## wvlet projects
 
 | project      |                                         | version |
 | -------------- | --------------------------------------- | -------- |
-| wvlet-log      | Logging utility                          | Moved to [wvlet-log](https://github.com/wvlet/log) |
-| wvlet-obj   |  Object schema inspection library   | [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.wvlet/wvlet-obj_2.11/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.wvlet/wvlet-obj_2.11) |
-| wvlet-inject      | Dependency injection library     | Moved to [Airframe](https://github.com/wvlet/airframe) |
+| [wvlet-log](https://github.com/wvlet/log)      | Logging utility                          | ![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.wvlet/wvlet-log_2.11/badge.svg) |
+| [object-schema](https://github.com/wvlet/object-schema)  |  Object schema inspection library   | [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.wvlet/object-schema_2.11/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.wvlet/object-schema_2.11) |
+| [Airframe](https://github.com/wvlet/airframe)      | Dependency injection library     |  ![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.wvlet/airframe_2.11/badge.svg) |
 | wvlet-jmx   | JMX utility| [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.wvlet/wvlet-jmx_2.11/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.wvlet/wvlet-jmx_2.11) |
 | wvlet-config    | Configuration loader from Yaml          | [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.wvlet/wvlet-config_2.11/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.wvlet/wvlet-config_2.11) |
 | wvlet-opts    | Command line option parser          | [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.wvlet/wvlet-opts_2.11/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.wvlet/wvlet-opts_2.11) |
