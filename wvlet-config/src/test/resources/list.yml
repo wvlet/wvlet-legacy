@@ -1,9 +1,0 @@
-- account_id: 1
-  database: mydb
-  table:
-    - A
-- account_id: 10
-  database: mydb2
-  table:
-    - T1
-    - T2
