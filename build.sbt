@@ -1,9 +1,9 @@
 import ReleaseTransformations._
 
+scalaVersion in ThisBuild := "2.12.1"
 
 val buildSettings = Seq[Setting[_]](
-  scalaVersion := "2.12.0",
-  crossScalaVersions := Seq("2.11.8", "2.12.0"),
+  crossScalaVersions := Seq("2.11.8", "2.12.1"),
   organization := "org.wvlet",
   description := "A framework for structured data mapping",
   crossPaths := true,
