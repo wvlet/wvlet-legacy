@@ -18,15 +18,6 @@ import wvlet.core.tablet._
 
 import scala.reflect.ClassTag
 
-trait Context
-
-trait Router {
-  /**
-    * Find a destination tablet for the given context
-    */
-  def findTablet(context: Context): Tablet
-}
-
 /**
   * A -> TabletRecord
   *

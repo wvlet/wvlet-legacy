@@ -12,11 +12,11 @@
  * limitations under the License.
  */
 package wvlet.core.tablet
-import wvlet.core.tablet.TabletReader.Line
 import wvlet.core.time.TimeStamp
 
 
 trait TextTabletReader extends TabletReader {
+  type Line = String
 
   def readLine[U](line:Line)(body: TabletReader => U)
 
@@ -32,8 +32,6 @@ object TextTabletReader {
 
     def readLine[U](line: Line)(body: TabletReader => U) {
       val cols = line.split("\t")
-
-
 
     }
 
