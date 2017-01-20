@@ -12,6 +12,7 @@
  * limitations under the License.
  */
 package wvlet.core.tablet
+import org.msgpack.value.{ArrayValue, MapValue}
 import wvlet.core.time.TimeStamp
 
 
@@ -35,19 +36,17 @@ object TextTabletReader {
 
     }
 
-
-
     override def readLong: Long = ???
     // TODO type resolution of array and map elements
-    override def readArray: Seq[_] = ???
+    override def readArray: ArrayValue = ???
     override def readNull: Unit = ???
     override def readTimestamp: TimeStamp = ???
-    override def readMap: Map[_, _] = ???
+    override def readMap: MapValue = ???
     override def isNull: Boolean = ???
     override def readString: String = ???
     override def readDouble: Double = ???
     override def readBinary: Array[Byte] = ???
-    override def readJson: String = ???
+    override def readJson: MapValue = ???
 
   }
 }

@@ -29,6 +29,21 @@ object Schema {
   case class ARRAY(elemType: ColumnType) extends ColumnType
   case class MAP(keyType: ColumnType, valueType: ColumnType) extends ColumnType
   case class RECORD(column: Seq[Column]) extends ColumnType
+
+  object ColumnType {
+    def unapply(s: String): Option[ColumnType] = {
+      val tpe = s match {
+        case "varchar" => STRING
+        case "string" => STRING
+        case "bigint" => INTEGER
+        case "double" => FLOAT
+        case "float" => FLOAT
+        case "json" => STRING // TODO jse JSON type
+        case _ => STRING // TODO support more type
+      }
+      Some(tpe)
+    }
+  }
 }
 
 case class Column(
