@@ -51,9 +51,14 @@ case class Column(
   index:Int,
   name: String,
   dataType: Schema.ColumnType
-)
+) {
+  override def toString = s"${index}:${name} ${dataType}"
+}
 
 case class Schema(name: String, column: Seq[Column]) {
+  override def toString : String = s"$name(${column.mkString(", ")})"
+
+
   private lazy val columnIdx: Map[Column, Int] = column.zipWithIndex.toMap[Column, Int]
 
   def size: Int = column.size
