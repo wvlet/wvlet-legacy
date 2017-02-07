@@ -18,12 +18,11 @@ import wvlet.core.tablet._
 
 import scala.reflect.ClassTag
 
-/**
-  * A -> TabletRecord
-  *
-  */
 trait Input {
-  def write(record: Any): Record
+
+
+
+
 }
 
 /**
@@ -33,7 +32,10 @@ trait Input {
   */
 trait Output[A] {
   //def inputCls: Class[_]
-  def tabletPrinter : TabletPrinter
+  //def tabletPrinter : TabletPrinter
+
+  //def context[U](name:String)(in:Input => U) : U
+
 }
 
 /**
@@ -56,4 +58,4 @@ object Wvlet {
   def fromJSON[A](implicit ev: ClassTag[A]) {}
 }
 
-case class TabletOutput[A](inputCls: Class[A], tabletPrinter: TabletPrinter) extends Output[String]
+case class TabletOutput[A](inputCls: Class[A], tabletPrinter: TabletPrinter) extends Output[A]

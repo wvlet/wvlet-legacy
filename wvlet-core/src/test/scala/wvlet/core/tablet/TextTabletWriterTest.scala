@@ -34,17 +34,17 @@ class TextTabletWriterTest extends WvletSpec {
     val seq = Seq(Person(1, "leo", Seq("xxx-xxxx")), Person(2, "yui", Seq("yyy-yyyy", "zzz-zzzz")))
 
     "output object in JSON array format" in {
-      val w  = create(seq) | toJSON[Person]
+      val w  = create(seq) | toJSON
       w.stream(info(_))
     }
 
     "output object in CSV format" in {
-      val w  = create(seq) | toCSV[Person]
+      val w  = create(seq) | toCSV
       w.stream(info(_))
     }
 
     "output object in TSV format" in {
-      val w  = create(seq) | toTSV[Person]
+      val w  = create(seq) | toTSV
       w.stream(info(_))
     }
 

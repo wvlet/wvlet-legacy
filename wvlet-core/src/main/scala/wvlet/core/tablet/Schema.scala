@@ -19,6 +19,7 @@ object Schema {
     //def javaType: Class[_]
   }
 
+  case object ANY extends ColumnType
   case object INTEGER extends ColumnType
   case object FLOAT extends ColumnType
   case object BOOLEAN extends ColumnType
@@ -79,4 +80,3 @@ case class Schema(name: String, column: Seq[Column]) {
 }
 
 
-case class Record(buffer:Array[Byte])
