@@ -5,16 +5,11 @@
 [coverall-badge]: https://coveralls.io/repos/github/wvlet/wvlet/badge.svg?branch=master
 [coverall-link]: https://coveralls.io/github/wvlet/wvlet?branch=master
 
-wvlet (weavelet) is a framework for weaving objects in Scala.
+Wvlet (e.g., pronounced as weave-let) is an library for simplifying structured data management in Scala. It supports loading and storing structured data (e.b., TSV, CSV, JSON, MessagePack, SQL query results, etc.), and mappings to objects. Wvlet aims to automate these tasks as much as possible to enable us to focus on data analysis tasks, rather than data management. 
 
-With wvlet, you can:
- - Build a new object from its dependencies (as in Google Guice)
- - Build objects from various data sources (e.g., JSON, JDBC, etc.)
- - Send object data through JMX
- - etc.
+- [Wvlet Design Doc](https://docs.google.com/document/d/1R8VL4INsIIlNc-fnmnujsXg0y_zUA3T6BsjeDvm-nkk/edit?usp=sharing)
 
-
-## wvlet projects
+## Companion Projects
 
 | project      |                                         | version |
 | -------------- | --------------------------------------- | -------- |

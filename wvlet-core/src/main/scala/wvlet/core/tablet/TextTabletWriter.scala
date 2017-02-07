@@ -133,7 +133,8 @@ class TabletPrinter(val formatter: RecordFormatter) {
   }
 
   def write(record: Record): String = {
-    val unpacker = MessagePack.newDefaultUnpacker(record.buffer)
+
+    val unpacker = MessagePack.newDefaultBufferPacker(record.buffer)
     val s = Seq.newBuilder[String]
     read(unpacker, 0)
   }

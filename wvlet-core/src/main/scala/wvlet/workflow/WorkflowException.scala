@@ -11,15 +11,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package wvlet.core.tablet
+package wvlet.workflow
 
-import org.msgpack.core.MessagePacker
-import wvlet.core.rx.Flow
-
-trait TabletWriter {
-  //def clearRecord
-  //def getRecord : Seq[String]
-
-  def writeRecord(schema: Schema, flow: Flow[Record])(body: MessagePacker => Unit)
+/**
+ *
+ */
+object WorkflowException {
+  def NA = {
+    val t = new Throwable
+    val caller = t.getStackTrace()(1)
+    throw new Exception(s"${caller.getMethodName} (${caller.getFileName}:${caller.getLineNumber})")
+  }
 }
-

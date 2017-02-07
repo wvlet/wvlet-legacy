@@ -24,25 +24,25 @@ object ObjectWriter {
 
   def createScheamOf[A: ru.TypeTag](name: String): Schema = {
     val schema = ObjectSchema.of[A]
-    val tabletColumnTypes: Seq[Column] = for (p <- schema.parameters) yield {
+    val tabletColumnTypes: Seq[Column] = for ((p, i) <- schema.parameters.zipWithIndex) yield {
       val vt = p.valueType
-      val columnType: Tablet.Type = vt match {
-        case Primitive.Byte => Tablet.INTEGER
-        case Primitive.Short => Tablet.INTEGER
-        case Primitive.Int => Tablet.INTEGER
-        case Primitive.Long => Tablet.INTEGER
-        case Primitive.Float => Tablet.FLOAT
-        case Primitive.Double => Tablet.FLOAT
-        case Primitive.Char => Tablet.STRING
-        case Primitive.Boolean => Tablet.BOOLEAN
-        case TextType.String => Tablet.STRING
-        case TextType.File => Tablet.STRING
-        case TextType.Date => Tablet.STRING
+      val columnType: Schema.ColumnType = vt match {
+        case Primitive.Byte => Schema.INTEGER
+        case Primitive.Short => Schema.INTEGER
+        case Primitive.Int => Schema.INTEGER
+        case Primitive.Long => Schema.INTEGER
+        case Primitive.Float => Schema.FLOAT
+        case Primitive.Double => Schema.FLOAT
+        case Primitive.Char => Schema.STRING
+        case Primitive.Boolean => Schema.BOOLEAN
+        case TextType.String => Schema.STRING
+        case TextType.File => Schema.STRING
+        case TextType.Date => Schema.STRING
         case _ =>
           // TODO support Option, Array, Map, the other types etc.
-          Tablet.STRING
+          Schema.STRING
       }
-      Column(p.name, columnType)
+      Column(i, p.name, columnType)
     }
     Schema(name, tabletColumnTypes)
   }
