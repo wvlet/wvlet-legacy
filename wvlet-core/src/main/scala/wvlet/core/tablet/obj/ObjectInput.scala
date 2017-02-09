@@ -69,10 +69,11 @@ class ObjectWriter[A](cl:Class[A]) extends TabletWriter[A] {
 
     val args = Array.newBuilder[AnyRef]
     while(index < cols && unpacker.hasNext) {
-      val param = paramIndex(index)
+
       val f = unpacker.getNextFormat
       f.getValueType match {
         case ValueType.NIL =>
+          val param = paramIndex(index)
           unpacker.unpackNil()
           args += TypeUtil.zero(param.rawType, param.valueType).asInstanceOf[AnyRef]
         case ValueType.BOOLEAN =>

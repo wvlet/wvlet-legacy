@@ -2,6 +2,7 @@ package wvlet.core.tablet
 
 import org.msgpack.core.{MessagePack, MessagePacker, MessageUnpacker}
 import org.msgpack.value.{ArrayValue, MapValue, Value}
+import wvlet.core.tablet.obj.ObjectTabletReader
 
 
 trait Record {
@@ -66,6 +67,13 @@ object Tablet {
   }
 
   val nullOutput = NullTabletWriter
+
+  implicit class ObjectPipe[A](seq:Seq[A]) {
+    def |[B](out:TabletWriter[B]) = {
+      new ObjectTabletReader(seq) | out
+    }
+  }
+
 }
 
 object NullTabletWriter extends TabletWriter[Unit] {
