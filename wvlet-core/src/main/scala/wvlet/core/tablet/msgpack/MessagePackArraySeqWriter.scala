@@ -4,7 +4,7 @@ import java.io.FileOutputStream
 import java.util.zip.GZIPOutputStream
 
 import org.msgpack.core.{MessagePack, MessagePacker}
-import wvlet.core.tablet.{ArrayValueRecord, MessagePackRecord, Record, TabletWriter}
+import wvlet.core.tablet._
 
 object MessgePackArray {
   def msgpackGzWriter(file: String): MessagePackArraySeqWriter = {
@@ -17,14 +17,7 @@ object MessgePackArray {
   */
 class MessagePackArraySeqWriter(packer: MessagePacker) extends TabletWriter {
   def write(r: Record) {
-    r match {
-      case ArrayValueRecord(v) =>
-        packer.packValue(v)
-      case MessagePackRecord(arr) =>
-        packer.addPayload(arr)
-      case other =>
-        throw new UnsupportedOperationException(s"Unuspported record type: ${other.getClass}")
-    }
+    r.pack(packer)
   }
 
   override def close(): Unit = {

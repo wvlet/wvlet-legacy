@@ -49,6 +49,73 @@ object ObjectWriter {
 
 }
 
+object ObjectInput extends LogSupport {
+  def read[A](record:A) : Record = {
+    val packer = MessagePack.newDefaultBufferPacker()
+
+    if (record == null) {
+      packer.packArrayHeader(0) // empty array
+    }
+    else {
+      // TODO polymorphic types (e.g., B extends A, C extends B)
+      val objSchema = ObjectSchema(record.getClass)
+      //val arrSize = Math.max(objSchema.parameters.length, schema.size)
+      // TODO add parameter values not in the schema
+      info(objSchema)
+
+      packer.packArrayHeader(objSchema.parameters.length)
+      for (p <- objSchema.parameters) {
+        val v = p.get(record)
+        if (v == null) {
+          packer.packNil()
+        }
+        else {
+          p.valueType match {
+            case Primitive.Byte | Primitive.Short | Primitive.Int | Primitive.Long =>
+              packer.packLong(v.toString.toLong)
+            case Primitive.Float | Primitive.Double =>
+              packer.packDouble(v.toString.toDouble)
+            case Primitive.Boolean =>
+              packer.packBoolean(v.toString.toBoolean)
+            case Primitive.Char | TextType.String | TextType.File | TextType.Date =>
+              packer.packString(v.toString)
+            case arr if TypeUtil.isArray(v.getClass) =>
+              v match {
+                case a: Array[String] =>
+                  packer.packArrayHeader(a.length)
+                  a.foreach(packer.packString(_))
+                case a: Array[Int] =>
+                  packer.packArrayHeader(a.length)
+                  a.foreach(packer.packInt(_))
+                case a: Array[Float] =>
+                  packer.packArrayHeader(a.length)
+                  a.foreach(packer.packFloat(_))
+                case a: Array[Double] =>
+                  packer.packArrayHeader(a.length)
+                  a.foreach(packer.packDouble(_))
+                case a: Array[Boolean] =>
+                  packer.packArrayHeader(a.length)
+                  a.foreach(packer.packBoolean(_))
+                case _ =>
+                  throw new UnsupportedOperationException(s"Reading array type of ${arr.getClass} is not supported")
+              }
+            case seq: Seq[_] =>
+              packer.packArrayHeader(seq.length)
+              for (s <- seq) {
+                packer.packString("test")
+              }
+            case other =>
+              // TODO support Array, Map, etc.
+              packer.packString(other.toString())
+          }
+        }
+      }
+    }
+    MessagePackRecord(packer.toByteArray)
+  }
+}
+
+
 /**
   *
   */
@@ -61,68 +128,9 @@ class ObjectTabletReader[A](input:Seq[A]) extends TabletReader with LogSupport {
       None
     }
     else {
+
       val record = cursor.next()
-      val packer = MessagePack.newDefaultBufferPacker()
-
-      if (record == null) {
-        packer.packArrayHeader(0) // empty array
-      }
-      else {
-        // TODO polymorphic types (e.g., B extends A, C extends B)
-        val objSchema = ObjectSchema(record.getClass)
-        //val arrSize = Math.max(objSchema.parameters.length, schema.size)
-        // TODO add parameter values not in the schema
-        info(objSchema)
-
-        packer.packArrayHeader(objSchema.parameters.length)
-        for (p <- objSchema.parameters) {
-          val v = p.get(record)
-          if (v == null) {
-            packer.packNil()
-          }
-          else {
-            p.valueType match {
-              case Primitive.Byte | Primitive.Short | Primitive.Int | Primitive.Long =>
-                packer.packLong(v.toString.toLong)
-              case Primitive.Float | Primitive.Double =>
-                packer.packDouble(v.toString.toDouble)
-              case Primitive.Boolean =>
-                packer.packBoolean(v.toString.toBoolean)
-              case Primitive.Char | TextType.String | TextType.File | TextType.Date =>
-                packer.packString(v.toString)
-              case arr if TypeUtil.isArray(v.getClass) =>
-                v match {
-                  case a: Array[String] =>
-                    packer.packArrayHeader(a.length)
-                    a.foreach(packer.packString(_))
-                  case a: Array[Int] =>
-                    packer.packArrayHeader(a.length)
-                    a.foreach(packer.packInt(_))
-                  case a: Array[Float] =>
-                    packer.packArrayHeader(a.length)
-                    a.foreach(packer.packFloat(_))
-                  case a: Array[Double] =>
-                    packer.packArrayHeader(a.length)
-                    a.foreach(packer.packDouble(_))
-                  case a: Array[Boolean] =>
-                    packer.packArrayHeader(a.length)
-                    a.foreach(packer.packBoolean(_))
-                  case _ =>
-                    throw new UnsupportedOperationException(s"Reading array type of ${arr.getClass} is not supported")
-                }
-              case seq: Seq[_] =>
-                packer.packArrayHeader(seq.length)
-                for (s <- seq) {
-                  packer.packString("test")
-                }
-              case other =>
-                // TODO support Array, Map, etc.
-                packer.packString(other.toString())
-            }
-          }
-        }
-      }
-      Some(MessagePackRecord(packer.toByteArray))
+      Some(ObjectInput.read(record))
     }
   }
 }

@@ -46,7 +46,7 @@ class ResultSetReader(rs:ResultSet) extends TabletReader {
           case Schema.TIMESTAMP =>
             val v: java.sql.Timestamp = rs.getTimestamp(i + 1)
             val epochMillis = v.getTime
-            pack(v, b.packLong)
+            pack(epochMillis, b.packLong)
           case Schema.STRING =>
             pack(rs.getString(i + 1), b.packString)
           case Schema.ARRAY(elemType) =>
@@ -84,6 +84,8 @@ class ResultSetReader(rs:ResultSet) extends TabletReader {
               b.packBinaryHeader(in.length)
               b.writePayload(in)
             })
+          case _ =>
+            throw new UnsupportedOperationException(s"reading ${colType} is not supported")
         }
       }
       val arr = b.toByteArray

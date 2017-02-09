@@ -15,6 +15,7 @@ package wvlet.core.tablet.text
 
 import org.msgpack.core.MessageUnpacker
 import org.msgpack.value.ValueType
+import wvlet.core.tablet.Record
 
 import scala.util.parsing.json.JSONFormat
 
@@ -132,12 +133,10 @@ class TabletPrinter(val formatter: RecordFormatter) {
     }
   }
 
-//  def write(record: Record): String = {
-//
-//    val unpacker = MessagePack.newDefaultBufferPacker(record.buffer)
-//    val s = Seq.newBuilder[String]
-//    read(unpacker, 0)
-//  }
+  def write(record: Record): String = {
+    val s = Seq.newBuilder[String]
+    read(record.unpacker, 0)
+  }
 }
 
 object JSONTabletPrinter extends TabletPrinter(JSONRecordFormatter)

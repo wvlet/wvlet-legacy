@@ -14,7 +14,6 @@
 package wvlet.core
 
 import wvlet.core.WvletOps.SeqOp
-import wvlet.core.tablet._
 import wvlet.core.tablet.text.{CSVTabletPrinter, JSONTabletPrinter, TSVTabletPrinter, TabletPrinter}
 
 import scala.reflect.ClassTag
@@ -33,7 +32,7 @@ trait Input {
   */
 trait Output[A] {
   //def inputCls: Class[_]
-  //def tabletPrinter : TabletPrinter
+  def tabletPrinter : TabletPrinter
 
   //def context[U](name:String)(in:Input => U) : U
 

@@ -1,7 +1,7 @@
 package wvlet.core.tablet.msgpack
 
-import org.msgpack.core.MessageUnpacker
-import wvlet.core.tablet.{ArrayValueRecord, Record, TabletReader}
+import org.msgpack.core.{MessagePack, MessageUnpacker}
+import wvlet.core.tablet.{MessagePackRecord, Record, TabletReader}
 import wvlet.log.LogSupport
 
 /**
@@ -16,7 +16,10 @@ class MessagePackArraySeqReader(unpacker:MessageUnpacker) extends TabletReader w
     else {
       val v = unpacker.unpackValue()
       if(v.isArrayValue) {
-        Some(ArrayValueRecord(v.asArrayValue()))
+        // TODO read as Array[Byte] without translating it to Value objects
+        val packer = MessagePack.newDefaultBufferPacker()
+        packer.packValue(v)
+        Some(MessagePackRecord(packer.toByteArray))
       }
       else {
         error(s"${v} is not an array")

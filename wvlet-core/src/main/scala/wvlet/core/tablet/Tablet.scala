@@ -1,13 +1,33 @@
 package wvlet.core.tablet
 
+import org.msgpack.core.{MessagePack, MessagePacker, MessageUnpacker}
 import org.msgpack.value.{ArrayValue, MapValue, Value}
 
 
-trait Record
+trait Record {
+  def pack(packer:MessagePacker)
+  def unpacker: MessageUnpacker
+}
 
-case class MessagePackRecord(arr:Array[Byte]) extends Record
-case class ArrayValueRecord(v:ArrayValue) extends Record
-case class StringArrayRecord(arr:Array[String]) extends Record
+case class MessagePackRecord(arr:Array[Byte]) extends Record {
+  override def unpacker = {
+    MessagePack.newDefaultUnpacker(arr)
+  }
+  override def pack(packer: MessagePacker): Unit = {
+    packer.addPayload(arr)
+  }
+}
+case class StringArrayRecord(arr:Array[String]) extends Record {
+  override def unpacker = {
+    val packer = MessagePack.newDefaultBufferPacker()
+    pack(packer)
+    MessagePack.newDefaultUnpacker(packer.toByteArray)
+  }
+  override def pack(packer: MessagePacker): Unit = {
+    packer.packArrayHeader(arr.length)
+    arr.foreach(v => packer.packString(v))
+  }
+}
 
 /**
   *

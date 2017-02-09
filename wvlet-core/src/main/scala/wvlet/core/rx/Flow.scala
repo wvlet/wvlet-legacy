@@ -14,10 +14,9 @@
 package wvlet.core.rx
 
 import wvlet.core.Output
-import wvlet.core.WvletOps.{MapOp, SeqOp}
-import wvlet.core.tablet.text.TabletPrinter
 import wvlet.core.tablet.Record
 import wvlet.core.tablet.obj.ObjectInput
+import wvlet.core.tablet.text.TabletPrinter
 
 /**
   * Flow is an interface to handle streaming objects
@@ -61,10 +60,8 @@ class FilterFlow[A](cond: A => Boolean, flow: Flow[A]) extends FlowBase[A, A](fl
 }
 
 class ConvertFlow[A, B](out: Output[B], flow: Flow[Record]) extends FlowBase[A, Record](flow) {
-  val input = new ObjectInput()
-
   override def onNext(elem: A): Unit = {
-    val record = input.write(elem)
+    val record = ObjectInput.read(elem)
     flow.onNext(record)
   }
 }
