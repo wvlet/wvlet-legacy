@@ -14,10 +14,12 @@
 package wvlet.core.tablet.obj
 
 import org.msgpack.core.MessagePack
+import org.msgpack.value.ValueType
 import wvlet.core.tablet._
 import wvlet.log.LogSupport
-import wvlet.obj.{ObjectSchema, Primitive, TextType, TypeUtil}
+import wvlet.obj._
 
+import scala.reflect.ClassTag
 import scala.reflect.runtime.{universe => ru}
 
 object ObjectWriter {
@@ -47,7 +49,59 @@ object ObjectWriter {
     Schema(name, tabletColumnTypes)
   }
 
+  def of[A:ClassTag] : ObjectWriter[A] = {
+    val cl = implicitly[ClassTag[A]]
+    new ObjectWriter(cl.runtimeClass.asInstanceOf[Class[A]])
+  }
 }
+
+class ObjectWriter[A](cl:Class[A]) extends TabletWriter[A] {
+
+  private val schema = ObjectSchema(cl)
+  private lazy val paramIndex = (for((p, i) <- schema.parameters.zipWithIndex) yield {
+    i -> p
+  }).toMap
+
+  override def write(record: Record): A = {
+    val unpacker = record.unpacker
+    val b : ObjectBuilder[A] = ObjectBuilder(cl)
+
+    val depth = 0
+    var index : Int = 0
+    val cols = unpacker.unpackArrayHeader()
+    while(index < cols && unpacker.hasNext) {
+      val param = paramIndex(index).name
+      val f = unpacker.getNextFormat
+      f.getValueType match {
+        case ValueType.NIL =>
+          unpacker.unpackNil
+        case ValueType.BOOLEAN =>
+          b.set(param, unpacker.unpackBoolean())
+        case ValueType.INTEGER =>
+          b.set(param, unpacker.unpackLong())
+        case ValueType.FLOAT =>
+          b.set(param, unpacker.unpackDouble())
+        case ValueType.STRING =>
+          b.set(param, unpacker.unpackString())
+        case ValueType.BINARY =>
+          val size = unpacker.unpackBinaryHeader()
+          b.set(param, unpacker.readPayload(size))
+        case ValueType.ARRAY =>
+          b.set(param, unpacker.unpackValue())
+        case ValueType.MAP =>
+          b.set(param, unpacker.unpackValue())
+        case ValueType.EXTENSION =>
+          b.set(param, unpacker.unpackValue())
+      }
+      index += 1
+    }
+    b.build
+  }
+
+  override def close(): Unit = {}
+}
+
+
 
 object ObjectInput extends LogSupport {
   def read[A](record:A) : Record = {
@@ -61,8 +115,6 @@ object ObjectInput extends LogSupport {
       val objSchema = ObjectSchema(record.getClass)
       //val arrSize = Math.max(objSchema.parameters.length, schema.size)
       // TODO add parameter values not in the schema
-      info(objSchema)
-
       packer.packArrayHeader(objSchema.parameters.length)
       for (p <- objSchema.parameters) {
         val v = p.get(record)
