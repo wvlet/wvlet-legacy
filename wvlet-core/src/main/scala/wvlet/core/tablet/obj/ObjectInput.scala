@@ -64,38 +64,39 @@ class ObjectWriter[A](cl:Class[A]) extends TabletWriter[A] {
 
   override def write(record: Record): A = {
     val unpacker = record.unpacker
-    val b : ObjectBuilder[A] = ObjectBuilder(cl)
-
-    val depth = 0
     var index : Int = 0
     val cols = unpacker.unpackArrayHeader()
+
+    val args = Array.newBuilder[AnyRef]
     while(index < cols && unpacker.hasNext) {
-      val param = paramIndex(index).name
+      val param = paramIndex(index)
       val f = unpacker.getNextFormat
       f.getValueType match {
         case ValueType.NIL =>
-          unpacker.unpackNil
+          unpacker.unpackNil()
+          args += TypeUtil.zero(param.rawType, param.valueType).asInstanceOf[AnyRef]
         case ValueType.BOOLEAN =>
-          b.set(param, unpacker.unpackBoolean())
+          args += java.lang.Boolean.valueOf(unpacker.unpackBoolean())
         case ValueType.INTEGER =>
-          b.set(param, unpacker.unpackLong())
+          args += java.lang.Long.valueOf(unpacker.unpackLong())
         case ValueType.FLOAT =>
-          b.set(param, unpacker.unpackDouble())
+          args += java.lang.Double.valueOf(unpacker.unpackDouble())
         case ValueType.STRING =>
-          b.set(param, unpacker.unpackString())
+          args += unpacker.unpackString()
         case ValueType.BINARY =>
           val size = unpacker.unpackBinaryHeader()
-          b.set(param, unpacker.readPayload(size))
+          args += unpacker.readPayload(size)
         case ValueType.ARRAY =>
-          b.set(param, unpacker.unpackValue())
+          args += unpacker.unpackValue()
         case ValueType.MAP =>
-          b.set(param, unpacker.unpackValue())
+          args += unpacker.unpackValue()
         case ValueType.EXTENSION =>
-          b.set(param, unpacker.unpackValue())
+          args += unpacker.unpackValue()
       }
       index += 1
     }
-    b.build
+
+    schema.constructor.newInstance(args.result()).asInstanceOf[A]
   }
 
   override def close(): Unit = {}
