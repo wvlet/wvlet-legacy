@@ -64,8 +64,18 @@ object Tablet {
     out.close()
     result
   }
+
+  val nullOutput = NullTabletWriter
 }
 
+object NullTabletWriter extends TabletWriter[Unit] {
+  override def write(record: Record): Unit = {
+    val u = record.unpacker
+    u.skipValue()
+  }
+
+  override def close(): Unit = {}
+}
 
 
 //  private implicit class RichColumnIndex(columnIndex: Int) {
