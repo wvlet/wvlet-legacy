@@ -11,9 +11,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package wvlet.core.tablet
+package wvlet.core.tablet.text
 
-import org.msgpack.core.{MessagePack, MessageUnpacker}
+import org.msgpack.core.MessageUnpacker
 import org.msgpack.value.ValueType
 
 import scala.util.parsing.json.JSONFormat
@@ -78,7 +78,7 @@ object TextTabletWriter {
 
 }
 
-import wvlet.core.tablet.TextTabletWriter._
+import wvlet.core.tablet.text.TextTabletWriter._
 
 /**
   *
@@ -132,12 +132,12 @@ class TabletPrinter(val formatter: RecordFormatter) {
     }
   }
 
-  def write(record: Record): String = {
-
-    val unpacker = MessagePack.newDefaultBufferPacker(record.buffer)
-    val s = Seq.newBuilder[String]
-    read(unpacker, 0)
-  }
+//  def write(record: Record): String = {
+//
+//    val unpacker = MessagePack.newDefaultBufferPacker(record.buffer)
+//    val s = Seq.newBuilder[String]
+//    read(unpacker, 0)
+//  }
 }
 
 object JSONTabletPrinter extends TabletPrinter(JSONRecordFormatter)

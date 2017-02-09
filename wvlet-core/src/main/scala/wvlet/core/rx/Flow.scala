@@ -15,7 +15,9 @@ package wvlet.core.rx
 
 import wvlet.core.Output
 import wvlet.core.WvletOps.{MapOp, SeqOp}
-import wvlet.core.tablet.{ObjectInput, Record, TabletPrinter}
+import wvlet.core.tablet.text.TabletPrinter
+import wvlet.core.tablet.Record
+import wvlet.core.tablet.obj.ObjectInput
 
 /**
   * Flow is an interface to handle streaming objects

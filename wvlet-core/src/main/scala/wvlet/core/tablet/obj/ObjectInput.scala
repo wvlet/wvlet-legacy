@@ -11,10 +11,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package wvlet.core.tablet
+package wvlet.core.tablet.obj
 
 import org.msgpack.core.MessagePack
 import wvlet.core._
+import wvlet.core.tablet.{Column, MessagePackRecord, Record, Schema}
 import wvlet.log.LogSupport
 import wvlet.obj.{ObjectSchema, Primitive, TextType, TypeUtil}
 
@@ -62,7 +63,7 @@ class ObjectInput() extends Input with LogSupport {
     val packer = MessagePack.newDefaultBufferPacker()
 
     if (record == null) {
-      packer.packNil()
+      packer.packArrayHeader(0) // empty array
     }
     else {
       val objSchema = ObjectSchema(record.getClass)
@@ -100,7 +101,7 @@ class ObjectInput() extends Input with LogSupport {
         }
       }
     }
-    Record(packer.toByteArray)
+    MessagePackRecord(packer.toByteArray)
   }
 }
 

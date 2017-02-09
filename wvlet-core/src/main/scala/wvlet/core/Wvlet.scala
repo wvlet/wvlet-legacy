@@ -15,6 +15,7 @@ package wvlet.core
 
 import wvlet.core.WvletOps.SeqOp
 import wvlet.core.tablet._
+import wvlet.core.tablet.text.{CSVTabletPrinter, JSONTabletPrinter, TSVTabletPrinter, TabletPrinter}
 
 import scala.reflect.ClassTag
 

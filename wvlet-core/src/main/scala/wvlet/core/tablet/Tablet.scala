@@ -21,6 +21,7 @@ trait RecordReader {
 
 case class MessagePackRecord(arr:Array[Byte]) extends Record
 case class ArrayValueRecord(v:ArrayValue) extends Record
+case class StringArrayRecord(arr:Array[String]) extends Record
 
 /**
   *
