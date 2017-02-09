@@ -5,20 +5,6 @@ import org.msgpack.value.{ArrayValue, MapValue, Value}
 
 trait Record
 
-trait RecordReader {
-  def isNull : Boolean
-  def readNull : Unit
-  def readLong : Long
-  def readDouble : Double
-  def readString : String
-  def readBinary : Array[Byte]
-  def readTimestamp : java.time.temporal.Temporal
-  def readJson : Value
-
-  def readArray: ArrayValue
-  def readMap: MapValue
-}
-
 case class MessagePackRecord(arr:Array[Byte]) extends Record
 case class ArrayValueRecord(v:ArrayValue) extends Record
 case class StringArrayRecord(arr:Array[String]) extends Record
@@ -30,9 +16,25 @@ trait TabletReader {
   def read: Option[Record]
 }
 
-trait TabletWriter extends AutoCloseable { self =>
+trait TabletWriter extends AutoCloseable {
+  self =>
 
-  def write(record:Record)
+  def write(record: Record)
+}
+
+
+object Tablet {
+
+  def pipe(in:TabletReader, out:TabletWriter) {
+    Iterator
+    .continually(in.read)
+    .takeWhile(_.isDefined)
+    .map(record => out.write(record.get))
+  }
+
+}
+
+
 
 //  private implicit class RichColumnIndex(columnIndex: Int) {
 //    def toType: Column = schema.columnType(columnIndex)
@@ -64,5 +66,17 @@ trait TabletWriter extends AutoCloseable { self =>
 //  def writeArray(columnIndex: Int, v: ArrayValue): self.type = writeArray(columnIndex.toType, v)
 //  def writeMap(columnIndex: Int, v: MapValue): self.type = writeMap(columnIndex.toType, v)
 
+trait RecordReader {
+  def isNull : Boolean
+  def readNull : Unit
+  def readLong : Long
+  def readDouble : Double
+  def readString : String
+  def readBinary : Array[Byte]
+  def readTimestamp : java.time.temporal.Temporal
+  def readJson : Value
+
+  def readArray: ArrayValue
+  def readMap: MapValue
 }
 
