@@ -9,6 +9,12 @@ trait Record {
   def unpacker: MessageUnpacker
 }
 
+case class ShallowMessagePackRecord(unpacker:MessageUnpacker) extends Record {
+  override def pack(packer: MessagePacker): Unit = {
+    throw new UnsupportedOperationException("pack is not supported")
+  }
+}
+
 case class MessagePackRecord(arr:Array[Byte]) extends Record {
   override def unpacker = {
     MessagePack.newDefaultUnpacker(arr)

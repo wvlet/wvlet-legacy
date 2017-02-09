@@ -4,7 +4,7 @@ import java.io.{FileInputStream, FileOutputStream}
 import java.util.zip.{GZIPInputStream, GZIPOutputStream}
 
 import org.msgpack.core.{MessagePack, MessagePacker, MessageUnpacker}
-import wvlet.core.tablet.{MessagePackRecord, Record, TabletReader, TabletWriter}
+import wvlet.core.tablet._
 import wvlet.log.LogSupport
 
 /**
@@ -32,17 +32,14 @@ class MessagePackTabletReader(unpacker:MessageUnpacker) extends TabletReader wit
       None
     }
     else {
-      val v = unpacker.unpackValue()
-      if(v.isArrayValue) {
-        // TODO read as Array[Byte] without translating it to Value objects
-        val packer = MessagePack.newDefaultBufferPacker()
-        packer.packValue(v)
-        Some(MessagePackRecord(packer.toByteArray))
+      val f = unpacker.getNextFormat
+      if(f.getValueType.isArrayType) {
+        Some(ShallowMessagePackRecord(unpacker))
       }
       else {
-        error(s"${v} is not an array")
+        error(s"${f} is not an array")
         // TODO error handling
-        throw new IllegalStateException(s"${v} is not an array")
+        throw new IllegalStateException(s"${f} is not an array")
       }
     }
   }
