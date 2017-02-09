@@ -76,7 +76,7 @@ lazy val wvletCore =
     libraryDependencies ++= Seq(
       wvletLog,
       "org.wvlet" %% "object-schema" % "1.0",
-      "org.msgpack" % "msgpack-core" % "0.8.7",
+      "org.msgpack" % "msgpack-core" % "0.8.11",
       "org.scala-lang" % "scala-reflect" % scalaVersion.value,
       "org.scala-lang" % "scalap" % scalaVersion.value,
       "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.4"

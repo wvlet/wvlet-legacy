@@ -14,7 +14,6 @@
 package wvlet.core.rx
 
 import wvlet.core.WvletOps.{ConvertOp, FilterOp, MapOp, SeqOp}
-import wvlet.core.tablet.Record
 import wvlet.core.{WvSeq, WvletOp}
 
 /**

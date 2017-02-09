@@ -15,7 +15,7 @@ object MessgePackArray {
 /**
   *
   */
-class MessagePackArraySeqWriter(packer: MessagePacker) extends TabletWriter {
+class MessagePackArraySeqWriter(packer: MessagePacker) extends TabletWriter[Unit] {
   def write(r: Record) {
     r.pack(packer)
   }

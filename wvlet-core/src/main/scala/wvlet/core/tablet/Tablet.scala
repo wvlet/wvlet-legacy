@@ -34,24 +34,30 @@ case class StringArrayRecord(arr:Array[String]) extends Record {
   */
 trait TabletReader {
   def read: Option[Record]
+
+  def |[A](out:TabletWriter[A]) : Seq[A] = {
+    Tablet.pipe(this, out)
+  }
 }
 
-trait TabletWriter extends AutoCloseable {
+trait TabletWriter[A] extends AutoCloseable {
   self =>
 
-  def write(record: Record)
+  def write(record: Record) : A
 }
 
 
 object Tablet {
 
-  def pipe(in:TabletReader, out:TabletWriter) {
-    Iterator
+  def pipe[A](in:TabletReader, out:TabletWriter[A]) : Seq[A] = {
+    val result = Iterator
     .continually(in.read)
     .takeWhile(_.isDefined)
     .map(record => out.write(record.get))
+    .toIndexedSeq
+    out.close()
+    result
   }
-
 }
 
 

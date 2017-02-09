@@ -67,7 +67,6 @@ class ConvertFlow[A, B](out: Output[B], flow: Flow[Record]) extends FlowBase[A, 
 }
 
 class RecordPrintFlow(printer:TabletPrinter, flow:Flow[String]) extends FlowBase[Record, String](flow) {
-
   override def onNext(x: Record): Unit = {
     val s = printer.write(x)
     flow.onNext(s)
