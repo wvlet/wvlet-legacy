@@ -60,8 +60,9 @@ class FilterFlow[A](cond: A => Boolean, flow: Flow[A]) extends FlowBase[A, A](fl
 }
 
 class ConvertFlow[A, B](out: Output[B], flow: Flow[Record]) extends FlowBase[A, Record](flow) {
+  private val reader = new ObjectInput
   override def onNext(elem: A): Unit = {
-    val record = ObjectInput.read(elem)
+    val record = reader.read(elem)
     flow.onNext(record)
   }
 }

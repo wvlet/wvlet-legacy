@@ -13,7 +13,7 @@
  */
 package wvlet.core.tablet.obj
 
-import org.msgpack.core.{MessagePack, MessagePacker}
+import org.msgpack.core.{MessagePack, MessagePacker, MessageUnpacker}
 import org.msgpack.value.ValueType
 import wvlet.core.tablet._
 import wvlet.log.LogSupport
@@ -55,51 +55,119 @@ object ObjectWriter {
   }
 }
 
-class ObjectWriter[A](cl:Class[A]) extends TabletWriter[A] with LogSupport {
+trait MessagePackCodec[A] {
+  def packTo(a:A, packer:MessagePacker)
+  def unpack(unpacker:MessageUnpacker) : A
+}
 
-  private val schema = ObjectSchema(cl)
-  private lazy val paramIndex = (for((p, i) <- schema.parameters.zipWithIndex) yield {
-    i -> p
-  }).toMap
+
+class ObjectWriter[A](cl:Class[A], codec:Map[Class[_], MessagePackCodec[_]] = Map.empty) extends TabletWriter[A] with LogSupport {
+
+  private def unpack(unpacker:MessageUnpacker, objType:ObjectType) : AnyRef = {
+    objType match {
+      case AliasedObjectType(_, _, orig) =>
+        unpack(unpacker, orig)
+      case _ =>
+          val f = unpacker.getNextFormat
+          val vt = f.getValueType
+
+        val readValue =
+          if(vt.isNilType) {
+            TypeUtil.zero(objType.rawType, objType)
+          }
+          else if (codec.contains(objType.rawType)) {
+            codec(objType.rawType).unpack(unpacker).asInstanceOf[AnyRef]
+          }
+          else {
+            vt match {
+              case ValueType.BOOLEAN =>
+                java.lang.Boolean.valueOf(unpacker.unpackBoolean())
+              case ValueType.INTEGER =>
+                objType match {
+                  case Primitive.Byte =>
+                    java.lang.Byte.valueOf(unpacker.unpackByte())
+                  case Primitive.Short =>
+                    java.lang.Short.valueOf(unpacker.unpackShort())
+                  case Primitive.Int =>
+                    java.lang.Integer.valueOf(unpacker.unpackInt())
+                  case Primitive.Long =>
+                    java.lang.Long.valueOf(unpacker.unpackLong())
+                }
+              case ValueType.FLOAT =>
+                java.lang.Double.valueOf(unpacker.unpackDouble())
+              case ValueType.STRING =>
+                unpacker.unpackString()
+              case ValueType.BINARY =>
+                val size = unpacker.unpackBinaryHeader()
+                unpacker.readPayload(size)
+              case ValueType.ARRAY =>
+                unpackObj(unpacker, objType)
+              case ValueType.MAP =>
+                // TODO? support mapping key->value to obj?
+                objType match {
+                  case MapType(cl, keyType, valueType) =>
+                    val b = Map.newBuilder[Any, Any]
+                    val size = unpacker.unpackMapHeader()
+                    (0 until size).foreach {i =>
+                      val k = unpack(unpacker, keyType)
+                      val v = unpack(unpacker, valueType)
+                      b += (k -> v)
+                    }
+                    b.result()
+                  case _ =>
+                    // Fallback to JSOn
+                    val v = unpacker.unpackValue()
+                    v.toJson
+                }
+              case ValueType.EXTENSION =>
+                warn(s"Extension type mapping is not properly supported")
+                // Fallback to JSON
+                unpacker.unpackValue().toJson
+            }
+          }
+
+        objType match {
+          case OptionType(cl, elemType) =>
+            if(vt == ValueType.NIL)
+              None
+            else {
+              Some(readValue)
+            }
+          case _ =>
+            readValue.asInstanceOf[AnyRef]
+        }
+    }
+  }
+
+  private def unpackObj(unpacker:MessageUnpacker, objType:ObjectType) : AnyRef = {
+    val schema = ObjectSchema.of(objType)
+    if(codec.contains(objType.rawType)) {
+      val f = unpacker.getNextFormat
+      if(f.getValueType == ValueType.NIL) {
+        null
+      }
+      else {
+        codec(objType.rawType).unpack(unpacker).asInstanceOf[AnyRef]
+      }
+    }
+    else {
+      val size = unpacker.unpackArrayHeader()
+      var index = 0
+      val args = Array.newBuilder[AnyRef]
+      for (p <- schema.parameters if index < size) {
+        args += unpack(unpacker, p.valueType)
+        index += 1
+      }
+      val a = args.result()
+      trace(s"${a.map(x => s"${x.getClass.getName}:${x}").mkString("\n")}")
+      val r = schema.constructor.newInstance(a).asInstanceOf[AnyRef]
+      r
+    }
+  }
 
   override def write(record: Record): A = {
     val unpacker = record.unpacker
-    var index : Int = 0
-    val cols = unpacker.unpackArrayHeader()
-
-    val args = Array.newBuilder[AnyRef]
-    while(index < cols && unpacker.hasNext) {
-
-      val f = unpacker.getNextFormat
-      f.getValueType match {
-        case ValueType.NIL =>
-          val param = paramIndex(index)
-          unpacker.unpackNil()
-          args += TypeUtil.zero(param.rawType, param.valueType).asInstanceOf[AnyRef]
-        case ValueType.BOOLEAN =>
-          args += java.lang.Boolean.valueOf(unpacker.unpackBoolean())
-        case ValueType.INTEGER =>
-          args += java.lang.Long.valueOf(unpacker.unpackLong())
-        case ValueType.FLOAT =>
-          args += java.lang.Double.valueOf(unpacker.unpackDouble())
-        case ValueType.STRING =>
-          args += unpacker.unpackString()
-        case ValueType.BINARY =>
-          val size = unpacker.unpackBinaryHeader()
-          args += unpacker.readPayload(size)
-        case ValueType.ARRAY =>
-          args += unpacker.unpackValue()
-        case ValueType.MAP =>
-          args += unpacker.unpackValue()
-        case ValueType.EXTENSION =>
-          args += unpacker.unpackValue()
-      }
-      index += 1
-    }
-
-    val a = args.result()
-    info(s"${a.mkString(", ")}")
-    schema.constructor.newInstance(a).asInstanceOf[A]
+    unpackObj(unpacker, ObjectType.of(cl)).asInstanceOf[A]
   }
 
   override def close(): Unit = {}
@@ -107,12 +175,15 @@ class ObjectWriter[A](cl:Class[A]) extends TabletWriter[A] with LogSupport {
 
 
 
-object ObjectInput extends LogSupport {
+class ObjectInput(codec:Map[Class[_], MessagePackCodec[_]] = Map.empty) extends LogSupport {
 
   def packValue(packer:MessagePacker, v:Any, valueType:ObjectType) {
     trace(s"packValue: ${v}, ${valueType}, ${valueType.getClass}")
     if (v == null) {
       packer.packNil()
+    }
+    else if(codec.contains(valueType.rawType)) {
+      codec(valueType.rawType).asInstanceOf[MessagePackCodec[Any]].packTo(v, packer)
     }
     else {
       valueType match {
@@ -131,7 +202,7 @@ object ObjectInput extends LogSupport {
           }
           else {
             val content = opt.get
-            packValue(packer, content, ObjectType.of(content.getClass))
+            packValue(packer, content, elemType)
           }
         case AliasedObjectType(name, fullName, base) =>
           packValue(packer, v, base)
@@ -181,14 +252,21 @@ object ObjectInput extends LogSupport {
   }
 
   def packObj(packer:MessagePacker, obj:Any) {
-    // TODO polymorphic types (e.g., B extends A, C extends B)
-    val objSchema = ObjectSchema(obj.getClass)
-    // TODO add parameter values not in the schema
-    packer.packArrayHeader(objSchema.parameters.length)
-    for (p <- objSchema.parameters) {
-      val v = p.get(obj)
-      trace(s"packing ${p.name}, ${p.valueType}")
-      packValue(packer, v, p.valueType)
+
+    val cl = obj.getClass
+    if (codec.contains(cl)) {
+      codec(cl).asInstanceOf[MessagePackCodec[Any]].packTo(obj, packer)
+    }
+    else {
+      // TODO polymorphic types (e.g., B extends A, C extends B)
+      val objSchema = ObjectSchema(obj.getClass)
+      // TODO add parameter values not in the schema
+      packer.packArrayHeader(objSchema.parameters.length)
+      for (p <- objSchema.parameters) {
+        val v = p.get(obj)
+        trace(s"packing ${p.name}, ${p.valueType}")
+        packValue(packer, v, p.valueType)
+      }
     }
   }
 
@@ -208,18 +286,19 @@ object ObjectInput extends LogSupport {
 /**
   *
   */
-class ObjectTabletReader[A](input:Seq[A]) extends TabletReader with LogSupport {
+class ObjectTabletReader[A](input:Seq[A], codec:Map[Class[_], MessagePackCodec[_]] = Map.empty) extends TabletReader with LogSupport {
 
   private val cursor = input.iterator
+
+  private val reader = new ObjectInput(codec = codec)
 
   def read: Option[Record] = {
     if (!cursor.hasNext) {
       None
     }
     else {
-
       val record = cursor.next()
-      Some(ObjectInput.read(record))
+      Some(reader.read(record))
     }
   }
 }
