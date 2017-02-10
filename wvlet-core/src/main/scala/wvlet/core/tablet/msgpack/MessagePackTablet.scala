@@ -7,6 +7,8 @@ import org.msgpack.core.{MessagePack, MessagePacker, MessageUnpacker}
 import wvlet.core.tablet._
 import wvlet.log.LogSupport
 
+import scala.annotation.tailrec
+
 /**
   *
   */
@@ -27,21 +29,29 @@ object MessagePackTablet {
   */
 class MessagePackTabletReader(unpacker:MessageUnpacker) extends TabletReader with LogSupport {
 
-  override def read: Option[Record] = {
+  private var readRows = 0
+
+  @tailrec private def readNext : Option[Record] = {
     if(!unpacker.hasNext) {
       None
     }
     else {
       val f = unpacker.getNextFormat
+      readRows += 1
       if(f.getValueType.isArrayType) {
         Some(ShallowMessagePackRecord(unpacker))
       }
       else {
-        error(s"${f} is not an array")
+        val v = unpacker.unpackValue()
+        error(s"(row:${readRows}) ${v} is not an array")
         // TODO error handling
-        throw new IllegalStateException(s"${f} is not an array")
+        readNext
       }
     }
+  }
+
+  override def read: Option[Record] = {
+    readNext
   }
 }
 

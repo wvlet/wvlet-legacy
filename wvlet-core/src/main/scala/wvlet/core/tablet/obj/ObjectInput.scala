@@ -67,31 +67,39 @@ class ObjectWriter[A](cl:Class[A], codec:Map[Class[_], MessagePackCodec[_]] = Ma
     objType match {
       case AliasedObjectType(_, _, orig) =>
         unpack(unpacker, orig)
+      case OptionType(cl, elemType) =>
+        if(unpacker.getNextFormat.getValueType.isNilType) {
+          unpacker.unpackNil()
+          None
+        }
+        else {
+          Some(unpack(unpacker, elemType))
+        }
       case _ =>
-          val f = unpacker.getNextFormat
-          val vt = f.getValueType
-
+        val f = unpacker.getNextFormat
+        val vt = f.getValueType
         val readValue =
-          if(vt.isNilType) {
-            TypeUtil.zero(objType.rawType, objType)
-          }
-          else if (codec.contains(objType.rawType)) {
+          if (!vt.isNilType && codec.contains(objType.rawType)) {
             codec(objType.rawType).unpack(unpacker).asInstanceOf[AnyRef]
           }
           else {
             vt match {
+              case ValueType.NIL =>
+                unpacker.unpackNil()
+                TypeUtil.zero(objType.rawType, objType)
               case ValueType.BOOLEAN =>
                 java.lang.Boolean.valueOf(unpacker.unpackBoolean())
               case ValueType.INTEGER =>
+                val l = unpacker.unpackLong()
                 objType match {
                   case Primitive.Byte =>
-                    java.lang.Byte.valueOf(unpacker.unpackByte())
+                    java.lang.Byte.valueOf(l.toByte)
                   case Primitive.Short =>
-                    java.lang.Short.valueOf(unpacker.unpackShort())
+                    java.lang.Short.valueOf(l.toShort)
                   case Primitive.Int =>
-                    java.lang.Integer.valueOf(unpacker.unpackInt())
+                    java.lang.Integer.valueOf(l.toInt)
                   case Primitive.Long =>
-                    java.lang.Long.valueOf(unpacker.unpackLong())
+                    java.lang.Long.valueOf(l)
                 }
               case ValueType.FLOAT =>
                 java.lang.Double.valueOf(unpacker.unpackDouble())
@@ -101,7 +109,17 @@ class ObjectWriter[A](cl:Class[A], codec:Map[Class[_], MessagePackCodec[_]] = Ma
                 val size = unpacker.unpackBinaryHeader()
                 unpacker.readPayload(size)
               case ValueType.ARRAY =>
-                unpackObj(unpacker, objType)
+                objType match {
+                  case SeqType(cl, elemType) =>
+                    val b = Seq.newBuilder[Any]
+                    val size = unpacker.unpackArrayHeader()
+                    (0 until size).foreach { i =>
+                      b += unpack(unpacker, elemType)
+                    }
+                    b.result()
+                  case _ =>
+                    unpackObj(unpacker, objType)
+                }
               case ValueType.MAP =>
                 // TODO? support mapping key->value to obj?
                 objType match {
@@ -125,25 +143,17 @@ class ObjectWriter[A](cl:Class[A], codec:Map[Class[_], MessagePackCodec[_]] = Ma
                 unpacker.unpackValue().toJson
             }
           }
-
-        objType match {
-          case OptionType(cl, elemType) =>
-            if(vt == ValueType.NIL)
-              None
-            else {
-              Some(readValue)
-            }
-          case _ =>
-            readValue.asInstanceOf[AnyRef]
-        }
+        readValue.asInstanceOf[AnyRef]
     }
   }
 
   private def unpackObj(unpacker:MessageUnpacker, objType:ObjectType) : AnyRef = {
     val schema = ObjectSchema.of(objType)
+    val f = unpacker.getNextFormat
+    trace(s"unpack obj ${f} -> ${objType}")
     if(codec.contains(objType.rawType)) {
-      val f = unpacker.getNextFormat
       if(f.getValueType == ValueType.NIL) {
+        unpacker.unpackNil()
         null
       }
       else {
@@ -154,13 +164,15 @@ class ObjectWriter[A](cl:Class[A], codec:Map[Class[_], MessagePackCodec[_]] = Ma
       val size = unpacker.unpackArrayHeader()
       var index = 0
       val args = Array.newBuilder[AnyRef]
-      for (p <- schema.parameters if index < size) {
-        args += unpack(unpacker, p.valueType)
+      val params = schema.parameters
+      while(index < size) {
+        args += unpack(unpacker, params(index).valueType)
         index += 1
       }
       val a = args.result()
       trace(s"${a.map(x => s"${x.getClass.getName}:${x}").mkString("\n")}")
       val r = schema.constructor.newInstance(a).asInstanceOf[AnyRef]
+      trace(r)
       r
     }
   }
@@ -255,6 +267,7 @@ class ObjectInput(codec:Map[Class[_], MessagePackCodec[_]] = Map.empty) extends 
 
     val cl = obj.getClass
     if (codec.contains(cl)) {
+      trace(s"Using codec for ${cl}")
       codec(cl).asInstanceOf[MessagePackCodec[Any]].packTo(obj, packer)
     }
     else {
