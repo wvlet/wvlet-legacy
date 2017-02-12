@@ -19,17 +19,21 @@ object Schema {
     //def javaType: Class[_]
   }
 
-  case object ANY extends ColumnType
-  case object INTEGER extends ColumnType
-  case object FLOAT extends ColumnType
-  case object BOOLEAN extends ColumnType
-  case object STRING extends ColumnType
-  case object TIMESTAMP extends ColumnType
-  case object JSON extends ColumnType
-  case object BINARY extends ColumnType
-  case class ARRAY(elemType: ColumnType) extends ColumnType
-  case class MAP(keyType: ColumnType, valueType: ColumnType) extends ColumnType
-  case class RECORD(column: Seq[Column]) extends ColumnType
+  sealed trait PrimitiveType extends ColumnType
+  sealed trait StructureType extends ColumnType
+
+  case object NIL extends PrimitiveType
+  case object ANY extends PrimitiveType
+  case object INTEGER extends PrimitiveType
+  case object FLOAT extends PrimitiveType
+  case object BOOLEAN extends PrimitiveType
+  case object STRING extends PrimitiveType
+  case object TIMESTAMP extends PrimitiveType
+  case object BINARY extends PrimitiveType
+  case object JSON extends PrimitiveType
+  case class ARRAY(elemType: ColumnType) extends StructureType
+  case class MAP(keyType: ColumnType, valueType: ColumnType) extends StructureType
+  case class RECORD(column: Seq[Column]) extends StructureType
 
   object ColumnType {
     def unapply(s: String): Option[ColumnType] = {
