@@ -9,10 +9,10 @@ import scala.util.{Failure, Success, Try}
 
 trait MessageFormatter[@specialized(Int, Long, Float, Double, Boolean) A] {
   def pack(p: MessagePacker, v: A)
-  def unpack(u: MessageUnpacker, v: ValueHolder): ValueHolder
+  def unpack(u: MessageUnpacker, v: MessageHolder)
 }
 
-class ValueHolder {
+class MessageHolder {
   private var b: Boolean = false
   private var l: Long    = 0L
   private var d: Double  = 0d
@@ -28,6 +28,28 @@ class ValueHolder {
   def getDouble: Double = d
   def getString: String = s
   def getObject: AnyRef = o
+
+  def getLastValue: Any = {
+    if(isNull) {
+      null
+    }
+    else {
+      valueType match {
+        case Schema.NIL =>
+          null
+        case Schema.INTEGER =>
+          this.getLong
+        case Schema.FLOAT =>
+          this.getDouble
+        case Schema.STRING =>
+          this.getString
+        case Schema.BOOLEAN =>
+          this.getBoolean
+        case _ =>
+          getObject
+      }
+    }
+  }
 
   def setLong(v: Long): Long = {
     l = v
@@ -69,7 +91,7 @@ object LongFormatter extends MessageFormatter[Long] {
     p.packLong(v)
   }
 
-  override def unpack(u: MessageUnpacker, v: ValueHolder): ValueHolder = {
+  override def unpack(u: MessageUnpacker, v: MessageHolder) {
     val f = u.getNextFormat
     val vt = f.getValueType
     vt match {
@@ -98,7 +120,6 @@ object LongFormatter extends MessageFormatter[Long] {
         u.skipValue()
         v.setNull
     }
-    v
   }
 }
 
@@ -107,7 +128,7 @@ object StringFormatter extends MessageFormatter[String] {
     p.packString(v)
   }
 
-  override def unpack(u: MessageUnpacker, v: ValueHolder): ValueHolder = {
+  override def unpack(u: MessageUnpacker, v: MessageHolder) {
     u.getNextFormat.getValueType match {
       case ValueType.NIL =>
         u.unpackNil()
@@ -133,7 +154,6 @@ object StringFormatter extends MessageFormatter[String] {
         val ext = u.unpackValue()
         v.setString(ext.toJson)
     }
-    v
   }
 }
 
@@ -142,7 +162,7 @@ object BooleanFormatter extends MessageFormatter[Boolean] {
     p.packBoolean(v)
   }
 
-  override def unpack(u: MessageUnpacker, v: ValueHolder): ValueHolder = {
+  override def unpack(u: MessageUnpacker, v: MessageHolder) {
     u.getNextFormat.getValueType match {
       case ValueType.NIL =>
         u.unpackNil()
@@ -159,7 +179,6 @@ object BooleanFormatter extends MessageFormatter[Boolean] {
         u.skipValue()
         v.setNull
     }
-    v
   }
 }
 
@@ -168,7 +187,7 @@ object DoubleFormatter extends MessageFormatter[Double] {
     p.packDouble(v)
   }
 
-  override def unpack(u: MessageUnpacker, v: ValueHolder): ValueHolder = {
+  override def unpack(u: MessageUnpacker, v: MessageHolder) {
     u.getNextFormat.getValueType match {
       case ValueType.NIL =>
         u.unpackNil()
@@ -186,7 +205,6 @@ object DoubleFormatter extends MessageFormatter[Double] {
         u.skipValue()
         v.setNull
     }
-    v
   }
 }
 
@@ -196,18 +214,18 @@ object IntArrayFormatter extends MessageFormatter[Array[Int]] {
     v.foreach {x => LongFormatter.pack(p, x)}
   }
 
-  override def unpack(u: MessageUnpacker, v: ValueHolder): ValueHolder = {
+  override def unpack(u: MessageUnpacker, v: MessageHolder) {
     val len = u.unpackArrayHeader()
     val b = Array.newBuilder[Int]
     b.sizeHint(len)
     (0 until len).foreach {i =>
-      val x = LongFormatter.unpack(u, v)
+      LongFormatter.unpack(u, v)
       if (v.isNull) {
         // TODO report error?
         b += 0
       }
       else {
-        val l = x.getLong
+        val l = v.getLong
         if (l.isValidInt) {
           b += l.toInt
         }
@@ -218,7 +236,6 @@ object IntArrayFormatter extends MessageFormatter[Array[Int]] {
       }
     }
     v.setObject(b.result())
-    v
   }
 }
 
@@ -228,23 +245,22 @@ object LongArrayFormatter extends MessageFormatter[Array[Long]] {
     v.foreach {x => LongFormatter.pack(p, x)}
   }
 
-  override def unpack(u: MessageUnpacker, v: ValueHolder): ValueHolder = {
+  override def unpack(u: MessageUnpacker, v: MessageHolder) {
     val len = u.unpackArrayHeader()
     val b = Array.newBuilder[Long]
     b.sizeHint(len)
     (0 until len).foreach {i =>
-      val x = LongFormatter.unpack(u, v)
+      LongFormatter.unpack(u, v)
       if (v.isNull) {
         // TODO report error?
         b += 0L
       }
       else {
-        val l = x.getLong
+        val l = v.getLong
         b += l
       }
     }
     v.setObject(b.result())
-    v
   }
 }
 
@@ -254,7 +270,7 @@ object FlaotArrayFormatter extends MessageFormatter[Array[Float]] {
     v.foreach {x => DoubleFormatter.pack(p, x)}
   }
 
-  override def unpack(u: MessageUnpacker, v: ValueHolder): ValueHolder = {
+  override def unpack(u: MessageUnpacker, v: MessageHolder) {
     val len = u.unpackArrayHeader()
     val b = Array.newBuilder[Float]
     b.sizeHint(len)
@@ -269,7 +285,6 @@ object FlaotArrayFormatter extends MessageFormatter[Array[Float]] {
       }
     }
     v.setObject(b.result())
-    v
   }
 }
 
@@ -279,7 +294,7 @@ object DoubleArrayFormatter extends MessageFormatter[Array[Double]] {
     v.foreach {x => DoubleFormatter.pack(p, x)}
   }
 
-  override def unpack(u: MessageUnpacker, v: ValueHolder): ValueHolder = {
+  override def unpack(u: MessageUnpacker, v: MessageHolder) {
     val len = u.unpackArrayHeader()
     val b = Array.newBuilder[Double]
     b.sizeHint(len)
@@ -294,7 +309,6 @@ object DoubleArrayFormatter extends MessageFormatter[Array[Double]] {
       }
     }
     v.setObject(b.result())
-    v
   }
 }
 
@@ -304,7 +318,7 @@ object BooleanArrayFormatter extends MessageFormatter[Array[Boolean]] {
     v.foreach {x => BooleanFormatter.pack(p, x) }
   }
 
-  override def unpack(u: MessageUnpacker, v: ValueHolder): ValueHolder = {
+  override def unpack(u: MessageUnpacker, v: MessageHolder) {
     val len = u.unpackArrayHeader()
     val b = Array.newBuilder[Boolean]
     b.sizeHint(len)
@@ -319,7 +333,6 @@ object BooleanArrayFormatter extends MessageFormatter[Array[Boolean]] {
       }
     }
     v.setObject(b.result())
-    v
   }
 }
 
@@ -329,7 +342,7 @@ object StringArrayFormatter extends MessageFormatter[Array[String]] {
     v.foreach {x => StringFormatter.pack(p, x)}
   }
 
-  override def unpack(u: MessageUnpacker, v: ValueHolder): ValueHolder = {
+  override def unpack(u: MessageUnpacker, v: MessageHolder) {
     val len = u.unpackArrayHeader()
     val b = Array.newBuilder[String]
     b.sizeHint(len)
@@ -343,6 +356,12 @@ object StringArrayFormatter extends MessageFormatter[Array[String]] {
       }
     }
     v.setObject(b.result())
-    v
+
   }
+}
+
+
+class ObjectFormatter[A](cl:Class[A], codecTable:Map[Class[_], MessageFormatter[_]]) {
+
+
 }

@@ -16,6 +16,7 @@ package wvlet.core.tablet.obj
 import org.msgpack.core.{MessagePack, MessagePacker, MessageUnpacker}
 import org.msgpack.value.ValueType
 import wvlet.core.tablet._
+import wvlet.core.tablet.msgpack.{MessageFormatter, MessageHolder}
 import wvlet.log.LogSupport
 import wvlet.obj.{GenericType, _}
 
@@ -49,26 +50,20 @@ object ObjectWriter {
     Schema(name, tabletColumnTypes)
   }
 
-  def of[A:ClassTag] : ObjectWriter[A] = {
+  def of[A: ClassTag]: ObjectWriter[A] = {
     val cl = implicitly[ClassTag[A]]
     new ObjectWriter(cl.runtimeClass.asInstanceOf[Class[A]])
   }
 }
 
-trait MessagePackCodec[A] {
-  def packTo(a:A, packer:MessagePacker)
-  def unpack(unpacker:MessageUnpacker) : A
-}
+class ObjectWriter[A](cl: Class[A], codec: Map[Class[_], MessageFormatter[_]] = Map.empty) extends TabletWriter[A] with LogSupport {
 
-
-class ObjectWriter[A](cl:Class[A], codec:Map[Class[_], MessagePackCodec[_]] = Map.empty) extends TabletWriter[A] with LogSupport {
-
-  private def unpack(unpacker:MessageUnpacker, objType:ObjectType) : AnyRef = {
+  private def unpack(unpacker: MessageUnpacker, objType: ObjectType): AnyRef = {
     objType match {
       case AliasedObjectType(_, _, orig) =>
         unpack(unpacker, orig)
       case OptionType(cl, elemType) =>
-        if(unpacker.getNextFormat.getValueType.isNilType) {
+        if (unpacker.getNextFormat.getValueType.isNilType) {
           unpacker.unpackNil()
           None
         }
@@ -80,7 +75,9 @@ class ObjectWriter[A](cl:Class[A], codec:Map[Class[_], MessagePackCodec[_]] = Ma
         val vt = f.getValueType
         val readValue =
           if (!vt.isNilType && codec.contains(objType.rawType)) {
-            codec(objType.rawType).unpack(unpacker).asInstanceOf[AnyRef]
+            val m = new MessageHolder
+            codec(objType.rawType).unpack(unpacker, m)
+            m.getLastValue
           }
           else {
             vt match {
@@ -113,7 +110,7 @@ class ObjectWriter[A](cl:Class[A], codec:Map[Class[_], MessagePackCodec[_]] = Ma
                   case SeqType(cl, elemType) =>
                     val b = Seq.newBuilder[Any]
                     val size = unpacker.unpackArrayHeader()
-                    (0 until size).foreach { i =>
+                    (0 until size).foreach {i =>
                       b += unpack(unpacker, elemType)
                     }
                     b.result()
@@ -147,17 +144,19 @@ class ObjectWriter[A](cl:Class[A], codec:Map[Class[_], MessagePackCodec[_]] = Ma
     }
   }
 
-  private def unpackObj(unpacker:MessageUnpacker, objType:ObjectType) : AnyRef = {
+  private def unpackObj(unpacker: MessageUnpacker, objType: ObjectType): AnyRef = {
     val schema = ObjectSchema.of(objType)
     val f = unpacker.getNextFormat
     trace(s"unpack obj ${f} -> ${objType}")
-    if(codec.contains(objType.rawType)) {
-      if(f.getValueType == ValueType.NIL) {
+    if (codec.contains(objType.rawType)) {
+      if (f.getValueType == ValueType.NIL) {
         unpacker.unpackNil()
         null
       }
       else {
-        codec(objType.rawType).unpack(unpacker).asInstanceOf[AnyRef]
+        val m = new MessageHolder
+        codec(objType.rawType).unpack(unpacker, m)
+        m.getLastValue.asInstanceOf[AnyRef]
       }
     }
     else {
@@ -165,7 +164,7 @@ class ObjectWriter[A](cl:Class[A], codec:Map[Class[_], MessagePackCodec[_]] = Ma
       var index = 0
       val args = Array.newBuilder[AnyRef]
       val params = schema.parameters
-      while(index < size) {
+      while (index < size) {
         args += unpack(unpacker, params(index).valueType)
         index += 1
       }
@@ -185,17 +184,15 @@ class ObjectWriter[A](cl:Class[A], codec:Map[Class[_], MessagePackCodec[_]] = Ma
   override def close(): Unit = {}
 }
 
+class ObjectInput(codec: Map[Class[_], MessageFormatter[_]] = Map.empty) extends LogSupport {
 
-
-class ObjectInput(codec:Map[Class[_], MessagePackCodec[_]] = Map.empty) extends LogSupport {
-
-  def packValue(packer:MessagePacker, v:Any, valueType:ObjectType) {
+  def packValue(packer: MessagePacker, v: Any, valueType: ObjectType) {
     trace(s"packValue: ${v}, ${valueType}, ${valueType.getClass}")
     if (v == null) {
       packer.packNil()
     }
-    else if(codec.contains(valueType.rawType)) {
-      codec(valueType.rawType).asInstanceOf[MessagePackCodec[Any]].packTo(v, packer)
+    else if (codec.contains(valueType.rawType)) {
+      codec(valueType.rawType).asInstanceOf[MessageFormatter[Any]].pack(packer, v)
     }
     else {
       valueType match {
@@ -209,7 +206,7 @@ class ObjectInput(codec:Map[Class[_], MessagePackCodec[_]] = Map.empty) extends 
           packer.packString(v.toString)
         case OptionType(cl, elemType) =>
           val opt = v.asInstanceOf[Option[_]]
-          if(opt.isEmpty) {
+          if (opt.isEmpty) {
             packer.packNil()
           }
           else {
@@ -221,7 +218,7 @@ class ObjectInput(codec:Map[Class[_], MessagePackCodec[_]] = Map.empty) extends 
         case MapType(cl, keyType, valueType) =>
           val m = v.asInstanceOf[Map[_, _]]
           packer.packMapHeader(m.size)
-          for((k, v) <- m.seq) {
+          for ((k, v) <- m.seq) {
             packValue(packer, k, keyType)
             packValue(packer, v, keyType)
           }
@@ -263,12 +260,12 @@ class ObjectInput(codec:Map[Class[_], MessagePackCodec[_]] = Map.empty) extends 
     }
   }
 
-  def packObj(packer:MessagePacker, obj:Any) {
+  def packObj(packer: MessagePacker, obj: Any) {
 
     val cl = obj.getClass
     if (codec.contains(cl)) {
       trace(s"Using codec for ${cl}")
-      codec(cl).asInstanceOf[MessagePackCodec[Any]].packTo(obj, packer)
+      codec(cl).asInstanceOf[MessageFormatter[Any]].pack(packer, obj)
     }
     else {
       // TODO polymorphic types (e.g., B extends A, C extends B)
@@ -283,7 +280,7 @@ class ObjectInput(codec:Map[Class[_], MessagePackCodec[_]] = Map.empty) extends 
     }
   }
 
-  def read[A](record:A) : Record = {
+  def read[A](record: A): Record = {
     val packer = MessagePack.newDefaultBufferPacker()
     if (record == null) {
       packer.packArrayHeader(0) // empty array
@@ -295,11 +292,10 @@ class ObjectInput(codec:Map[Class[_], MessagePackCodec[_]] = Map.empty) extends 
   }
 }
 
-
 /**
   *
   */
-class ObjectTabletReader[A](input:Seq[A], codec:Map[Class[_], MessagePackCodec[_]] = Map.empty) extends TabletReader with LogSupport {
+class ObjectTabletReader[A](input: Seq[A], codec: Map[Class[_], MessageFormatter[_]] = Map.empty) extends TabletReader with LogSupport {
 
   private val cursor = input.iterator
 
