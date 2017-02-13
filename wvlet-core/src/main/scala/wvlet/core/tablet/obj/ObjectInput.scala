@@ -133,7 +133,7 @@ class ObjectWriter[A](cl:Class[A], codec:Map[Class[_], MessagePackCodec[_]] = Ma
                     }
                     b.result()
                   case _ =>
-                    // Fallback to JSOn
+                    // Fallback to JSON
                     val v = unpacker.unpackValue()
                     v.toJson
                 }
