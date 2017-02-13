@@ -31,22 +31,14 @@ class MessagePackTabletReader(unpacker:MessageUnpacker) extends TabletReader wit
 
   private var readRows = 0
 
-  @tailrec private def readNext : Option[Record] = {
+  private def readNext : Option[Record] = {
     if(!unpacker.hasNext) {
       None
     }
     else {
       val f = unpacker.getNextFormat
       readRows += 1
-      if(f.getValueType.isArrayType) {
-        Some(ShallowMessagePackRecord(unpacker))
-      }
-      else {
-        val v = unpacker.unpackValue()
-        error(s"(row:${readRows}) ${v} is not an array")
-        // TODO error handling
-        readNext
-      }
+      Some(ShallowMessagePackRecord(unpacker))
     }
   }
 

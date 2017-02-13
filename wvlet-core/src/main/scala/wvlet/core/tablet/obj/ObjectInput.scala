@@ -159,6 +159,9 @@ class ObjectWriter[A](cl: Class[A], codec: Map[Class[_], MessageFormatter[_]] = 
         m.getLastValue.asInstanceOf[AnyRef]
       }
     }
+    else if(objType.isPrimitive) {
+      unpack(unpacker, objType)
+    }
     else {
       val size = unpacker.unpackArrayHeader()
       var index = 0
@@ -261,21 +264,26 @@ class ObjectInput(codec: Map[Class[_], MessageFormatter[_]] = Map.empty) extends
   }
 
   def packObj(packer: MessagePacker, obj: Any) {
-
     val cl = obj.getClass
     if (codec.contains(cl)) {
       trace(s"Using codec for ${cl}")
       codec(cl).asInstanceOf[MessageFormatter[Any]].pack(packer, obj)
     }
     else {
-      // TODO polymorphic types (e.g., B extends A, C extends B)
-      val objSchema = ObjectSchema(obj.getClass)
-      // TODO add parameter values not in the schema
-      packer.packArrayHeader(objSchema.parameters.length)
-      for (p <- objSchema.parameters) {
-        val v = p.get(obj)
-        trace(s"packing ${p.name}, ${p.valueType}")
-        packValue(packer, v, p.valueType)
+      val valueType = ObjectType.of(cl)
+      if (valueType.isPrimitive) {
+        packValue(packer, obj, valueType)
+      }
+      else {
+        // TODO polymorphic types (e.g., B extends A, C extends B)
+        val objSchema = ObjectSchema(obj.getClass)
+        // TODO add parameter values not in the schema
+        packer.packArrayHeader(objSchema.parameters.length)
+        for (p <- objSchema.parameters) {
+          val v = p.get(obj)
+          trace(s"packing ${p.name}, ${p.valueType}")
+          packValue(packer, v, p.valueType)
+        }
       }
     }
   }
