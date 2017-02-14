@@ -12,8 +12,7 @@ import java.lang.annotation.Target;
 @Target({ElementType.FIELD, ElementType.METHOD, ElementType.PARAMETER})
 public @interface workflow {
     /**
-     * Description of the option, used to generate a help message of this
-     * command-line option.
+     * Description of the workflow
      */
     String description() default "";
 }
