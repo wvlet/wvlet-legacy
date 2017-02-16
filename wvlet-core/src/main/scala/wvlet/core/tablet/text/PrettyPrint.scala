@@ -1,5 +1,7 @@
 package wvlet.core.tablet.text
 
+import java.nio.charset.StandardCharsets
+
 import org.msgpack.value.Variable
 import wvlet.core.tablet.obj.ObjectTabletReader
 import wvlet.log.LogSupport
@@ -37,18 +39,23 @@ object PrettyPrint extends LogSupport {
     s.result()
   }
 
-
+  def screenTextLength(s:String) : Int = {
+    (for (i <- 0 until s.length) yield {
+      val ch = s.charAt(i)
+      if (ch < 128) 1 else 2
+    }).sum
+  }
 
   def maxColWidths(rows:Seq[Seq[String]]) : IndexedSeq[Int] = {
     val maxWidth = (0 until rows.length).map(i => 0).toArray
     for(r <- rows; (c, i) <- r.zipWithIndex) {
-      maxWidth(i) = math.max(c.length, maxWidth(i))
+      maxWidth(i) = math.max(screenTextLength(c), maxWidth(i))
     }
     maxWidth.toIndexedSeq
   }
 
   def pad(s:String, colWidth:Int) : String = {
-    (" " * Math.max(0, colWidth - s.length)) + s
+    (" " * Math.max(0, colWidth - screenTextLength(s))) + s
   }
 
 }
