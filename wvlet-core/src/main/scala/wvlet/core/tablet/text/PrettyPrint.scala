@@ -29,11 +29,11 @@ object PrettyPrint extends LogSupport {
 
     val reader = new ObjectTabletReader(seq)
     b ++= (reader | RecordPrinter)
+    val s = Seq.newBuilder[String]
     val rows = b.result
     val colWidth = maxColWidths(rows)
-    val s = Seq.newBuilder[String]
-    for(r <- rows) {
-      val cols = for((c, i) <- r.zipWithIndex) yield pad(c, colWidth(i))
+    for (r <- rows) {
+      val cols = for ((c, i) <- r.zipWithIndex) yield pad(c, colWidth(i))
       s += cols.mkString(" ")
     }
     s.result()
@@ -47,7 +47,7 @@ object PrettyPrint extends LogSupport {
   }
 
   def maxColWidths(rows:Seq[Seq[String]]) : IndexedSeq[Int] = {
-    val maxWidth = (0 until rows.length).map(i => 0).toArray
+    val maxWidth = (0 until rows.head.length).map(i => 0).toArray
     for(r <- rows; (c, i) <- r.zipWithIndex) {
       maxWidth(i) = math.max(screenTextLength(c), maxWidth(i))
     }
