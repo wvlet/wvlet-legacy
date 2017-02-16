@@ -108,8 +108,9 @@ class TabletPrinter(val formatter: RecordFormatter) extends TabletWriter[String]
           val s = unpacker.unpackString
           formatter.sanitize(s)
         case ValueType.BINARY =>
-          // TODO
-          "null"
+          val b = unpacker.unpackValue()
+          // TODO formatting
+          formatter.sanitize(b.toJson)
         case ValueType.ARRAY =>
           val arrSize = unpacker.unpackArrayHeader()
           val r = Seq.newBuilder[String]
@@ -143,6 +144,4 @@ class TabletPrinter(val formatter: RecordFormatter) extends TabletWriter[String]
 object JSONTabletPrinter extends TabletPrinter(JSONRecordFormatter)
 object CSVTabletPrinter extends TabletPrinter(CSVRecordFormatter)
 object TSVTabletPrinter extends TabletPrinter(TSVRecordFormatter)
-
-
 

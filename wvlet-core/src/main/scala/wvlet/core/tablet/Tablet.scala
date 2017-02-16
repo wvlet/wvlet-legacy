@@ -51,6 +51,8 @@ trait TabletWriter[A] extends AutoCloseable {
   self =>
 
   def write(record: Record) : A
+
+  override def close() {}
 }
 
 
