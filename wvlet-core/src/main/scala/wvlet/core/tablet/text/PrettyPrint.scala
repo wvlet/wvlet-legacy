@@ -33,11 +33,16 @@ object PrettyPrint extends LogSupport {
   }
 
   def maxColWidths(rows: Seq[Seq[String]]): IndexedSeq[Int] = {
-    val maxWidth = (0 until rows.head.length).map(i => 0).toArray
-    for (r <- rows; (c, i) <- r.zipWithIndex) {
-      maxWidth(i) = math.max(screenTextLength(c), maxWidth(i))
+    if(rows.isEmpty) {
+      IndexedSeq(0)
     }
-    maxWidth.toIndexedSeq
+    else {
+      val maxWidth = (0 until rows.head.length).map(i => 0).toArray
+      for (r <- rows; (c, i) <- r.zipWithIndex) {
+        maxWidth(i) = math.max(screenTextLength(c), maxWidth(i))
+      }
+      maxWidth.toIndexedSeq
+    }
   }
 
   def pad(s: String, colWidth: Int): String = {
