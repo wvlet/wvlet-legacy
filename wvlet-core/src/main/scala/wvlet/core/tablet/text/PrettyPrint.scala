@@ -32,26 +32,32 @@ object PrettyPrint extends LogSupport {
     }).sum
   }
 
-  def maxColWidths(rows: Seq[Seq[String]]): IndexedSeq[Int] = {
+  def maxColWidths(rows: Seq[Seq[String]], max:Int): IndexedSeq[Int] = {
     if(rows.isEmpty) {
       IndexedSeq(0)
     }
     else {
       val maxWidth = (0 until rows.head.length).map(i => 0).toArray
       for (r <- rows; (c, i) <- r.zipWithIndex) {
-        maxWidth(i) = math.max(screenTextLength(c), maxWidth(i))
+        maxWidth(i) = math.min(max, math.max(screenTextLength(c), maxWidth(i)))
       }
       maxWidth.toIndexedSeq
     }
   }
 
   def pad(s: String, colWidth: Int): String = {
-    (" " * Math.max(0, colWidth - screenTextLength(s))) + s
+    val str = (" " * Math.max(0, colWidth - screenTextLength(s))) + s
+    if(str.length >= colWidth) {
+      str.substring(0, colWidth)
+    }
+    else {
+      str
+    }
   }
 
 }
 
-class PrettyPrint(codec: Map[Class[_], MessageFormatter[_]] = Map.empty) extends LogSupport {
+class PrettyPrint(codec: Map[Class[_], MessageFormatter[_]] = Map.empty, maxColWidth:Int = 100) extends LogSupport {
   def show[A](seq: Seq[A], limit: Int = 20) {
     pp(seq.take(limit))
   }
@@ -71,7 +77,7 @@ class PrettyPrint(codec: Map[Class[_], MessageFormatter[_]] = Map.empty) extends
     b ++= (reader | RecordPrinter)
     val s = Seq.newBuilder[String]
     val rows = b.result
-    val colWidth = PrettyPrint.maxColWidths(rows)
+    val colWidth = PrettyPrint.maxColWidths(rows, maxColWidth)
     for (r <- rows) {
       val cols = for ((c, i) <- r.zipWithIndex) yield PrettyPrint.pad(c, colWidth(i))
       s += cols.mkString(" ")
