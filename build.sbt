@@ -99,11 +99,16 @@ lazy val wvletUi = Project(id = "wvlet-ui", base = file("wvlet-ui"))
 .enablePlugins(ScalaJSPlugin)
 .settings(
    scalaVersion := SCALA_VERSION,
-   name := "wvlet user interface",
+   name := "wvlet-ui",
 //   mainClass in Compile := Some("wvlet.ui.WvletUI"),
    persistLauncher := true,
+   libraryDependencies ++= Seq(
+     "org.scala-js" %%% "scalajs-dom" % "0.9.1",
+     "be.doeraene" %%% "scalajs-jquery" % "0.9.1",
+     "com.lihaoyi" %%% "scalatags" % "0.6.2"
+   ),
    jsDependencies ++= Seq(
-     "org.webjars" % "jquery" % "2.1.4" / "2.1.4/jquery.js",   		  
+     "org.webjars" % "jquery" % "2.1.4" / "2.1.4/jquery.js",
       RuntimeDOM
    )
 )
