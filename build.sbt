@@ -1,9 +1,10 @@
 import ReleaseTransformations._
 
-scalaVersion in ThisBuild := "2.12.1"
+val SCALA_VERSION = "2.12.1"
+scalaVersion in ThisBuild := SCALA_VERSION
 
 val buildSettings = Seq[Setting[_]](
-  crossScalaVersions := Seq("2.11.8", "2.12.1"),
+  crossScalaVersions := Seq("2.11.8", SCALA_VERSION),
   organization := "org.wvlet",
   description := "A framework for structured data mapping",
   crossPaths := true,
@@ -65,7 +66,7 @@ lazy val wvlet =
     publishArtifact := false,
     publish := {},
     publishLocal := {}
-  ).aggregate(wvletCore, wvletTest)
+  ).aggregate(wvletCore, wvletTest, wvletUi)
 
 val wvletLog = "org.wvlet" %% "wvlet-log" % "1.1"
 
@@ -93,3 +94,16 @@ lazy val wvletTest =
       "org.scalacheck" %% "scalacheck" % "1.12.6"
     )
   )
+
+lazy val wvletUi = Project(id = "wvlet-ui", base = file("wvlet-ui"))
+.enablePlugins(ScalaJSPlugin)
+.settings(
+   scalaVersion := SCALA_VERSION,
+   name := "wvlet user interface",
+//   mainClass in Compile := Some("wvlet.ui.WvletUI"),
+   persistLauncher := true,
+   jsDependencies ++= Seq(
+     "org.webjars" % "jquery" % "2.1.4" / "2.1.4/jquery.js",   		  
+      RuntimeDOM
+   )
+)
