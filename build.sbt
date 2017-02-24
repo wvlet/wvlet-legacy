@@ -105,7 +105,10 @@ lazy val wvletUi = Project(id = "wvlet-ui", base = file("wvlet-ui"))
    libraryDependencies ++= Seq(
      "org.scala-js" %%% "scalajs-dom" % "0.9.1",
      "be.doeraene" %%% "scalajs-jquery" % "0.9.1",
-     "com.lihaoyi" %%% "scalatags" % "0.6.2"
+     "com.lihaoyi" %%% "scalatags" % "0.6.3"
+     //"com.github.japgolly.scalajs-react" %%% "core" % "0.11.3",
+     //"com.github.japgolly.scalajs-react" %%% "extra" % "0.11.3",
+     //"com.github.chandu0101.scalajs-react-components" %%% "core" % "0.5.0"
    ),
    jsDependencies ++= Seq(
      "org.webjars" % "jquery" % "2.1.4" / "2.1.4/jquery.js",
