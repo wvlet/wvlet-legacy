@@ -7,6 +7,9 @@ import scalatags.JsDom.all._
 
 object WvletUI extends js.JSApp {
   def main() = {
+    val body = document.getElementById("body")
+    body.appendChild(Layout.layout("wvlet").render)
+
     val m = document.getElementById("main")
     val message = p("hello world!!!")
     m.appendChild(message.render)
