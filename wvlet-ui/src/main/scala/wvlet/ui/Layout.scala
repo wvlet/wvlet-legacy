@@ -20,16 +20,13 @@ import scalatags.JsDom.all._
 object Layout {
 
   def icon(iconName:String) = {
-    i(cls := "mdl-color-text--blue-grey-400 material-icons", role := "presentation")(iconName)
+    i(cls := "material-icons", role := "presentation")(iconName)
   }
 
   def searchBox = {
     form(action:="#")(
       div(cls:="mdl-textfield mdl-js-textfield") (
-        label(cls:="mdl-button mdl-js-button mdl-button--icon", attr("for"):="search-box")(
-          icon("search")
-        ),
-        div(cls:="mdl-textfield__expandable-holder")(
+        div(cls:="mdl-textfield")(
           input(cls:="mdl-textfield__input", tpe:="text", id:="search-box"),
           label(cls:="mdl-textfield__label", attr("for"):="search-box") ("Search ...")
         )
@@ -49,6 +46,12 @@ object Layout {
       thead(
         tr(
           for(h <- tableHeader) yield th(cls:="mdl-data-table__cell--non-numeric")(h)
+        )
+      ),
+      tbody(
+        tr(
+          td(),
+          td()
         )
       )
     )

@@ -30,6 +30,8 @@ object WvletUI extends js.JSApp {
       else {
         m.appendChild(p(xhr.responseText).render)
       }
+
+      
     }
   }
 }
