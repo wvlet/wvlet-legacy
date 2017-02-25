@@ -101,7 +101,8 @@ lazy val wvletServer =
   .settings(
     scalaVersion := SCALA_VERSION,
     scalaJSProjects := Seq(wvletUi),
-    pipelineStages in Assets := Seq(scalaJSPipeline)
+    pipelineStages in Assets := Seq(scalaJSPipeline),
+    compile in Compile := ((compile in Compile) dependsOn scalaJSPipeline).value
   )
 
 lazy val wvletUi =
@@ -112,6 +113,7 @@ lazy val wvletUi =
     name := "wvlet-ui",
     //pipelineStages in Assets := Seq(scalaJSPipeline),
 //   mainClass in Compile := Some("wvlet.ui.WvletUI"),
+
     persistLauncher := true,
     persistLauncher in Test := false,
             libraryDependencies ++= Seq(
