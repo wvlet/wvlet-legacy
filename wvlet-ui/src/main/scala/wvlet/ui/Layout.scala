@@ -58,8 +58,8 @@ object Layout {
         span(cls:="mdl-layout-title")(title),
         tag("nav")(cls:="wvlet-navigation mdl-navigation")(
           navLink("", "Home", "home"),
-          navLink("list", "List", "list"),
-          navLink("setting", "Settings", "settings")
+          navLink("", "List", "list"),
+          navLink("", "Settings", "settings")
         )
       ),
       tag("main")(cls:="mdl-layout__content")(
