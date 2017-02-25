@@ -5,5 +5,7 @@ addSbtPlugin("com.jsuereth" % "sbt-pgp" % "1.0.0")
 addSbtPlugin("io.get-coursier" % "sbt-coursier" % "1.0.0-M14-7")
 addSbtPlugin("org.scoverage" % "sbt-scoverage" % "1.5.0")
 addSbtPlugin("org.scoverage" % "sbt-coveralls" % "1.1.0")
+// For Scala.js
 addSbtPlugin("org.scala-js" % "sbt-scalajs" % "0.6.14")
+addSbtPlugin("com.vmunier" % "sbt-web-scalajs" % "1.0.3")
 scalacOptions ++= Seq("-deprecation", "-feature")

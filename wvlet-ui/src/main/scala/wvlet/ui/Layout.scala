@@ -23,6 +23,20 @@ object Layout {
     i(cls := "mdl-color-text--blue-grey-400 material-icons", role := "presentation")(iconName)
   }
 
+  def searchBox = {
+    form(action:="#")(
+      div(cls:="mdl-textfield mdl-js-textfield") (
+        label(cls:="mdl-button mdl-js-button mdl-button--icon", attr("for"):="search-box")(
+          icon("search")
+        ),
+        div(cls:="mdl-textfield__expandable-holder")(
+          input(cls:="mdl-textfield__input", tpe:="text", id:="search-box"),
+          label(cls:="mdl-textfield__label", attr("for"):="search-box") ("Search ...")
+        )
+      )
+    )
+  }
+
   def navLink(url:String, name:String, iconName:String) = {
     a(cls := "mdl-navigation__link", href := url)(
       icon(iconName),
@@ -45,9 +59,8 @@ object Layout {
     div(cls:="mdl-layout mdl-js-layout mdl-layout--fixed-drawer mdl-layout--fixed-header has-drawer")(
       header(cls:="mdl-layout__header")(
         div(cls:="mdl-layout__header-row")(
-          span(cls:="mld-layout-title")(title),
-          div(cls:="mdl-layout-spacer"),
-          icon("search")
+          searchBox,
+          div(cls:="mdl-layout-spacer")
 //          tag("nav")(cls:="mdl-navigation mdl-layout--lage-screen-only")(
 //            navLink("", "Home"),
 //            navLink("", "Link")

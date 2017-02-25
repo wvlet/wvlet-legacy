@@ -16,25 +16,25 @@ val buildSettings = Seq[Setting[_]](
   updateOptions := updateOptions.value.withCachedResolution(true),
   sonatypeProfileName := "org.wvlet",
   pomExtra := {
-  <url>https://github.com/xerial/wvlet</url>
-    <licenses>
-      <license>
-        <name>Apache 2</name>
-        <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-      </license>
-    </licenses>
-    <scm>
-      <connection>scm:git:github.com/wvlet/wvlet.git</connection>
-      <developerConnection>scm:git:git@github.com:wvlet/wvlet.git</developerConnection>
-      <url>github.com/wvlet/wvlet.git</url>
-    </scm>
-    <developers>
-      <developer>
-        <id>leo</id>
-        <name>Taro L. Saito</name>
-        <url>http://xerial.org/leo</url>
-      </developer>
-    </developers>
+    <url>https://github.com/xerial/wvlet</url>
+      <licenses>
+        <license>
+          <name>Apache 2</name>
+          <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+      </licenses>
+      <scm>
+        <connection>scm:git:github.com/wvlet/wvlet.git</connection>
+        <developerConnection>scm:git:git@github.com:wvlet/wvlet.git</developerConnection>
+        <url>github.com/wvlet/wvlet.git</url>
+      </scm>
+      <developers>
+        <developer>
+          <id>leo</id>
+          <name>Taro L. Saito</name>
+          <url>http://xerial.org/leo</url>
+        </developer>
+      </developers>
   },
   // Use sonatype resolvers
   resolvers ++= Seq(
@@ -42,7 +42,7 @@ val buildSettings = Seq[Setting[_]](
     Resolver.sonatypeRepo("snapshots")
   ),
   // Release settings
-  releaseTagName := { (version in ThisBuild).value },
+  releaseTagName := {(version in ThisBuild).value},
   releaseProcess := Seq[ReleaseStep](
     checkSnapshotDependencies,
     inquireVersions,
@@ -66,7 +66,7 @@ lazy val wvlet =
     publishArtifact := false,
     publish := {},
     publishLocal := {}
-  ).aggregate(wvletCore, wvletTest, wvletUi)
+  ).aggregate(wvletCore, wvletTest, wvletServer, wvletUi)
 
 val wvletLog = "org.wvlet" %% "wvlet-log" % "1.1"
 
@@ -95,23 +95,35 @@ lazy val wvletTest =
     )
   )
 
-lazy val wvletUi = Project(id = "wvlet-ui", base = file("wvlet-ui"))
-.enablePlugins(ScalaJSPlugin)
-.settings(
-   scalaVersion := SCALA_VERSION,
-   name := "wvlet-ui",
+lazy val wvletServer =
+  Project(id = "wvlet-server", base = file("wvlet-server"))
+  .enablePlugins(SbtWeb)
+  .settings(
+    scalaVersion := SCALA_VERSION,
+    scalaJSProjects := Seq(wvletUi),
+    pipelineStages in Assets := Seq(scalaJSPipeline)
+  )
+
+lazy val wvletUi =
+  Project(id = "wvlet-ui", base = file("wvlet-ui"))
+  .enablePlugins(ScalaJSPlugin, ScalaJSWeb)
+  .settings(
+    scalaVersion := SCALA_VERSION,
+    name := "wvlet-ui",
+    //pipelineStages in Assets := Seq(scalaJSPipeline),
 //   mainClass in Compile := Some("wvlet.ui.WvletUI"),
-   persistLauncher := true,
-   libraryDependencies ++= Seq(
-     "org.scala-js" %%% "scalajs-dom" % "0.9.1",
-     "be.doeraene" %%% "scalajs-jquery" % "0.9.1",
-     "com.lihaoyi" %%% "scalatags" % "0.6.3"
-     //"com.github.japgolly.scalajs-react" %%% "core" % "0.11.3",
-     //"com.github.japgolly.scalajs-react" %%% "extra" % "0.11.3",
-     //"com.github.chandu0101.scalajs-react-components" %%% "core" % "0.5.0"
-   ),
-   jsDependencies ++= Seq(
-     "org.webjars" % "jquery" % "2.1.4" / "2.1.4/jquery.js",
+    persistLauncher := true,
+    persistLauncher in Test := false,
+            libraryDependencies ++= Seq(
+      "org.scala-js" %%% "scalajs-dom" % "0.9.1",
+      "be.doeraene" %%% "scalajs-jquery" % "0.9.1",
+      "com.lihaoyi" %%% "scalatags" % "0.6.3"
+      //"com.github.japgolly.scalajs-react" %%% "core" % "0.11.3",
+      //"com.github.japgolly.scalajs-react" %%% "extra" % "0.11.3",
+      //"com.github.chandu0101.scalajs-react-components" %%% "core" % "0.5.0"
+    ),
+    jsDependencies ++= Seq(
+      "org.webjars" % "jquery" % "2.1.4" / "2.1.4/jquery.js",
       RuntimeDOM
-   )
-)
+    )
+  )
