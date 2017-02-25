@@ -42,8 +42,8 @@ object Layout {
   }
 
   def dataTable(tableHeader:Seq[String]) = {
-    table(cls:="mdl-data-table mdl-js-data-table mdl-shadow--2dp")(
-      thead(
+    table(cls:="table table-sm table-striped")(
+      thead(cls:="thead-inverse")(
         tr(
           for(h <- tableHeader) yield th(cls:="mdl-data-table__cell--non-numeric")(h)
         )
