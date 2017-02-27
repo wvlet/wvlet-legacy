@@ -9,8 +9,22 @@ import org.scalajs.dom.raw.XMLHttpRequest
 import scala.util.{Failure, Success}
 import scalatags.JsDom.all._
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
+import play.api.libs.json._
+import play.api.libs.json.Reads._
+import play.api.libs.functional.syntax._
 
 object WvletUI extends js.JSApp {
+
+  case class FormData(
+    status: String,
+    schema: Seq[String],
+    data: Seq[Row]
+  )
+  case class Row(values: Seq[Any])
+
+  implicit val rowReads = Json.reads[Row]
+  implicit val readder  = Json.reads[FormData]
+
 
   def main() = {
     val body = document.getElementById("body")
@@ -22,16 +36,20 @@ object WvletUI extends js.JSApp {
 
     Ajax.get(url).map {xhr =>
       if (xhr.status == 200) {
-        val json = js.JSON.parse(xhr.responseText)
-        val header = json.schema.asInstanceOf[js.Array[String]].toSeq
-        val content = Layout.dataTable(header)
-        m.appendChild(content.render)
+        val json = StaticBinding.parseJsValue(xhr.responseText)
+//        m.appendChild(p(json.toString()).render)
+        json.validate[FormData] match {
+          case s: JsSuccess[FormData] =>
+            val content = Layout.dataTable(s.get.schema)
+            m.appendChild(content.render)
+          case e: JsError =>
+            m.appendChild(p(e.errors.mkString("\n")).render)
+        }
       }
       else {
         m.appendChild(p(xhr.responseText).render)
       }
 
-      
     }
   }
 }
