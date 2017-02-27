@@ -18,13 +18,9 @@ object WvletUI extends js.JSApp {
   case class FormData(
     status: String,
     schema: Seq[String],
-    data: Seq[Row]
+    data: Seq[JsArray]
   )
-  case class Row(values: Seq[Any])
-
-  implicit val rowReads = Json.reads[Row]
-  implicit val readder  = Json.reads[FormData]
-
+  implicit val formReader  = Json.reads[FormData]
 
   def main() = {
     val body = document.getElementById("body")
