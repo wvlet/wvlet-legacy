@@ -12,6 +12,10 @@
  * limitations under the License.
  */
 package wvlet.ui
+import org.scalajs.dom
+import org.scalajs.dom.document
+import org.scalajs.dom.ext.KeyCode
+
 import scalatags.JsDom.all._
 
 /**
@@ -24,14 +28,29 @@ object Layout {
   }
 
   def searchBox = {
-    form(action:="#")(
-      div(cls:="mdl-textfield mdl-js-textfield") (
-        div(cls:="mdl-textfield")(
-          input(cls:="mdl-textfield__input", tpe:="text", id:="search-box"),
-          label(cls:="mdl-textfield__label", attr("for"):="search-box") ("Search ...")
+    val box = input(cls:="mdl-textfield__input", tpe:="text", id:="search-box").render
+    box.onkeypress = (e:dom.KeyboardEvent) => {
+      if(e.keyCode == KeyCode.Enter) {
+        val b = div(cls:="alert alert-success", attr("role"):="alert")(
+          s"Searching for ${box.value}"
+        ).render
+
+        val status = document.getElementById("status")
+        status.appendChild(b)
+      }
+    }
+
+    val searchForm =
+      form(action:="#")(
+        div(cls:="mdl-textfield mdl-js-textfield") (
+          div(cls:="mdl-textfield")(
+            box,
+            label(cls:="mdl-textfield__label", attr("for"):="search-box") ("Search ...")
+          )
         )
       )
-    )
+
+    searchForm
   }
 
   def navLink(url:String, name:String, iconName:String) = {
@@ -80,6 +99,7 @@ object Layout {
       ),
       tag("main")(cls:="mdl-layout__content")(
         div(cls:="page-content")(
+          div(id:="status"),
           div(id:="main")
         )
       )
