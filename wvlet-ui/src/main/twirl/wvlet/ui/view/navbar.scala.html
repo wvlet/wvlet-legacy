@@ -1,0 +1,14 @@
+@navlink(url:String, name:String, iconName:String) = {
+    <a class="mdl-navigation__link" href="@url">
+        <i class="material-icons" role="presentation">@iconName</i> @name
+    </a>
+}
+
+<div class="mdl-layout__drawer mdl-color--blue-grey-900 mdl-color-text-blue-grey-50">
+    <span class="mdl-layout-title">wvlet</span>
+    <nav class="wvlet-navigation mdl-navigation">k
+        @navlink("", "Home", "home")
+        @navlink("", "List", "list")
+        @navlink("", "Settings", "settings")
+    </nav>
+</div>

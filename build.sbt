@@ -1,6 +1,7 @@
 import ReleaseTransformations._
 
 val SCALA_VERSION = "2.12.1"
+val SCALA_UI_VERSION = "2.11.8"
 scalaVersion in ThisBuild := SCALA_VERSION
 
 val buildSettings = Seq[Setting[_]](
@@ -99,17 +100,22 @@ lazy val wvletServer =
   Project(id = "wvlet-server", base = file("wvlet-server"))
   .enablePlugins(SbtWeb)
   .settings(
-    scalaVersion := SCALA_VERSION,
+    scalaVersion := SCALA_UI_VERSION,
+    mainClass in (Compile, run) := Some("wvlet.server.api.WvletServer"),
     scalaJSProjects := Seq(wvletUi),
     pipelineStages in Assets := Seq(scalaJSPipeline),
-    compile in Compile := ((compile in Compile) dependsOn scalaJSPipeline).value
+    compile in Compile := ((compile in Compile) dependsOn scalaJSPipeline).value,
+    libraryDependencies ++= Seq(
+      "com.github.finagle" %% "finch-playjson" % "0.13.0",
+      "com.twitter" %% "twitter-server" % "1.27.0"
+    )
   )
 
 lazy val wvletUi =
   Project(id = "wvlet-ui", base = file("wvlet-ui"))
   .enablePlugins(ScalaJSPlugin, ScalaJSWeb, SbtTwirl)
   .settings(
-    scalaVersion := SCALA_VERSION,
+    scalaVersion := SCALA_UI_VERSION,
     name := "wvlet-ui",
     //pipelineStages in Assets := Seq(scalaJSPipeline),
 //   mainClass in Compile := Some("wvlet.ui.WvletUI"),
