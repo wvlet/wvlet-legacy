@@ -36,6 +36,9 @@ object Layout {
         ).render
 
         val status = document.getElementById("status")
+        while(status.hasChildNodes()) {
+          status.removeChild(status.firstChild)
+        }
         status.appendChild(b)
       }
     }
@@ -97,10 +100,12 @@ object Layout {
           navLink("", "Settings", "settings")
         )
       ),
-      tag("main")(cls:="mdl-layout__content")(
-        div(cls:="page-content")(
-          div(id:="status"),
-          div(id:="main")
+      tag("main")(cls:="container")(
+        div(cls := "row")(
+          div(id := "status")
+        ),
+        div(cls := "row") (
+          div(id := "main")
         )
       )
     )

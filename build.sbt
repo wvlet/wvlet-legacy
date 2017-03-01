@@ -107,7 +107,7 @@ lazy val wvletServer =
 
 lazy val wvletUi =
   Project(id = "wvlet-ui", base = file("wvlet-ui"))
-  .enablePlugins(ScalaJSPlugin, ScalaJSWeb)
+  .enablePlugins(ScalaJSPlugin, ScalaJSWeb, SbtTwirl)
   .settings(
     scalaVersion := SCALA_VERSION,
     name := "wvlet-ui",
