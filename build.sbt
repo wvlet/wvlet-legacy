@@ -107,7 +107,8 @@ lazy val wvletServer =
     compile in Compile := ((compile in Compile) dependsOn scalaJSPipeline).value,
     libraryDependencies ++= Seq(
       "com.github.finagle" %% "finch-playjson" % "0.13.0",
-      "com.twitter" %% "twitter-server" % "1.27.0"
+      "com.twitter" %% "twitter-server" % "1.27.0",
+      "org.wvlet" %% "wvlet-log" % "1.1"
     )
   )
 
