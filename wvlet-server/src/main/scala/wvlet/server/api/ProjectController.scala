@@ -13,13 +13,24 @@
  */
 package wvlet.server.api
 
-import wvlet.log.LogFormatter.SourceCodeLogFormatter
-import wvlet.log.Logger
+import com.twitter.finagle.http.Request
+import com.twitter.finatra.http.Controller
 
-/**
-  *
-  */
-object WvletServer extends WvletApi {
-  Logger.setDefaultFormatter(SourceCodeLogFormatter)
-  override val defaultFinatraHttpPort: String = ":8080"
+
+case class Project(id: Int, name: String)
+
+case class AddProject(
+  name: String,
+  description: Option[String] = None,
+  classpath: Option[String] = None
+)
+
+class ProjectController extends Controller {
+  get("/v1/project") {request: Request =>
+    response.ok(Project(1, "sample project"))
+  }
+
+  post("/v1/project") {p: AddProject =>
+    response.ok(Project(1, "hello"))
+  }
 }

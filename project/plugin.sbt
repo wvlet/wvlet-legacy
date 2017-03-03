@@ -6,6 +6,9 @@ addSbtPlugin("io.get-coursier" % "sbt-coursier" % "1.0.0-M14-7")
 addSbtPlugin("org.scoverage" % "sbt-scoverage" % "1.5.0")
 addSbtPlugin("org.scoverage" % "sbt-coveralls" % "1.1.0")
 
+// Dependency tree check
+addSbtPlugin("net.virtual-void" % "sbt-dependency-graph" % "0.8.2")
+
 // For web application
 addSbtPlugin("io.spray" % "sbt-revolver" % "0.8.0")
 

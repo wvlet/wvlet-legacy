@@ -13,60 +13,27 @@
  */
 package wvlet.server.api
 
-import com.twitter.finagle.Service
-import com.twitter.finagle.http.{Request, Response}
+import com.google.inject.Module
+import com.twitter.finatra.http.HttpServer
 import com.twitter.finatra.http.filters.CommonFilters
 import com.twitter.finatra.http.routing.HttpRouter
-import com.twitter.finatra.http.{Controller, HttpServer}
-import com.twitter.util.{Await, Duration}
 
 /**
   *
   */
-class WvletApi extends HttpServer {
+trait WvletApi extends HttpServer {
 
-  override val defaultFinatraHttpPort: String = ":8080"
+  override protected def modules: Seq[Module] = Seq.empty
 
   override def configureHttp(router: HttpRouter) {
     router
     .filter[CommonFilters]
-    .add[StatusApiController]
-    .add[ProjectApiController]
+    .add[StatusController]
+    .add[ProjectController]
   }
 }
 
-case class Status(message: String)
 
-class StatusApiController extends Controller {
-  get("/v1/status") {request: Request =>
-    response.ok(Status("Ok!"))
-  }
 
-  post("/v1/shutdown") {request: Request =>
-    try {
-      response.ok(Status("Shutting down"))
-    }
-    finally {
-      WvletServer.close(Duration.fromSeconds(3))
-    }
-  }
-}
 
-case class Project(id: Int, name: String)
-case class AddProject(
-  name: String,
-  description: Option[String] = None,
-  classpath: Option[String] = None
-)
 
-class ProjectApiController extends Controller {
-
-  get("/v1/project") {request: Request =>
-    response.ok(Project(1, "sample project"))
-  }
-
-  post("/v1/project") {p: AddProject =>
-    response.ok(Project(1, "hello"))
-  }
-
-}

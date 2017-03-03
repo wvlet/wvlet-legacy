@@ -13,13 +13,23 @@
  */
 package wvlet.server.api
 
-import wvlet.log.LogFormatter.SourceCodeLogFormatter
-import wvlet.log.Logger
+import com.twitter.finagle.http.Request
+import com.twitter.finatra.http.Controller
+import com.twitter.util.Duration
 
-/**
-  *
-  */
-object WvletServer extends WvletApi {
-  Logger.setDefaultFormatter(SourceCodeLogFormatter)
-  override val defaultFinatraHttpPort: String = ":8080"
+case class Status(message: String)
+
+class StatusController extends Controller {
+  get("/v1/status") {request: Request =>
+    response.ok(Status("Ok!"))
+  }
+
+  post("/v1/shutdown") {request: Request =>
+    try {
+      response.ok(Status("Shutting down"))
+    }
+    finally {
+      WvletServer.close(Duration.fromSeconds(3))
+    }
+  }
 }
