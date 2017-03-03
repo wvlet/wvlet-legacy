@@ -13,26 +13,19 @@
  */
 package wvlet.server.api
 
-import io.finch._
 import com.twitter.finagle.{Http, Service}
 import com.twitter.finagle.http.{Request, Response}
 import com.twitter.finagle.param.Stats
 import com.twitter.server.TwitterServer
 import com.twitter.util.Await
+import wvlet.log.LogFormatter.SourceCodeLogFormatter
+import wvlet.log.Logger
 
 /**
   *
   */
-object WvletServer extends TwitterServer {
-
-  lazy val server = Http.server
-                    .configured(Stats(statsReceiver))
-                    .serve(":8080", WvletApi.service)
-
-  def main(): Unit = {
-    onExit {server.close()}
-    Await.ready(server)
-  }
+object WvletServer extends WvletApi {
+  Logger.setDefaultFormatter(SourceCodeLogFormatter)
 }
 
 

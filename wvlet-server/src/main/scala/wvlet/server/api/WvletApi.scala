@@ -15,76 +15,58 @@ package wvlet.server.api
 
 import com.twitter.finagle.Service
 import com.twitter.finagle.http.{Request, Response}
+import com.twitter.finatra.http.filters.CommonFilters
+import com.twitter.finatra.http.routing.HttpRouter
+import com.twitter.finatra.http.{Controller, HttpServer}
 import com.twitter.util.{Await, Duration}
-import io.finch.{Endpoint, Ok, get}
-import io.finch._
-import io.finch.Application.Json
-import io.finch.playjson._
-import play.api.libs.json._
-import wvlet.log.LogSupport
-import wvlet.server.api.WvletApi.Status
-
 
 /**
   *
   */
-object WvletApi extends StatusApi with ProjectApi with LogSupport
-{
-  case class Status(message: String)
+class WvletApi extends HttpServer {
 
-  implicit val statusWriter  = Json.writes[Status]
+  override val defaultFinatraHttpPort: String = ":8080"
 
-  lazy val service: Service[Request, Response] =
-    (statusService :+: projectService)
-    .toServiceAs[Json]
-
+  override def configureHttp(router: HttpRouter) {
+    router
+    .filter[CommonFilters]
+    .add[StatusApiController]
+    .add[ProjectApiController]
+  }
 }
 
-trait StatusApi extends LogSupport {
-  lazy val statusService = status :+: shutdown
+case class Status(message: String)
 
-  def status: Endpoint[Status] = get("v1" :: "status") {
-    Ok(Status("Ok!"))
+class StatusApiController extends Controller {
+  get("/v1/status") {request: Request =>
+    response.ok(Status("Ok!"))
   }
 
-  def shutdown: Endpoint[Status] = get("v1" :: "shutdown") {
+  post("/v1/shutdown") {request: Request =>
     try {
-      Ok(Status("Shutting down"))
+      response.ok(Status("Shutting down"))
     }
     finally {
-      WvletServer.server.close(Duration.fromSeconds(3))
+      WvletServer.close(Duration.fromSeconds(3))
     }
   }
 }
 
-trait ProjectApi extends LogSupport {
-  case class Project(id: Int, name: String)
-  case class AddProject(
-    name:String,
-    description:Option[String] = None,
-    classpath:Option[String] = None
-  )
+case class Project(id: Int, name: String)
+case class AddProject(
+  name: String,
+  description: Option[String] = None,
+  classpath: Option[String] = None
+)
 
-  implicit val projectWriter = Json.writes[Project]
-  implicit val projectReader = Json.reads[AddProject]
+class ProjectApiController extends Controller {
 
-  lazy val projectService = project :+: addProject
-  private def projectPath = "v1" :: "project"
-
-  def project: Endpoint[Project] = get(projectPath) {
-    try {
-      Ok(Project(1, "sample project"))
-    }
-    catch {
-      case e: Throwable =>
-        error(e)
-        throw e
-    }
+  get("/v1/project") {request: Request =>
+    response.ok(Project(1, "sample project"))
   }
 
-  def addProject: Endpoint[Project] = post(projectPath :: jsonBody[AddProject]) { p: AddProject =>
-    info(s"Add project ${p}")
-    Ok(Project(1, "hello"))
+  post("/v1/project") {p: AddProject =>
+    response.ok(Project(1, "hello"))
   }
 
 }

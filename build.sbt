@@ -106,8 +106,11 @@ lazy val wvletServer =
     pipelineStages in Assets := Seq(scalaJSPipeline),
     compile in Compile := ((compile in Compile) dependsOn scalaJSPipeline).value,
     libraryDependencies ++= Seq(
-      "com.github.finagle" %% "finch-playjson" % "0.13.0",
-      "com.twitter" %% "twitter-server" % "1.27.0",
+      "com.twitter" %% "finatra-http" % "2.8.0",
+      // sl4j -> wvlet bridge
+      "org.slf4j" % "slf4j-jdk14" % "1.7.21",
+      //"com.github.finagle" %% "finch-playjson" % "0.13.0",
+      //"com.twitter" %% "twitter-server" % "1.27.0",
       "org.wvlet" %% "wvlet-log" % "1.1"
     )
   )
