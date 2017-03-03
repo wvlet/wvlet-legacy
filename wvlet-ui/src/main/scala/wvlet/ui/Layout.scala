@@ -57,24 +57,29 @@ object Layout {
   }
 
   def navLink(url:String, name:String, iconName:String) = {
-    a(cls := "mdl-navigation__link", href := url)(
-      icon(iconName),
-      name
+    li(cls:="nav-item")(
+      a(cls := "nav-link", href := url)(
+        icon(iconName),
+        name
+      )
     )
   }
 
-  def dataTable(tableHeader:Seq[String]) = {
-    table(cls:="table table-sm table-striped")(
+  def dataTable(tableHeader:Seq[String], rows:Seq[Seq[Any]]) = {
+    table(cls:="table table-sm")(
       thead(cls:="thead-inverse")(
         tr(
           for(h <- tableHeader) yield th(cls:="mdl-data-table__cell--non-numeric")(h)
         )
       ),
       tbody(
-        tr(
-          td(),
-          td()
-        )
+        for(row <- rows) yield {
+          tr(
+            for(col <- row) yield {
+              td(col.toString)
+            }
+          )
+        }
       )
     )
   }
@@ -82,33 +87,38 @@ object Layout {
 
   def layout(title:String) = {
     div(cls:="mdl-layout mdl-js-layout mdl-layout--fixed-drawer mdl-layout--fixed-header has-drawer")(
-      header(cls:="mdl-layout__header")(
-        div(cls:="mdl-layout__header-row")(
-          searchBox,
-          div(cls:="mdl-layout-spacer")
-//          tag("nav")(cls:="mdl-navigation mdl-layout--lage-screen-only")(
-//            navLink("", "Home"),
-//            navLink("", "Link")
-//          )
-        )
-      ),
-      div(cls:="mdl-layout__drawer mdl-color--blue-grey-900 mdl-color-text--blue-grey-50")(
-        span(cls:="mdl-layout-title")(title),
-        tag("nav")(cls:="wvlet-navigation mdl-navigation")(
-          navLink("", "Home", "home"),
-          navLink("", "List", "list"),
-          navLink("", "Settings", "settings")
-        )
-      ),
-      tag("main")(cls:="container")(
-        div(cls := "row")(
-          div(id := "status")
+//      header(cls:="mdl-layout__header")(
+//        div(cls:="mdl-layout__header-row")(
+//          searchBox,
+//          div(cls:="mdl-layout-spacer")
+////          tag("nav")(cls:="mdl-navigation mdl-layout--lage-screen-only")(
+////            navLink("", "Home"),
+////            navLink("", "Link")
+////          )
+//        )
+//      ),
+      div(cls:="container-fluid")(
+        div(cls:="row")(
+          tag("nav")(cls:="col-sm-3 col-md-2 sidebar")(
+            span(cls:="mdl-layout-title")(title),
+            ul(cls:="nav nav-pills flex-column")(
+              navLink("", "Home", "home"),
+              navLink("", "List", "list"),
+              navLink("", "Settings", "settings")
+            )
+          )
         ),
-        div(cls := "row") (
-          div(id := "main")
+        tag("main")(cls:="col-sm-9 offset-sm-3 col-md-10 offset-md-2 pt-3")(
+          div(cls:="container")(
+            div(cls := "row")(
+              div(id := "status")
+            ),
+            div(cls := "row") (
+              div(id := "main")
+            )
+          )
         )
       )
     )
   }
-
 }

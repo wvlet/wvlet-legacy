@@ -13,9 +13,11 @@
  */
 package wvlet.server.api
 
+import javax.inject.Inject
+
+import com.google.inject.Singleton
 import com.twitter.finagle.http.Request
 import com.twitter.finatra.http.Controller
-
 
 case class Project(id: Int, name: String)
 
@@ -25,12 +27,33 @@ case class AddProject(
   classpath: Option[String] = None
 )
 
-class ProjectController extends Controller {
+class ProjectController @Inject()(
+  projectStore:ProjectStore
+) extends Controller {
   get("/v1/project") {request: Request =>
-    response.ok(Project(1, "sample project"))
+    response.ok {
+      projectStore.listProjects
+    }
   }
 
   post("/v1/project") {p: AddProject =>
-    response.ok(Project(1, "hello"))
+    val newProject = projectStore.addProject(p)
+    response.ok(newProject)
   }
+}
+
+@Singleton
+class ProjectStore {
+  private var count = 1
+  private var projects: Seq[Project] = Seq(Project(1, "sample"))
+
+  def addProject(p: AddProject) {
+    synchronized {
+      projects :+= Project(count + 1, p.name)
+      count += 1
+    }
+  }
+
+  def listProjects = projects
+
 }

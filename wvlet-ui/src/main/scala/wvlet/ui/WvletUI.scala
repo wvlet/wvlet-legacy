@@ -1,17 +1,12 @@
 package wvlet.ui
 
-import scala.scalajs.js
-import org.scalajs.dom
-import dom.{Event, document}
+import org.scalajs.dom.document
 import org.scalajs.dom.ext.Ajax
-import org.scalajs.dom.raw.XMLHttpRequest
-
-import scala.util.{Failure, Success}
-import scalatags.JsDom.all._
-import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import play.api.libs.json._
-import play.api.libs.json.Reads._
-import play.api.libs.functional.syntax._
+
+import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
+import scala.scalajs.js
+import scalatags.JsDom.all.{p, _}
 
 object WvletUI extends js.JSApp {
 
@@ -22,21 +17,24 @@ object WvletUI extends js.JSApp {
   )
   implicit val formReader  = Json.reads[FormData]
 
+  case class Project(id:Int, name:String)
+  implicit val projectReader = Json.reads[Project]
+
   def main() = {
     val body = document.getElementById("body")
     body.appendChild(Layout.layout("wvlet").render)
 
     val m = document.getElementById("main")
 
-    val url = "https://gist.githubusercontent.com/xerial/d953d6e301c7d08c064edc3cf8312f1c/raw/281c44e5830b52456ec09a82fe60848fec0290ff/sample.json"
-
+    val url = "http://localhost:8080/v1/project"
     Ajax.get(url).map {xhr =>
       if (xhr.status == 200) {
         val json = StaticBinding.parseJsValue(xhr.responseText)
-//        m.appendChild(p(json.toString()).render)
-        json.validate[FormData] match {
-          case s: JsSuccess[FormData] =>
-            val content = Layout.dataTable(s.get.schema)
+        json.validate[Seq[Project]] match {
+          case s: JsSuccess[Seq[Project]] =>
+            val rows = s.get.map(x => Seq(x.id, x.name))
+            val content = Layout.dataTable(Seq("id", "name"), rows)
+            //m.appendChild(p("hello").render)
             m.appendChild(content.render)
           case e: JsError =>
             m.appendChild(p(e.errors.mkString("\n")).render)
