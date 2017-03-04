@@ -1,12 +1,13 @@
 package wvlet.ui
 
+import org.scalajs.dom
 import org.scalajs.dom.document
-import org.scalajs.dom.ext.Ajax
 import play.api.libs.json._
+import wvlet.ui.component.Navbar
+import wvlet.ui.view.html.navbar
 
-import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 import scala.scalajs.js
-import scalatags.JsDom.all.{p, _}
+import scalatags.JsDom.all._
 
 object WvletUI extends js.JSApp {
 
@@ -21,29 +22,36 @@ object WvletUI extends js.JSApp {
   implicit val projectReader = Json.reads[Project]
 
   def main() = {
+
     val body = document.getElementById("body")
-    body.appendChild(Layout.layout("wvlet").render)
-
     val m = document.getElementById("main")
+    //body.appendChild(Layout.layout("wvlet").render)
+    //val content = navbar.render()
+    //content.body
+    //m.innerHTML = content.toString
+    com.thoughtworks.binding.dom.render(m, Navbar.render)
+    //m.appendChild(pre(content.toString).render)
 
-    val url = "http://localhost:8080/v1/project"
-    Ajax.get(url).map {xhr =>
-      if (xhr.status == 200) {
-        val json = StaticBinding.parseJsValue(xhr.responseText)
-        json.validate[Seq[Project]] match {
-          case s: JsSuccess[Seq[Project]] =>
-            val rows = s.get.map(x => Seq(x.id, x.name))
-            val content = Layout.dataTable(Seq("id", "name"), rows)
-            //m.appendChild(p("hello").render)
-            m.appendChild(content.render)
-          case e: JsError =>
-            m.appendChild(p(e.errors.mkString("\n")).render)
-        }
-      }
-      else {
-        m.appendChild(p(xhr.responseText).render)
-      }
-
-    }
+//
+//
+//
+//    val url = "http://localhost:8080/v1/project"
+//    Ajax.get(url).map {xhr =>
+//      if (xhr.status == 200) {
+//        val json = StaticBinding.parseJsValue(xhr.responseText)
+//        json.validate[Seq[Project]] match {
+//          case s: JsSuccess[Seq[Project]] =>
+//            val rows = s.get.map(x => Seq(x.id, x.name))
+//            val content = Layout.dataTable(Seq("id", "name"), rows)
+//            m.appendChild(content.render)
+//          case e: JsError =>
+//            m.appendChild(p(e.errors.mkString("\n")).render)
+//        }
+//      }
+//      else {
+//        m.appendChild(p(xhr.responseText).render)
+//      }
+//
+//    }
   }
 }
