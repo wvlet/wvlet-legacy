@@ -127,6 +127,7 @@ lazy val wvletUi =
       "org.scala-js" %%% "scalajs-dom" % "0.9.1",
       "be.doeraene" %%% "scalajs-jquery" % "0.9.1",
       "com.lihaoyi" %%% "scalatags" % "0.6.3",
+      "com.lihaoyi" %%% "scalarx" % "0.3.2",
       "com.typesafe.play" %%% "play-json" % "2.6.0-M3"
       //"com.thoughtworks.binding" %%% "dom" % "10.0.2"
       //"com.github.japgolly.scalajs-react" %%% "core" % "0.11.3",
@@ -138,4 +139,3 @@ lazy val wvletUi =
       RuntimeDOM
     )
   )
-
