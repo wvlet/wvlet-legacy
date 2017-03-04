@@ -29,8 +29,8 @@ object WvletUI extends js.JSApp {
     //val content = navbar.render()
     //content.body
     //m.innerHTML = content.toString
-    com.thoughtworks.binding.dom.render(m, Navbar.render)
     //m.appendChild(pre(content.toString).render)
+    m.appendChild(Navbar.render.render)
 
 //
 //

@@ -127,8 +127,8 @@ lazy val wvletUi =
       "org.scala-js" %%% "scalajs-dom" % "0.9.1",
       "be.doeraene" %%% "scalajs-jquery" % "0.9.1",
       "com.lihaoyi" %%% "scalatags" % "0.6.3",
-      "com.typesafe.play" %%% "play-json" % "2.6.0-M3",
-      "com.thoughtworks.binding" %%% "dom" % "10.0.2"
+      "com.typesafe.play" %%% "play-json" % "2.6.0-M3"
+      //"com.thoughtworks.binding" %%% "dom" % "10.0.2"
       //"com.github.japgolly.scalajs-react" %%% "core" % "0.11.3",
       //"com.github.japgolly.scalajs-react" %%% "extra" % "0.11.3",
       //"com.github.chandu0101.scalajs-react-components" %%% "core" % "0.5.0"
@@ -136,8 +136,6 @@ lazy val wvletUi =
     jsDependencies ++= Seq(
       "org.webjars" % "jquery" % "2.1.4" / "2.1.4/jquery.js",
       RuntimeDOM
-    ),
-    addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full)
+    )
   )
-
 

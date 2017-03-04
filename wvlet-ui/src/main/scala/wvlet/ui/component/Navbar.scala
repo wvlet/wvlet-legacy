@@ -14,38 +14,35 @@
 package wvlet.ui.component
 
 import com.thoughtworks.binding.dom
+import scalatags.JsDom.all._
 
 /**
   *
   */
 object Navbar {
-
-  @dom
-  def navLink(url: String, name: String, iconName: String) = {
-    <li class="nav-item">
-      <a class="nav-link" href={ url }>
-        <i class="material-icons">
-          {iconName}
-        </i>{name}
-      </a>
-    </li>
+  def icon(iconName:String) = {
+    i(cls := "material-icons", role := "presentation")(iconName)
   }
 
-  @dom
+  def navLink(url:String, name:String, iconName:String) = {
+    li(cls:="nav-item")(
+      a(cls := "nav-link", href := url)(
+        icon(iconName),
+        name
+      )
+    )
+  }
+
+
   def render = {
-    <div class="container-fluid">
-      <div class="row">
-        <nav class="col-sm-3 col-md-2 sidebar">
-          <span class="mdl-layout-title">wvlet</span>
-          <ul class="nav nav-pills flex-column">
-            { navLink("", "Home", "home").bind }
-            { navLink("", "List", "list").bind }
-            { navLink("", "Settings", "settings").bind }
-          </ul>
-        </nav>
-      </div>
-    </div>
+    tag("nav")(cls:="col-sm-3 col-md-2 sidebar")(
+      span(cls:="mdl-layout-title")("wvlet"),
+      ul(cls:="nav nav-pills flex-column")(
+        navLink("", "Home", "home"),
+        navLink("", "List", "list"),
+        navLink("", "Settings", "settings")
+      )
+    )
   }
-
 
 }
