@@ -13,7 +13,6 @@
  */
 package wvlet.ui.component
 
-import com.thoughtworks.binding.dom
 import scalatags.JsDom.all._
 
 /**
