@@ -30,7 +30,11 @@ object WvletUI extends js.JSApp {
     //content.body
     //m.innerHTML = content.toString
     //m.appendChild(pre(content.toString).render)
-    m.appendChild(LayoutFrame.render)
+
+    val layout = LayoutFrame.render(
+      p("hello")
+    )
+    m.appendChild(layout)
 
 //
 //

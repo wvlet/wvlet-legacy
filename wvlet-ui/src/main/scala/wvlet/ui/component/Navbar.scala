@@ -38,10 +38,9 @@ object Navbar extends RxComponent{
     NavLink("", "Settings", "settings")
   )
 
-
   def draw = {
     val page = state.now
-    tag("nav")(cls:="col-sm-3 col-md-2 hidden-xs-down sidebar bg-faded")(
+    tag("nav")(cls:="hidden-xs-down bg-faded sidebar")(
       a(cls:="navbar", href:="#")("wvlet"),
       ul(cls:="nav nav-pills flex-column")(
         for (l <- links) yield {

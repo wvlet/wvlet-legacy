@@ -13,6 +13,7 @@
  */
 package wvlet.ui.component
 
+import scalatags.JsDom.TypedTag
 import scalatags.JsDom.all._
 
 /**
@@ -20,12 +21,14 @@ import scalatags.JsDom.all._
   */
 object LayoutFrame {
 
-  def render = {
-    div(cls:="container-fluid")(
-      div(cls:="row")(
-        Navbar.render,
-        div(cls:="col-sm-9 offset-sm-3 col-md-10 offset-md-2 pt-3")(
-
+  def render[T <: TypedTag[_]](body: T) = {
+    div(cls := "container-fluid")(
+      div(cls := "row")(
+        div(cls := "col-2")(
+          Navbar.render
+        ),
+        div(cls := "col-10")(
+          body
         )
       )
     ).render
