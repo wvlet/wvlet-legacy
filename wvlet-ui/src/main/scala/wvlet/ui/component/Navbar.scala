@@ -15,8 +15,11 @@ package wvlet.ui.component
 
 import org.scalajs.dom
 import rx._
+
 import scalatags.JsDom.all._
 import Ctx.Owner.Unsafe._
+
+import scala.scalajs.js
 
 /**
   *
@@ -41,32 +44,37 @@ object Navbar {
   )
 
 
-  def navLink2 = Rx {
-    li(cls := "nav-item")("home")
-  }
-
-  def navLink = Rx {
-    for (l <- links) yield {
-      val isActive = currentPage() == l.name
-      val linkClass = s"nav-link${if (isActive) " active" else ""}"
-      val anchor = a(cls := linkClass, href:=l.url)(
-        icon(l.icon),
-        l.name
-      ).render
-      anchor.onclick = (e:dom.MouseEvent) => {
-        e.preventDefault()
-        Navbar.currentPage() = l.name
-      }
-      li(cls := "nav-item")(anchor)
-    }
+  def renderNav(currentPage:String) = {
+    tag("nav")(cls:="col-sm-3 col-md-2 hidden-xs-down sidebar bg-faded")(
+      a(cls:="navbar", href:="#")("wvlet"),
+      ul(cls:="nav nav-pills flex-column")(
+        for (l <- links) yield {
+          val isActive = currentPage == l.name
+          val linkClass = s"nav-link${if (isActive) " active" else ""}"
+          val anchor = a(cls := linkClass, href:=l.url)(
+            icon(l.icon),
+            l.name
+          ).render
+          anchor.onclick = (e:dom.MouseEvent) => {
+            e.preventDefault()
+            Navbar.currentPage() = l.name
+          }
+          li(cls := "nav-item")(anchor)
+        }
+      )
+    ).render
   }
 
   def render = {
-    tag("nav")(cls:="sidebar")(
-      span(cls:="mdl-layout-title")("wvlet"),
-      //ul(cls:="nav nav-pills flex-column")(navLink)
-      ul(navLink.now)
-    )
+    var last = renderNav("Home")
+    currentPage.foreach{ page =>
+      val newLast = renderNav(page)
+      if(last.parentNode != null) {
+        last.parentNode.replaceChild(newLast, last)
+      }
+      last = newLast
+    }
+    last
   }
 }
 

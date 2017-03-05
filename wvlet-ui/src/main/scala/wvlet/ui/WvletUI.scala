@@ -3,7 +3,7 @@ package wvlet.ui
 import org.scalajs.dom
 import org.scalajs.dom.document
 import play.api.libs.json._
-import wvlet.ui.component.Navbar
+import wvlet.ui.component.{LayoutFrame, Navbar}
 import wvlet.ui.view.html.navbar
 
 import scala.scalajs.js
@@ -30,7 +30,7 @@ object WvletUI extends js.JSApp {
     //content.body
     //m.innerHTML = content.toString
     //m.appendChild(pre(content.toString).render)
-    m.appendChild(Navbar.render.render)
+    m.appendChild(LayoutFrame.render)
 
 //
 //
