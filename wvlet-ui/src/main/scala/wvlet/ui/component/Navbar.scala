@@ -13,35 +13,60 @@
  */
 package wvlet.ui.component
 
+import org.scalajs.dom
+import rx._
 import scalatags.JsDom.all._
+import Ctx.Owner.Unsafe._
 
 /**
   *
   */
 object Navbar {
+
+  var currentPage = Var("Home")
+
+  def state = {
+    dom.document.URL
+  }
+
   def icon(iconName:String) = {
     i(cls := "material-icons", role := "presentation")(iconName)
   }
 
-  def navLink(url:String, name:String, iconName:String) = {
-    li(cls:="nav-item")(
-      a(cls := "nav-link", href := url)(
-        icon(iconName),
-        name
-      )
-    )
+  case class NavLink(url:String, name:String, icon:String)
+  val links = Seq(
+    NavLink("", "Home", "home"),
+    NavLink("", "List", "list"),
+    NavLink("", "Settings", "settings")
+  )
+
+
+  def navLink2 = Rx {
+    li(cls := "nav-item")("home")
   }
 
+  def navLink = Rx {
+    for (l <- links) yield {
+      val isActive = currentPage() == l.name
+      val linkClass = s"nav-link${if (isActive) " active" else ""}"
+      val anchor = a(cls := linkClass, href:=l.url)(
+        icon(l.icon),
+        l.name
+      ).render
+      anchor.onclick = (e:dom.MouseEvent) => {
+        e.preventDefault()
+        Navbar.currentPage() = l.name
+      }
+      li(cls := "nav-item")(anchor)
+    }
+  }
 
   def render = {
-    tag("nav")(cls:="col-sm-3 col-md-2 sidebar")(
+    tag("nav")(cls:="sidebar")(
       span(cls:="mdl-layout-title")("wvlet"),
-      ul(cls:="nav nav-pills flex-column")(
-        navLink("", "Home", "home"),
-        navLink("", "List", "list"),
-        navLink("", "Settings", "settings")
-      )
+      //ul(cls:="nav nav-pills flex-column")(navLink)
+      ul(navLink.now)
     )
   }
-
 }
+
