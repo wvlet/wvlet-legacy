@@ -17,20 +17,15 @@ import org.scalajs.dom
 import rx._
 
 import scalatags.JsDom.all._
-import Ctx.Owner.Unsafe._
 
 import scala.scalajs.js
 
 /**
   *
   */
-object Navbar {
+object Navbar extends RxComponent{
 
-  var currentPage = Var("Home")
-
-  def state = {
-    dom.document.URL
-  }
+  override val state = Var("Home")
 
   def icon(iconName:String) = {
     i(cls := "material-icons", role := "presentation")(iconName)
@@ -44,12 +39,13 @@ object Navbar {
   )
 
 
-  def renderNav(currentPage:String) = {
+  def draw = {
+    val page = state.now
     tag("nav")(cls:="col-sm-3 col-md-2 hidden-xs-down sidebar bg-faded")(
       a(cls:="navbar", href:="#")("wvlet"),
       ul(cls:="nav nav-pills flex-column")(
         for (l <- links) yield {
-          val isActive = currentPage == l.name
+          val isActive = page == l.name
           val linkClass = s"nav-link${if (isActive) " active" else ""}"
           val anchor = a(cls := linkClass, href:=l.url)(
             icon(l.icon),
@@ -57,24 +53,12 @@ object Navbar {
           ).render
           anchor.onclick = (e:dom.MouseEvent) => {
             e.preventDefault()
-            Navbar.currentPage() = l.name
+            state() = l.name
           }
           li(cls := "nav-item")(anchor)
         }
       )
     ).render
-  }
-
-  def render = {
-    var last = renderNav("Home")
-    currentPage.foreach{ page =>
-      val newLast = renderNav(page)
-      if(last.parentNode != null) {
-        last.parentNode.replaceChild(newLast, last)
-      }
-      last = newLast
-    }
-    last
   }
 }
 
