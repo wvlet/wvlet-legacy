@@ -26,15 +26,15 @@ object Navbar extends RxElement {
   override val state = Var("Home")
 
   def icon(iconName: String) = {
-    i(cls:="material-icons d-inline-block align-bottom", width:=20, height:=20)(iconName)
+    i(cls:=s"fa ${iconName} fa-lg", width:=20, height:=20)
   }
 
   case class NavLink(url: String, name: String, icon: String)
 
   val links = Seq(
-    NavLink("#", "Home", "home"),
-    NavLink("#", "List", "list"),
-    NavLink("#", "Settings", "settings")
+    NavLink("#", "Home", "fa-home"),
+    NavLink("#", "List", "fa-list"),
+    NavLink("#", "Settings", "fa-cog")
   )
 
   private def linkStyle(isActive: Boolean) = {
@@ -55,7 +55,7 @@ object Navbar extends RxElement {
           for (l <- links) yield {
             val isActive = page == l.name
             val anchor = a(cls := linkStyle(isActive), href := l.url)(
-              //icon(l.icon),
+              icon(l.icon),
               s" ${l.name} "
             ).render
             anchor.onclick = (e: dom.MouseEvent) => {
