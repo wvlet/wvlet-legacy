@@ -25,20 +25,11 @@ object WvletUI extends js.JSApp {
 
     val body = document.getElementById("body")
     val m = document.getElementById("main")
-    //body.appendChild(Layout.layout("wvlet").render)
-    //val content = navbar.render()
-    //content.body
-    //m.innerHTML = content.toString
-    //m.appendChild(pre(content.toString).render)
-
     val layout = LayoutFrame.render(
       p("hello")
     )
     m.appendChild(layout)
 
-//
-//
-//
 //    val url = "http://localhost:8080/v1/project"
 //    Ajax.get(url).map {xhr =>
 //      if (xhr.status == 200) {
