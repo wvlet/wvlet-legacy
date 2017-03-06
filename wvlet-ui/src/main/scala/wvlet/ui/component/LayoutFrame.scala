@@ -19,17 +19,13 @@ import scalatags.JsDom.all._
 /**
   *
   */
-object LayoutFrame {
+object LayoutFrame extends RxComponent {
 
-  def render[T <: TypedTag[_]](body: T) = {
-    div(cls := "container-fluid")(
-      div(cls := "row")(
-        div(cls := "col-2")(
-          Navbar.render
-        ),
-        div(cls := "col-10")(
-          body
-        )
+  def draw[T <: TypedTag[_]](body: T) = {
+    div(
+      Navbar.render,
+      div(cls := "container-fluid")(
+        body
       )
     ).render
   }

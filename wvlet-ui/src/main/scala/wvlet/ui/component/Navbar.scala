@@ -18,44 +18,53 @@ import rx._
 
 import scalatags.JsDom.all._
 
-import scala.scalajs.js
-
 /**
   *
   */
-object Navbar extends RxComponent{
+object Navbar extends RxElement {
 
   override val state = Var("Home")
 
-  def icon(iconName:String) = {
-    i(cls := "material-icons", role := "presentation")(iconName)
+  def icon(iconName: String) = {
+    i(cls:="material-icons d-inline-block align-bottom", width:=20, height:=20)(iconName)
   }
 
-  case class NavLink(url:String, name:String, icon:String)
+  case class NavLink(url: String, name: String, icon: String)
+
   val links = Seq(
-    NavLink("", "Home", "home"),
-    NavLink("", "List", "list"),
-    NavLink("", "Settings", "settings")
+    NavLink("#", "Home", "home"),
+    NavLink("#", "List", "list"),
+    NavLink("#", "Settings", "settings")
   )
+
+  private def linkStyle(isActive: Boolean) = {
+    if (isActive) {
+      "nav-item nav-link active"
+    }
+    else {
+      "nav-item nav-link"
+    }
+  }
 
   def draw = {
     val page = state.now
-    tag("nav")(cls:="hidden-xs-down bg-faded sidebar")(
-      a(cls:="navbar", href:="#")("wvlet"),
-      ul(cls:="nav nav-pills flex-column")(
-        for (l <- links) yield {
-          val isActive = page == l.name
-          val linkClass = s"nav-link${if (isActive) " active" else ""}"
-          val anchor = a(cls := linkClass, href:=l.url)(
-            icon(l.icon),
-            l.name
-          ).render
-          anchor.onclick = (e:dom.MouseEvent) => {
-            e.preventDefault()
-            state() = l.name
+    tag("nav")(cls := "navbar navbar-toggleable-md navbar-fixed-top navbar-inverse bg-inverse")(
+      a(cls := "navbar-brand", href := "#")("wvlet"),
+      div(cls:="nav-collapse", id:="navbarNavAltMarkup")(
+        div(cls := "navbar-nav")(
+          for (l <- links) yield {
+            val isActive = page == l.name
+            val anchor = a(cls := linkStyle(isActive), href := l.url)(
+              //icon(l.icon),
+              s" ${l.name} "
+            ).render
+            anchor.onclick = (e: dom.MouseEvent) => {
+              e.preventDefault()
+              state.update(l.name)
+            }
+            anchor
           }
-          li(cls := "nav-item")(anchor)
-        }
+        )
       )
     ).render
   }

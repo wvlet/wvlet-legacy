@@ -14,18 +14,19 @@
 package wvlet.ui.component
 
 import org.scalajs.dom
-import rx.{Ctx, Rx}
+import rx.{Ctx, Rx, Var}
+
+import scalatags.JsDom.TypedTag
 
 /**
   *
   */
-trait RxComponent {
+trait RxElement {
 
-  val state : Rx[_]
-
-  def draw : dom.Element
-
+  val state : Rx[_] = Var()
   private var lastElement : dom.Element = null
+
+  protected def draw : dom.Element
 
   def render : dom.Element = {
     import Ctx.Owner.Unsafe._
@@ -39,4 +40,27 @@ trait RxComponent {
     }
     lastElement
   }
+}
+
+trait RxComponent {
+
+  val state : Rx[_] = Var()
+
+  private var lastElement : dom.Element = null
+
+  protected def draw[T <: TypedTag[_]](body:T) : dom.Element
+
+  def render[T <: TypedTag[_]](body:T) : dom.Element = {
+    import Ctx.Owner.Unsafe._
+    lastElement = draw(body)
+    state.foreach { s =>
+      val newElement = draw(body)
+      if(lastElement.parentNode != null) {
+        lastElement.parentNode.replaceChild(newElement, lastElement)
+      }
+      lastElement = newElement
+    }
+    lastElement
+  }
+
 }
