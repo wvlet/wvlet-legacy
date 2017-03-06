@@ -13,12 +13,9 @@
  */
 
 
-.navbar .brand {
-    font-size: 1.2rem;
-    font-weight: 400;
-    color: #FFFFFF;
-}
-.navbar .brand a {
+.navbar-brand {
+    font-family:Lato, "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 1.0rem;
     text-decoration: none;
 }
 
@@ -30,6 +27,7 @@
 }
 
 .navbar {
+    font-size: 0.86rem;
     background-color: #336699;
     background-image: -moz-linear-gradient(top, #336699, #224466);
     background-image: -ms-linear-gradient(top, #336699, #224466);
@@ -46,20 +44,7 @@
 
 .nav-item > a {
     float: none;
-    line-height: 19px;
-    font-weight: 400;
     color: #CCCCCC;
-    text-decoration: none;
     text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
-}
-
-.navbar .nav > li > a:hover {
-    color: #FFFFFF;
-    text-decoratiodn: none;
-}
-
-.navbar .nav .active {
-    color: #FFFFFF;
-    text-decoration: none;
 }
 
