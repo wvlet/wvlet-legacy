@@ -26,7 +26,10 @@ object WvletUI extends js.JSApp {
     val body = document.getElementById("body")
     val m = document.getElementById("main")
     val layout = LayoutFrame.render(
-      p("hello")
+      div(
+        h1("wvlet"),
+        p("hello")
+      )
     )
     m.appendChild(layout)
 

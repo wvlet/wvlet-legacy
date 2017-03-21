@@ -13,25 +13,20 @@
  */
 package wvlet.ui.component
 
-import scalatags.JsDom.TypedTag
+import org.scalajs.dom
+import org.scalajs.dom.Element
+
 import scalatags.JsDom.all._
 
 /**
   *
   */
-object LayoutFrame extends RxComponent {
+object SearchBar extends RxElement {
+  override protected def draw: dom.Element = {
+    tag("nav")(cls := "navbar navbar-fixed-top navbar-inverse bg-inverse")(
+      a(cls := "navbar-brand", href := "#")("wvlet")
 
-  def draw[T <: TypedTag[_]](body: T) = {
-    div(
-      SearchBar.render,
-      div(cls := "container-fluid")(
-        div(cls := "row")(
-          Navbar.render,
-          tag("main")(cls := "col-10")(
-            body
-          )
-        )
-      )
+
     ).render
   }
 }

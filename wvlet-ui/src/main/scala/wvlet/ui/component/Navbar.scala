@@ -48,23 +48,20 @@ object Navbar extends RxElement {
 
   def draw = {
     val page = state.now
-    tag("nav")(cls := "navbar navbar-toggleable-md navbar-fixed-top navbar-inverse bg-inverse")(
-      a(cls := "navbar-brand", href := "#")("wvlet"),
-      div(cls:="nav-collapse", id:="navbarNavAltMarkup")(
-        div(cls := "navbar-nav")(
-          for (l <- links) yield {
-            val isActive = page == l.name
-            val anchor = a(cls := linkStyle(isActive), href := l.url)(
-              icon(l.icon),
-              s" ${l.name} "
-            ).render
-            anchor.onclick = (e: dom.MouseEvent) => {
-              e.preventDefault()
-              state.update(l.name)
-            }
-            anchor
+    tag("nav")(cls := "col-2 navbar-inverse bg-inverse sidebar")(
+      div(cls:="nav navbar-nav")(
+        for (l <- links) yield {
+          val isActive = page == l.name
+          val anchor = a(cls := linkStyle(isActive), href := l.url)(
+            icon(l.icon),
+            s" ${l.name} "
+          ).render
+          anchor.onclick = (e: dom.MouseEvent) => {
+            e.preventDefault()
+            state.update(l.name)
           }
-        )
+          anchor
+        }
       )
     ).render
   }
