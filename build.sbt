@@ -128,7 +128,8 @@ lazy val wvletUi =
       "be.doeraene" %%% "scalajs-jquery" % "0.9.1",
       "com.lihaoyi" %%% "scalatags" % "0.6.3",
       "com.lihaoyi" %%% "scalarx" % "0.3.2",
-      "com.typesafe.play" %%% "play-json" % "2.6.0-M3"
+      "com.typesafe.play" %%% "play-json" % "2.6.0-M3",
+      "org.wvlet" %%% "wvlet-log" % "1.2.1-SNAPSHOT" changing()
       //"com.thoughtworks.binding" %%% "dom" % "10.0.2"
       //"com.github.japgolly.scalajs-react" %%% "core" % "0.11.3",
       //"com.github.japgolly.scalajs-react" %%% "extra" % "0.11.3",
