@@ -6,7 +6,7 @@ import play.api.libs.json._
 import wvlet.log.LogFormatter.SourceCodeLogFormatter
 import wvlet.log.LogTimestampFormatter.formatTimestamp
 import wvlet.ui.component.{LayoutFrame, Navbar}
-import wvlet.log.{LogFormatter, LogRecord, LogSupport, Logger}
+import wvlet.log._
 import wvlet.ui.view.html.navbar
 
 import scala.scalajs.js
@@ -39,12 +39,16 @@ object WvletUI extends js.JSApp with LogSupport {
   case class Project(id:Int, name:String)
   implicit val projectReader = Json.reads[Project]
 
-  Logger.setDefaultFormatter(UILogFormatter)
+  Logger.setDefaultHandler(new JSConsoleLogHandler)
 
   def main() = {
-    info("start main")
-    println("hello logging")
-    Console.err.println("hello stderr logging")
+    Logger.setDefaultLogLevel(LogLevel.TRACE)
+
+    info("info log")
+    debug("debug log")
+    trace("trace log")
+    warn("warn log")
+    error("error log")
     //val body = document.getElementById("body")
 
     val layout = LayoutFrame.render(
@@ -53,7 +57,7 @@ object WvletUI extends js.JSApp with LogSupport {
     val m = document.getElementById("main")
     m.appendChild(layout)
 
-    info("appended child")
+    //info("appended child")
     //body.appendChild(Layout.layout("wvlet").render)
     //val content = navbar.render()
     //content.body
