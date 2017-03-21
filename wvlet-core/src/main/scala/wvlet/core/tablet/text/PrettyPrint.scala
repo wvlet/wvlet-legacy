@@ -63,7 +63,7 @@ class PrettyPrint(codec: Map[Class[_], MessageFormatter[_]] = Map.empty, maxColW
   }
 
   def pp[A](seq: Seq[A]) {
-    info(pf(seq).mkString("\n"))
+    println(pf(seq).mkString("\n"))
   }
 
   def pf[A](seq: Seq[A]): Seq[String] = {
