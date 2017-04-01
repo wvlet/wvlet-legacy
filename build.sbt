@@ -4,6 +4,11 @@ val SCALA_VERSION = "2.12.1"
 val SCALA_UI_VERSION = "2.11.8"
 scalaVersion in ThisBuild := SCALA_VERSION
 
+val sonatypeRepos = Seq(
+  Resolver.sonatypeRepo("releases"),
+  Resolver.sonatypeRepo("snapshots")
+)
+
 val buildSettings = Seq[Setting[_]](
   crossScalaVersions := Seq("2.11.8", SCALA_VERSION),
   organization := "org.wvlet",
@@ -38,10 +43,7 @@ val buildSettings = Seq[Setting[_]](
       </developers>
   },
   // Use sonatype resolvers
-  resolvers ++= Seq(
-    Resolver.sonatypeRepo("releases"),
-    Resolver.sonatypeRepo("snapshots")
-  ),
+  resolvers ++= sonatypeRepos,
   // Release settings
   releaseTagName := {(version in ThisBuild).value},
   releaseProcess := Seq[ReleaseStep](
@@ -119,6 +121,7 @@ lazy val wvletUi =
   .settings(
     scalaVersion := SCALA_UI_VERSION,
     name := "wvlet-ui",
+    resolvers ++= sonatypeRepos,
     //pipelineStages in Assets := Seq(scalaJSPipeline),
 //   mainClass in Compile := Some("wvlet.ui.WvletUI"),
     persistLauncher := true,
@@ -140,3 +143,4 @@ lazy val wvletUi =
       RuntimeDOM
     )
   )
+
