@@ -22,14 +22,13 @@ object LayoutFrame extends RxComponent {
 
   def body[T <: scala.xml.Node](body: T) =
     <div>
-      {SearchBar.body}
-      <div class="container-fluid">
-        <div class="row">
-          {Navbar.body}
-          <div class="col-10">
-            <div class="row">
-              {StatusPane.body}
-            </div>
+      {Navbar.body}
+      <div class="main">
+        <div class="container-fluid">
+          <div class="row">
+            {StatusPane.body}
+          </div>
+          <div class="row">
             {body}
           </div>
         </div>

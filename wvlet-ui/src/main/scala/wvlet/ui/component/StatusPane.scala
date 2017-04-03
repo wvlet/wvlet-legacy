@@ -12,7 +12,6 @@
  * limitations under the License.
  */
 package wvlet.ui.component
-import scala.xml.Node
 import mhtml._
 /**
   *
@@ -23,8 +22,12 @@ object StatusPane extends RxElement {
 
   override def body = {
     statusMessage.map { m =>
-      <div class="alert alert-info" role="alert">
-        <strong>status</strong>: {m}
+      <div class="alert alert-info alert-dismissible fade show" role="alert">
+<!--        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+         -->
+        <strong>status</strong>: {m.trim}
       </div>
     }
   }

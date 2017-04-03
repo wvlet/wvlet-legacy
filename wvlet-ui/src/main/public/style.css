@@ -16,14 +16,17 @@
 .navbar-brand {
     font-size: 1.0rem;
     text-decoration: none;
-    padding-top: 0.05rem;
 }
 
-.navbar-fixed-top {
+.fixed-top {
     padding-top: 0.5rem;
     padding-right: 1rem;
     padding-bottom: 0.5rem;
     padding-left: 1rem;
+}
+
+.main {
+    margin-top: 55px;
 }
 
 .navbar, .sidebar {

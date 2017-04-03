@@ -52,7 +52,6 @@ object WvletUI extends js.JSApp with LogSupport {
     //val body = document.getElementById("body")
 
     val m = document.getElementById("main")
-
     val layout = LayoutFrame.render(<p>hello wvlet</p>)
     m.appendChild(layout)
 
