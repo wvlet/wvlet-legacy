@@ -17,14 +17,11 @@ import mhtml._
 import org.scalajs.dom
 import wvlet.log.LogSupport
 
-import scalatags.JsDom.all._
-
 /**
   *
   */
 object Navbar extends RxElement with LogSupport {
-
-  override val state: Var[String] = Var("Home")
+  private val state: Var[String] = Var("Home")
 
   def icon(iconName: String) =
       <i class="fa ${iconName} fa-lg" width="20" height="20"/>
@@ -46,10 +43,10 @@ object Navbar extends RxElement with LogSupport {
     }
   }
 
-  def draw =
+  def body =
     <nav class="col-2 navbar-inverse bg-inverse sidebar">
-      <div class="nav navbar-nav"> { state.map
-      { page =>
+      <div class="nav navbar-nav">
+        {state.map(page =>
         for (l <- links) yield {
           val isActive = page == l.name
           <a class={linkStyle(isActive)} href={l.url} onclick={(e: dom.MouseEvent) =>
@@ -59,8 +56,7 @@ object Navbar extends RxElement with LogSupport {
             {icon(l.icon)}{l.name}
           </a>
         }
-      }
-        }
+      )}
       </div>
     </nav>
 

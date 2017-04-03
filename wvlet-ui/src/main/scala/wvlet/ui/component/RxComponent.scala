@@ -22,28 +22,23 @@ import scalatags.JsDom.TypedTag
   *
   */
 trait RxElement {
-
-  val state : Var[_] = Var()
-  protected def draw : scala.xml.Node
+  protected def body : scala.xml.Node
 
   def render : dom.Element = {
     val elem = dom.document.createElement("div")
-    mount(elem, draw)
+    mount(elem, body)
     elem
   }
 }
 
 trait RxComponent {
-
-  val state : Rx[_] = Var()
-
   private var lastElement : dom.Element = null
 
-  protected def draw[T <: scala.xml.Node](body:T) : scala.xml.Elem
+  protected def body[T <: scala.xml.Node](content:T) : scala.xml.Elem
 
-  def render[T <: scala.xml.Node](body:T) : dom.Element = {
+  def render[T <: scala.xml.Node](content:T) : dom.Element = {
     val elem = dom.document.createElement("div")
-    mount(elem, draw(body))
+    mount(elem, body(content))
     elem
   }
 

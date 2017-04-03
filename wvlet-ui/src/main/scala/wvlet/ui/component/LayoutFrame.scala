@@ -22,10 +22,10 @@ import mhtml._
   */
 object LayoutFrame extends RxComponent {
 
-  def draw[T <: scala.xml.Node](body: T) =
+  def body[T <: scala.xml.Node](body: T) =
     <div>
       <div class="container-fluid">
-        {Navbar.draw}
+        {Navbar.body}
         <div class="row">
           <main class="col-10">
             {body}
