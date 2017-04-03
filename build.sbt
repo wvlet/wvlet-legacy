@@ -122,12 +122,8 @@ lazy val wvletUi =
     scalaVersion := SCALA_VERSION,
     name := "wvlet-ui",
     resolvers ++= sonatypeRepos,
-    //pipelineStages in Assets := Seq(scalaJSPipeline),
-//   mainClass in Compile := Some("wvlet.ui.WvletUI"),
     scalaJSUseMainModuleInitializer := true,
     scalaJSUseMainModuleInitializer in Test := false,
-    //persistLauncher := true,
-    //persistLauncher in Test := false,
     libraryDependencies ++= Seq(
       "org.scala-js" %%% "scalajs-dom" % "0.9.1",
       "be.doeraene" %%% "scalajs-jquery" % "0.9.1",
@@ -135,10 +131,6 @@ lazy val wvletUi =
       "com.typesafe.play" %%% "play-json" % "2.6.0-M3",
       "in.nvilla" %%% "monadic-html" % "0.3.0",
       "org.wvlet" %%% "wvlet-log" % "1.2.1-SNAPSHOT" changing()
-      //"com.thoughtworks.binding" %%% "dom" % "10.0.2"
-      //"com.github.japgolly.scalajs-react" %%% "core" % "0.11.3",
-      //"com.github.japgolly.scalajs-react" %%% "extra" % "0.11.3",
-      //"com.github.chandu0101.scalajs-react-components" %%% "core" % "0.5.0"
     ),
     jsDependencies ++= Seq(
       "org.webjars" % "jquery" % "2.1.4" / "2.1.4/jquery.js",
