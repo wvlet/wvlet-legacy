@@ -13,8 +13,6 @@
  */
 package wvlet.ui.component
 
-import scalatags.JsDom.TypedTag
-import scalatags.JsDom.all._
 import mhtml._
 
 /**
@@ -24,12 +22,16 @@ object LayoutFrame extends RxComponent {
 
   def body[T <: scala.xml.Node](body: T) =
     <div>
+      {SearchBar.body}
       <div class="container-fluid">
-        {Navbar.body}
         <div class="row">
-          <main class="col-10">
+          {Navbar.body}
+          <div class="col-10">
+            <div class="row">
+              {StatusPane.body}
+            </div>
             {body}
-          </main>
+          </div>
         </div>
       </div>
     </div>

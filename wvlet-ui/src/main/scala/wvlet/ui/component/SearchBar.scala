@@ -21,8 +21,8 @@ import scalatags.JsDom.all._
 /**
   *
   */
-object SearchBar extends RxElement {
-  override protected def body =
+object SearchBar {
+  def body =
     <nav class="navbar navbar-fixed-top navbar-inverse bg-inverse">
       <a class="navbar-brand" href="#">wvlet</a>
     </nav>

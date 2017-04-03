@@ -12,34 +12,20 @@
  * limitations under the License.
  */
 package wvlet.ui.component
-
-import org.scalajs.dom
-import mhtml.{mount, _}
-
-import scalatags.JsDom.TypedTag
-
+import scala.xml.Node
+import mhtml._
 /**
   *
   */
-trait RxElement {
-  def body : mhtml.Rx[scala.xml.Node]
+object StatusPane extends RxElement {
 
-  def render : dom.Element = {
-    val elem = dom.document.createElement("div")
-    mount(elem, body)
-    elem
+  val statusMessage = Var("wvlet status")
+
+  override def body = {
+    statusMessage.map { m =>
+      <div class="alert alert-info" role="alert">
+        <strong>status</strong>: {m}
+      </div>
+    }
   }
-}
-
-trait RxComponent {
-  private var lastElement : dom.Element = null
-
-  def body[T <: scala.xml.Node](content:T) : scala.xml.Elem
-
-  def render[T <: scala.xml.Node](content:T) : dom.Element = {
-    val elem = dom.document.createElement("div")
-    mount(elem, body(content))
-    elem
-  }
-
 }

@@ -24,7 +24,7 @@ object Navbar extends RxElement with LogSupport {
   private val state: Var[String] = Var("Home")
 
   def icon(iconName: String) =
-      <i class="fa ${iconName} fa-lg" width="20" height="20"/>
+      <i class={s"fa ${iconName} fa-lg"} width="20" height="20"/>
 
   case class NavLink(url: String, name: String, icon: String)
 
@@ -43,22 +43,23 @@ object Navbar extends RxElement with LogSupport {
     }
   }
 
-  def body =
+  def body = state.map{ page =>
     <nav class="col-2 navbar-inverse bg-inverse sidebar">
-      <div class="nav navbar-nav">
-        {state.map(page =>
+      <div class="nav navbar-nav">{
         for (l <- links) yield {
           val isActive = page == l.name
           <a class={linkStyle(isActive)} href={l.url} onclick={(e: dom.MouseEvent) =>
             e.preventDefault()
             debug(s"clicked ${l.name}")
-            state.update(x => l.name)}>
-            {icon(l.icon)}{l.name}
+            state.update(x => l.name)}
+          >
+            {icon(l.icon)} {l.name}
           </a>
         }
-      )}
+        }
       </div>
     </nav>
+  }
 
 }
 
