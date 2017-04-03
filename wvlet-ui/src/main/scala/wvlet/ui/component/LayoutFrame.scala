@@ -15,23 +15,23 @@ package wvlet.ui.component
 
 import scalatags.JsDom.TypedTag
 import scalatags.JsDom.all._
+import mhtml._
 
 /**
   *
   */
 object LayoutFrame extends RxComponent {
 
-  def draw[T <: TypedTag[_]](body: T) = {
-    div(
-      SearchBar.render,
-      div(cls := "container-fluid")(
-        div(cls := "row")(
-          Navbar.render,
-          tag("main")(cls := "col-10")(
-            body
-          )
-        )
-      )
-    ).render
-  }
+  def draw[T <: scala.xml.Node](body: T) =
+    <div>
+      <div class="container-fluid">
+        {Navbar.draw}
+        <div class="row">
+          <main class="col-10">
+            {body}
+          </main>
+        </div>
+      </div>
+    </div>
+
 }

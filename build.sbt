@@ -119,19 +119,24 @@ lazy val wvletUi =
   Project(id = "wvlet-ui", base = file("wvlet-ui"))
   .enablePlugins(ScalaJSPlugin, ScalaJSWeb, SbtTwirl)
   .settings(
-    scalaVersion := SCALA_UI_VERSION,
+    scalaVersion := SCALA_VERSION,
     name := "wvlet-ui",
     resolvers ++= sonatypeRepos,
     //pipelineStages in Assets := Seq(scalaJSPipeline),
 //   mainClass in Compile := Some("wvlet.ui.WvletUI"),
-    persistLauncher := true,
-    persistLauncher in Test := false,
+    scalaJSUseMainModuleInitializer := true,
+    scalaJSUseMainModuleInitializer in Test := false,
+    //persistLauncher := true,
+    //persistLauncher in Test := false,
     libraryDependencies ++= Seq(
       "org.scala-js" %%% "scalajs-dom" % "0.9.1",
       "be.doeraene" %%% "scalajs-jquery" % "0.9.1",
       "com.lihaoyi" %%% "scalatags" % "0.6.3",
-      "com.lihaoyi" %%% "scalarx" % "0.3.2",
+//      "com.lihaoyi" %%% "scalarx" % "0.3.2",
       "com.typesafe.play" %%% "play-json" % "2.6.0-M3",
+//      "in.nvilla" %%% "monadic-html" % "0.3.0",
+      //"org.scala-lang.modules" %% "scala-xml" % "1.0.6",
+      "in.nvilla" %%% "monadic-html" % "0.3.0",
       "org.wvlet" %%% "wvlet-log" % "1.2.1-SNAPSHOT" changing()
       //"com.thoughtworks.binding" %%% "dom" % "10.0.2"
       //"com.github.japgolly.scalajs-react" %%% "core" % "0.11.3",
@@ -143,4 +148,3 @@ lazy val wvletUi =
       RuntimeDOM
     )
   )
-

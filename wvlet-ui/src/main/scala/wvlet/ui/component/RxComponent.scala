@@ -14,7 +14,7 @@
 package wvlet.ui.component
 
 import org.scalajs.dom
-import rx.{Ctx, Rx, Var}
+import mhtml.{mount, _}
 
 import scalatags.JsDom.TypedTag
 
@@ -23,22 +23,13 @@ import scalatags.JsDom.TypedTag
   */
 trait RxElement {
 
-  val state : Rx[_] = Var()
-  private var lastElement : dom.Element = null
-
-  protected def draw : dom.Element
+  val state : Var[_] = Var()
+  protected def draw : scala.xml.Node
 
   def render : dom.Element = {
-    import Ctx.Owner.Unsafe._
-    lastElement = draw
-    state.foreach { s =>
-      val newElement = draw
-      if(lastElement.parentNode != null) {
-        lastElement.parentNode.replaceChild(newElement, lastElement)
-      }
-      lastElement = newElement
-    }
-    lastElement
+    val elem = dom.document.createElement("div")
+    mount(elem, draw)
+    elem
   }
 }
 
@@ -48,19 +39,12 @@ trait RxComponent {
 
   private var lastElement : dom.Element = null
 
-  protected def draw[T <: TypedTag[_]](body:T) : dom.Element
+  protected def draw[T <: scala.xml.Node](body:T) : scala.xml.Elem
 
-  def render[T <: TypedTag[_]](body:T) : dom.Element = {
-    import Ctx.Owner.Unsafe._
-    lastElement = draw(body)
-    state.foreach { s =>
-      val newElement = draw(body)
-      if(lastElement.parentNode != null) {
-        lastElement.parentNode.replaceChild(newElement, lastElement)
-      }
-      lastElement = newElement
-    }
-    lastElement
+  def render[T <: scala.xml.Node](body:T) : dom.Element = {
+    val elem = dom.document.createElement("div")
+    mount(elem, draw(body))
+    elem
   }
 
 }

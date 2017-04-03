@@ -13,21 +13,21 @@
  */
 package wvlet.ui.component
 
+import mhtml._
 import org.scalajs.dom
-import rx._
+import wvlet.log.LogSupport
 
 import scalatags.JsDom.all._
 
 /**
   *
   */
-object Navbar extends RxElement {
+object Navbar extends RxElement with LogSupport {
 
-  override val state = Var("Home")
+  override val state: Var[String] = Var("Home")
 
-  def icon(iconName: String) = {
-    i(cls:=s"fa ${iconName} fa-lg", width:=20, height:=20)
-  }
+  def icon(iconName: String) =
+      <i class="fa ${iconName} fa-lg" width="20" height="20"/>
 
   case class NavLink(url: String, name: String, icon: String)
 
@@ -46,24 +46,23 @@ object Navbar extends RxElement {
     }
   }
 
-  def draw = {
-    val page = state.now
-    tag("nav")(cls := "col-2 navbar-inverse bg-inverse sidebar")(
-      div(cls:="nav navbar-nav")(
+  def draw =
+    <nav class="col-2 navbar-inverse bg-inverse sidebar">
+      <div class="nav navbar-nav"> { state.map
+      { page =>
         for (l <- links) yield {
           val isActive = page == l.name
-          val anchor = a(cls := linkStyle(isActive), href := l.url)(
-            icon(l.icon),
-            s" ${l.name} "
-          ).render
-          anchor.onclick = (e: dom.MouseEvent) => {
+          <a class={linkStyle(isActive)} href={l.url} onclick={(e: dom.MouseEvent) =>
             e.preventDefault()
-            state.update(l.name)
-          }
-          anchor
+            debug(s"clicked ${l.name}")
+            state.update(x => l.name)}>
+            {icon(l.icon)}{l.name}
+          </a>
         }
-      )
-    ).render
-  }
+      }
+        }
+      </div>
+    </nav>
+
 }
 

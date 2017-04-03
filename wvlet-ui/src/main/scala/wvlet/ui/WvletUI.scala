@@ -51,13 +51,9 @@ object WvletUI extends js.JSApp with LogSupport {
     error("error log")
     //val body = document.getElementById("body")
 
-    val layout = LayoutFrame.render(
-      div(
-        h1("wvlet"),
-        p("hello")
-      )
-    )
     val m = document.getElementById("main")
+
+    val layout = LayoutFrame.render(<p>hello wvlet</p>)
     m.appendChild(layout)
 
     //info("appended child")

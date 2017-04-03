@@ -22,11 +22,8 @@ import scalatags.JsDom.all._
   *
   */
 object SearchBar extends RxElement {
-  override protected def draw: dom.Element = {
-    tag("nav")(cls := "navbar navbar-fixed-top navbar-inverse bg-inverse")(
-      a(cls := "navbar-brand", href := "#")("wvlet")
-
-
-    ).render
-  }
+  override protected def draw =
+    <nav class="navbar navbar-fixed-top navbar-inverse bg-inverse">
+      <a class="navbar-brand" href="#">wvlet</a>
+    </nav>
 }
