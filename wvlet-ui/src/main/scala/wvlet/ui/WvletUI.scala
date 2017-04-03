@@ -42,43 +42,10 @@ object WvletUI extends js.JSApp with LogSupport {
   Logger.setDefaultHandler(new JSConsoleLogHandler)
 
   def main() = {
-    Logger.setDefaultLogLevel(LogLevel.TRACE)
-
-    info("info log")
-    debug("debug log")
-    trace("trace log")
-    warn("warn log")
-    error("error log")
-    //val body = document.getElementById("body")
-
+    Logger.setDefaultLogLevel(LogLevel.DEBUG)
+    info("Start WvletUI")
     val m = document.getElementById("main")
     val layout = LayoutFrame.render(<p>hello wvlet</p>)
     m.appendChild(layout)
-
-    //info("appended child")
-    //body.appendChild(Layout.layout("wvlet").render)
-    //val content = navbar.render()
-    //content.body
-    //m.innerHTML = content.toString
-    //m.appendChild(pre(content.toString).render)
-    //m.appendChild(Navbar.render.render)
-//    val url = "http://localhost:8080/v1/project"
-//    Ajax.get(url).map {xhr =>
-//      if (xhr.status == 200) {
-//        val json = StaticBinding.parseJsValue(xhr.responseText)
-//        json.validate[Seq[Project]] match {
-//          case s: JsSuccess[Seq[Project]] =>
-//            val rows = s.get.map(x => Seq(x.id, x.name))
-//            val content = Layout.dataTable(Seq("id", "name"), rows)
-//            m.appendChild(content.render)
-//          case e: JsError =>
-//            m.appendChild(p(e.errors.mkString("\n")).render)
-//        }
-//      }
-//      else {
-//        m.appendChild(p(xhr.responseText).render)
-//      }
-//
-//    }
   }
 }

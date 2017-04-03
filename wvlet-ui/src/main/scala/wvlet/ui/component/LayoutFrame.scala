@@ -25,9 +25,11 @@ object LayoutFrame extends RxComponent {
       {Navbar.body}
       <div class="main">
         <div class="container-fluid">
+          <!--
           <div class="row">
             {StatusPane.body}
           </div>
+          -->
           <div class="row">
             {body}
           </div>
