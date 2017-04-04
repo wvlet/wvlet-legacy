@@ -14,6 +14,7 @@ dependencies:
 
 test:
   override:
-    - ./sbt "; coverage; + test; coverageReport" && ./sbt coverageAggregate
+    - ./sbt "+ test"
+    - ./sbt coverage test coverageReport
   post:
-    - ./sbt coveralls
+    - ./sbt coverageAggregate coveralls
