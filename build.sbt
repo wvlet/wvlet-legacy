@@ -70,7 +70,7 @@ lazy val wvlet =
     publishLocal := {}
   ).aggregate(wvletCore, wvletTest, wvletServer, wvletUi)
 
-val wvletLog = "org.wvlet" %% "wvlet-log" % "1.1"
+val wvletLog = "org.wvlet" %% "wvlet-log" % "1.2.1"
 
 lazy val wvletCore =
   Project(id = "wvlet-core", base = file("wvlet-core")).settings(
@@ -116,7 +116,7 @@ lazy val wvletServer =
       "com.twitter" %% "finatra-http" % "2.9.0",
       // sl4j -> wvlet-log bridge
       "org.slf4j" % "slf4j-jdk14" % "1.7.21",
-      "org.wvlet" %% "wvlet-log" % "1.2"
+      wvletLog
     )
   )
 
@@ -134,7 +134,7 @@ lazy val wvletUi =
       "com.lihaoyi" %%% "scalatags" % "0.6.3",
       "com.typesafe.play" %%% "play-json" % "2.6.0-M6",
       "in.nvilla" %%% "monadic-html" % "0.3.0",
-      "org.wvlet" %%% "wvlet-log" % "1.2.1-SNAPSHOT" changing()
+      "org.wvlet" %%% "wvlet-log" % "1.2.1"
     ),
     jsDependencies ++= Seq(
       "org.webjars" % "jquery" % "2.1.4" / "2.1.4/jquery.js",
