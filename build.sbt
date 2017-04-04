@@ -102,13 +102,13 @@ lazy val wvletServer =
   Project(id = "wvlet-server", base = file("wvlet-server"))
   .enablePlugins(SbtWeb)
   .settings(
-    scalaVersion := SCALA_UI_VERSION,
+    scalaVersion := SCALA_VERSION,
     mainClass in(Compile, run) := Some("wvlet.server.api.WvletServer"),
     scalaJSProjects := Seq(wvletUi),
     pipelineStages in Assets := Seq(scalaJSPipeline),
     compile in Compile := ((compile in Compile) dependsOn scalaJSPipeline).value,
     libraryDependencies ++= Seq(
-      "com.twitter" %% "finatra-http" % "2.8.0",
+      "com.twitter" %% "finatra-http" % "2.9.0",
       // sl4j -> wvlet-log bridge
       "org.slf4j" % "slf4j-jdk14" % "1.7.21",
       "org.wvlet" %% "wvlet-log" % "1.1"
