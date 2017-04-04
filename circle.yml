@@ -8,7 +8,7 @@ dependencies:
     - "~/.sbt"
     - "~/.ivy2"
   pre:
-    - cd wvlet-ui && npm install jsdom
+    - npm install jsdom
   override:
     - ./sbt "+ compile"
 
