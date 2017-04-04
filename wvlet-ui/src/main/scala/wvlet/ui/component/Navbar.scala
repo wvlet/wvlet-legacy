@@ -73,7 +73,8 @@ object Navbar extends RxElement with LogSupport {
       <nav class="mdl-navigation">
         {
         links.map{l =>
-          <a class="mdl-navigation__link" href={s"${l.url}"} onclick={onClick(l.name)}>
+          val isActive = page == l.name
+          <a class={s"mdl-navigation__link${if(isActive) " active" else ""}"} href={s"${l.url}"} onclick={onClick(l.name)}>
             {icon(l.icon)} {l.name}
           </a>
         }

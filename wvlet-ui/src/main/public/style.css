@@ -25,10 +25,6 @@
     padding-left: 1rem;
 }
 
-.main {
-    margin-top: 55px;
-}
-
 .navbar, .sidebar {
     font-size: 0.96rem;
     font-weight: normal;
@@ -50,5 +46,9 @@
     float: none;
     color: #CCCCCC;
     text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
+}
+
+.mdl-layout__drawer .mdl-navigation .mdl-navigation__link + active {
+    color: #025aa5;
 }
 
