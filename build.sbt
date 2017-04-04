@@ -109,14 +109,14 @@ lazy val wvletServer =
   .settings(
     webSettings,
     mainClass in(Compile, run) := Some("wvlet.server.api.WvletServer"),
-    scalaJSProjects := Seq(wvletUi),
-    pipelineStages in Assets := Seq(scalaJSPipeline),
-    compile in Compile := ((compile in Compile) dependsOn scalaJSPipeline).value,
+    //scalaJSProjects := Seq(wvletUi),
+    //pipelineStages in Assets := Seq(scalaJSPipeline),
+    //compile in Compile := ((compile in Compile) dependsOn scalaJSPipeline).value,
     libraryDependencies ++= Seq(
       "com.twitter" %% "finatra-http" % "2.9.0",
       // sl4j -> wvlet-log bridge
       "org.slf4j" % "slf4j-jdk14" % "1.7.21",
-      "org.wvlet" %% "wvlet-log" % "1.1"
+      "org.wvlet" %% "wvlet-log" % "1.2"
     )
   )
 

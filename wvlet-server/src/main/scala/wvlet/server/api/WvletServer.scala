@@ -21,5 +21,6 @@ import wvlet.log.Logger
   */
 object WvletServer extends WvletApi {
   Logger.setDefaultFormatter(SourceCodeLogFormatter)
+
   override val defaultFinatraHttpPort: String = ":8080"
 }
