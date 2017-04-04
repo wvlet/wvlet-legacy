@@ -8,7 +8,6 @@ dependencies:
     - "~/.sbt"
     - "~/.ivy2"
   pre:
-    - . $HOME/.nvm/nvm.sh
     - nvm install stable
     - nvm use stable
     - npm install
