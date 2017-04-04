@@ -7,6 +7,9 @@ dependencies:
   cache_directories:
     - "~/.sbt"
     - "~/.ivy2"
+  pre:
+    - npm install
+    - npm install jsdom
   override:
     - ./sbt "+ compile"
 
