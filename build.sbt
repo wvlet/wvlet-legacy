@@ -1,7 +1,6 @@
 import sbtrelease.ReleasePlugin.autoImport.ReleaseTransformations._
 
 val SCALA_VERSION = "2.12.1"
-val SCALA_UI_VERSION = "2.11.8"
 scalaVersion in ThisBuild := SCALA_VERSION
 
 val sonatypeRepos = Seq(
@@ -98,11 +97,17 @@ lazy val wvletTest =
     )
   )
 
+val webSettings = Seq(
+  scalaVersion := SCALA_VERSION,
+  crossScalaVersions := Seq(SCALA_VERSION),
+  resolvers ++= sonatypeRepos
+)
+
 lazy val wvletServer =
   Project(id = "wvlet-server", base = file("wvlet-server"))
   .enablePlugins(SbtWeb)
   .settings(
-    scalaVersion := SCALA_VERSION,
+    webSettings,
     mainClass in(Compile, run) := Some("wvlet.server.api.WvletServer"),
     scalaJSProjects := Seq(wvletUi),
     pipelineStages in Assets := Seq(scalaJSPipeline),
@@ -119,9 +124,8 @@ lazy val wvletUi =
   Project(id = "wvlet-ui", base = file("wvlet-ui"))
   .enablePlugins(ScalaJSPlugin, ScalaJSWeb, SbtTwirl)
   .settings(
-    scalaVersion := SCALA_VERSION,
+    webSettings,
     name := "wvlet-ui",
-    resolvers ++= sonatypeRepos,
     scalaJSUseMainModuleInitializer := true,
     scalaJSUseMainModuleInitializer in Test := false,
     libraryDependencies ++= Seq(
