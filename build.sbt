@@ -132,7 +132,7 @@ lazy val wvletUi =
       "org.scala-js" %%% "scalajs-dom" % "0.9.1",
       "be.doeraene" %%% "scalajs-jquery" % "0.9.1",
       "com.lihaoyi" %%% "scalatags" % "0.6.3",
-      "com.typesafe.play" %%% "play-json" % "2.6.0-M3",
+      "com.typesafe.play" %%% "play-json" % "2.6.0-M6",
       "in.nvilla" %%% "monadic-html" % "0.3.0",
       "org.wvlet" %%% "wvlet-log" % "1.2.1-SNAPSHOT" changing()
     ),
