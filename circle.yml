@@ -3,6 +3,9 @@ machine:
   java:
     version: oraclejdk8
 
+node_js:
+  - "7.7"
+
 dependencies:
   cache_directories:
     - "~/.sbt"
