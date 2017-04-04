@@ -49,7 +49,7 @@ object Navbar extends RxElement with LogSupport {
     state.update(x => name)
   }
 
-  def body = state.map {page =>
+  def body2 = state.map {page =>
     <nav class="navbar navbar-toggleable-md navbar-inverse fixed-top bg-inverse">
       <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
@@ -65,6 +65,21 @@ object Navbar extends RxElement with LogSupport {
         </div>
       </div>
     </nav>
+  }
+
+  def body = state.map {page =>
+    <div class="mdl-layout__drawer">
+      <span class="mdl-layout-title">wvlet</span>
+      <nav class="mdl-navigation">
+        {
+        links.map{l =>
+          <a class="mdl-navigation__link" href={s"${l.url}"} onclick={onClick(l.name)}>
+            {icon(l.icon)} {l.name}
+          </a>
+        }
+        }
+      </nav>
+    </div>
   }
 
 }

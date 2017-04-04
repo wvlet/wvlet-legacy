@@ -13,17 +13,28 @@
  */
 package wvlet.ui.component
 
-import org.scalajs.dom
-import org.scalajs.dom.Element
-
-import scalatags.JsDom.all._
-
 /**
   *
   */
 object SearchBar {
+  def bodyMDL =
+    <div class="mdl-textfield mdl-js-textfield">
+      <input class="mdl-textfield__input" type="text" id="sample1"/>
+      <label class="mdl-textfield__label" for="sample1">Search...</label>
+    </div>
+
+  def bodyBS4 =
+    <div class="bd-search">
+      <input type="email" class="form-control" placeholder="Search..."/>
+    </div>
+
   def body =
-    <nav class="navbar navbar-fixed-top navbar-inverse bg-inverse">
-      <a class="navbar-brand" href="#">wvlet</a>
-    </nav>
+    <div class="mdl-textfield mdl-js-textfield mdl-textfield--expandable mdl-textfield--floating-label mdl-textfield--align-right">
+      <label class="mdl-button mdl-js-button mdl-button--icon" for="fixed-header-drawer-exp">
+        <i class="material-icons">search</i>
+      </label>
+      <div class="mdl-textfield__expandable-holder">
+        <input class="mdl-textfield__input" type="text" name="sample" id="fixed-header-drawer-exp"/>
+      </div>
+    </div>
 }

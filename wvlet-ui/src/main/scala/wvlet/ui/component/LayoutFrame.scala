@@ -21,20 +21,23 @@ import mhtml._
 object LayoutFrame extends RxComponent {
 
   def body[T <: scala.xml.Node](body: T) =
-    <div>
+
+    <div class="mdl-layout mdl-js-layout mdl-layout--fixed-drawer
+            mdl-layout--fixed-header">
+      <header class="mdl-layout__header">
+        <div class="mdl-layout__header-row">
+          <div class="mdl-layout-spacer"></div>
+          {SearchBar.body}
+        </div>
+      </header>
       {Navbar.body}
-      <div class="main">
-        <div class="container-fluid">
-          <!--
-          <div class="row">
-            {StatusPane.body}
-          </div>
-          -->
-          <div class="row">
+      <main class="mdl-layout__content">
+        <div class="page-content">
+
+          <div class="mdl-grid">
             {body}
           </div>
         </div>
-      </div>
+      </main>
     </div>
-
 }

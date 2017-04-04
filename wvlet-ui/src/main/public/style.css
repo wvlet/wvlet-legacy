@@ -14,7 +14,7 @@
 
 
 .navbar-brand {
-    font-size: 1.0rem;
+    font-size: 1.1rem;
     text-decoration: none;
 }
 
@@ -30,7 +30,8 @@
 }
 
 .navbar, .sidebar {
-    font-size: 0.86rem;
+    font-size: 0.96rem;
+    font-weight: normal;
     background-color: #336699;
     background-image: -moz-linear-gradient(top, #336699, #224466);
     background-image: -ms-linear-gradient(top, #336699, #224466);
