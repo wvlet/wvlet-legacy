@@ -60,20 +60,6 @@ object TimeWindow {
   val systemZone = ZoneId.systemDefault().normalized()
   val UTC        = ZoneOffset.UTC
 
-  private val unitTable: Map[String, ChronoUnit] = Map(
-    "s" -> ChronoUnit.SECONDS,
-    "m" -> ChronoUnit.MINUTES,
-    "d"-> ChronoUnit.DAYS,
-    "h" -> ChronoUnit.HOURS,
-    "w" -> ChronoUnit.WEEKS,
-    "M" -> ChronoUnit.MONTHS,
-    "y" -> ChronoUnit.YEARS
-  )
-
-  private[scales] def unitOf(s:String) : ChronoUnit = {
-    unitTable.getOrElse(s, throw new IllegalArgumentException(s"Unknown unit type ${s}"))
-  }
-
 
   def of(zoneId:ZoneId): TimeWindowBuilder = new TimeWindowBuilder(zoneId)
   def ofUTC: TimeWindowBuilder = new TimeWindowBuilder(UTC)
@@ -82,47 +68,25 @@ object TimeWindow {
 }
 
 
+
 class TimeWindowBuilder(zone:ZoneId = TimeWindow.systemZone) {
 
-  def durationPattern = "^([+-]|last|next)?([0-9]+)(s|m|d|h|w|M|y)".r("prefix", "num", "unit", "o")
+  private def parseOffset(o:String, unit:ChronoUnit): ZonedDateTime = {
+    o match {
+      case null => now.truncatedTo(unit)
+      case "now" => now
+      case other =>
 
-  private def parseDuration(s:String): TimeWindow = {
-    durationPattern.findFirstMatchIn(s) match {
-      case Some(m) =>
-        val length = m.group("num").toInt
-        val unit = TimeWindow.unitOf(m.group("unit"))
-        m.group("prefix") match {
-          case null | "-" | "last" =>
-            last(length).of(unit)
-          case "+" | "next" =>
-            next(length).of(unit)
-          case other =>
-            throw new IllegalArgumentException(s"Unknown duration prefix: ${other}")
-        }
-      case None =>
-        throw new IllegalArgumentException(s"Invalid duration: ${s}")
     }
   }
 
   def parse(str:String): TimeWindow = {
-    val pattern = s"^${durationPattern.regex}(/(.*))?".r("prefix", "num", "unit", "o", "offset")
+    val pattern = s"^([^/]+)(/(.*))?".r("duration", "sep", "offset")
     pattern.findFirstMatchIn(str) match {
       case Some(m) =>
-        val length = m.group("num").toInt
-        val unit = TimeWindow.unitOf(m.group("unit"))
-        val l = m.group("prefix") match {
-          case null | "-" | "last" => last(length)
-          case "+" | "next" => next(length)
-          case other =>
-            throw new IllegalArgumentException(s"Unknown duration prefix: ${other}")
-        }
-        m.group("offset") match {
-          case null => l.of(unit)
-          case "now" => l.untilNow(unit)
-          case other =>
-            l.from(parseDuration(other))
-            throw new IllegalArgumentException(s"Unknown offset: ${other}")
-        }
+        val duration = TimeDuration(m.group("duration"))
+        val offset = parseOffset(m.group("offset"))
+        duration.fromOffset(offset)
       case None =>
         throw new IllegalArgumentException(s"TimeRange.of(${str})")
     }
@@ -141,10 +105,6 @@ class TimeWindowBuilder(zone:ZoneId = TimeWindow.systemZone) {
   def beginningOfTheYear = now.withDayOfYear(1).truncatedTo(ChronoUnit.DAYS)
   def endOfTheYear = beginningOfTheYear.plusYears(1)
 
-
-  trait TimeCursor {
-    def of
-  }
 
   case class next(x: Long) {
     def of(unit: ChronoUnit): TimeWindow = {
