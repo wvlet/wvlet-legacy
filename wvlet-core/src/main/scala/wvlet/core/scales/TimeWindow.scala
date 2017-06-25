@@ -76,7 +76,7 @@ class TimeWindowBuilder(zone:ZoneId = TimeWindow.systemZone) {
       case null => now.truncatedTo(unit)
       case "now" => now
       case other =>
-
+        DateTimeParser.parse(o)
     }
   }
 
@@ -85,7 +85,7 @@ class TimeWindowBuilder(zone:ZoneId = TimeWindow.systemZone) {
     pattern.findFirstMatchIn(str) match {
       case Some(m) =>
         val duration = TimeDuration(m.group("duration"))
-        val offset = parseOffset(m.group("offset"))
+        val offset = parseOffset(m.group("offset"), duration.unit)
         duration.fromOffset(offset)
       case None =>
         throw new IllegalArgumentException(s"TimeRange.of(${str})")

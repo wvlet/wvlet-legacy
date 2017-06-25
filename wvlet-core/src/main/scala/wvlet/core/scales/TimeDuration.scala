@@ -19,7 +19,12 @@ import java.time.temporal.ChronoUnit
 
 case class TimeDuration(x:Long, unit:ChronoUnit) {
 
-  def fromOffset(offset:ZonedDateTime): TimeWindow
+  def fromOffset(offset:ZonedDateTime): TimeWindow = {
+
+
+
+
+  }
 
 }
 
