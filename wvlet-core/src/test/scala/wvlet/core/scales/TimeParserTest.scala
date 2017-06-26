@@ -20,10 +20,10 @@ import wvlet.test.WvletSpec
 /**
   *
   */
-class DateTimeParserTest extends WvletSpec {
+class TimeParserTest extends WvletSpec {
 
   def parse(str:String, expected:String) {
-    val z = DateTimeParser.parse(str, TimeWindow.UTC)
+    val z = TimeParser.parse(str, TimeWindow.UTC)
     val ans = ZonedDateTime.parse(expected)
 
     if(z.isEmpty) {
@@ -34,7 +34,7 @@ class DateTimeParserTest extends WvletSpec {
     TimeStampFormatter.formatTimestamp(z.get) shouldBe TimeStampFormatter.formatTimestamp(ans)
   }
 
-  "DateTimeParser" should {
+  "TimeParser" should {
 
     "parse date time" in {
 

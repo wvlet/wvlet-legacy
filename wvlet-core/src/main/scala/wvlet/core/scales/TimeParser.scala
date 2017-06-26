@@ -10,7 +10,7 @@ import scala.util.{Failure, Success, Try}
 /**
   *
   */
-object DateTimeParser extends LogSupport{
+object TimeParser extends LogSupport{
 
   val localDateTimePattern = DateTimeFormatter.ofPattern("yyyy-MM-dd[ HH:mm:ss[.SSS]]")
 
@@ -53,7 +53,7 @@ object DateTimeParser extends LogSupport{
     loop(zonedDateTimePatterns.toList)
   }
 
-  def parseLocal(s:String) = parse(s, TimeWindow.systemZone)
+  def parseAtLocalTimeZone(s:String) = parse(s, TimeWindow.systemZone)
 
   def parse(s: String, zone: ZoneOffset): Option[ZonedDateTime] = {
     parseLocalDateTime(s, zone)

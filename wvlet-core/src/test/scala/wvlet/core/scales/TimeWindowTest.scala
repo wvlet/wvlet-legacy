@@ -16,7 +16,7 @@ class TimeWindowTest extends WvletSpec {
   def parse(s:String, expected:String): TimeWindow = {
     val w = t.parse(s)
     info(s"str:${s}, window:${w}")
-    w.toStringAt(zone) shouldBe expected
+    w.toString shouldBe expected
     w
   }
 

@@ -106,7 +106,7 @@ class TimeWindowBuilder(val zone:ZoneOffset, currentTime:Option[ZonedDateTime]=N
 
   def withCurrentTime(t:ZonedDateTime): TimeWindowBuilder = new TimeWindowBuilder(zone, Some(t))
   def withCurrentTime(dateTimeStr:String): TimeWindowBuilder = {
-    DateTimeParser.parse(dateTimeStr, TimeWindow.systemZone)
+    TimeParser.parse(dateTimeStr, TimeWindow.systemZone)
     .map(d => withCurrentTime(d))
     .getOrElse {
       throw new IllegalArgumentException(s"Invalid datetime: ${dateTimeStr}")
@@ -144,7 +144,7 @@ class TimeWindowBuilder(val zone:ZoneOffset, currentTime:Option[ZonedDateTime]=N
           case Success(x) =>
             x.timeWindowAt(now).start
           case Failure(e) =>
-            DateTimeParser.parse(o, zone).getOrElse {
+            TimeParser.parse(o, zone).getOrElse {
               throw new IllegalArgumentException(s"Invalid offset string: ${o}")
             }
         }

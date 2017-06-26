@@ -25,7 +25,6 @@ case class TimeDuration(x: Long, unit: ChronoUnit, offset: Long=0) extends LogSu
     val base = grid.plus(offset, unit)
     val theOtherEnd = base.plus(x, unit)
 
-
     if (x <= 0) {
       if(grid.compareTo(context) == 0)
         TimeWindow(theOtherEnd, base)
@@ -47,6 +46,12 @@ object TimeDuration {
   def apply(s: String): TimeDuration = {
     s match {
       // current
+      // thisXXXX is a special time range and needs to be backward range to include the current time
+      //
+      //         now
+      //   |------x------|
+      //    <------------|  -1 x unit distance from the offset
+      // base          offset
       case "thisHour" => TimeDuration(-1, ChronoUnit.HOURS, 1)
       case "today" => TimeDuration(-1, ChronoUnit.DAYS, 1)
       case "thisWeek" => TimeDuration(-1, ChronoUnit.WEEKS, 1)
