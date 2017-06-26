@@ -1,9 +1,9 @@
 import ReleaseTransformations._
 
-scalaVersion in ThisBuild := "2.12.1"
+scalaVersion in ThisBuild := "2.12.2"
 
 val buildSettings = Seq[Setting[_]](
-  crossScalaVersions := Seq("2.11.8", "2.12.1"),
+  crossScalaVersions := Seq("2.11.11", "2.12.2"),
   organization := "org.wvlet",
   description := "A framework for structured data mapping",
   crossPaths := true,
@@ -67,7 +67,7 @@ lazy val wvlet =
     publishLocal := {}
   ).aggregate(wvletCore, wvletTest)
 
-val wvletLog = "org.wvlet" %% "wvlet-log" % "1.1"
+val wvletLog = "org.wvlet" %% "wvlet-log" % "1.2.3"
 
 lazy val wvletCore =
   Project(id = "wvlet-core", base = file("wvlet-core")).settings(
