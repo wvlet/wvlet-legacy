@@ -80,6 +80,18 @@ object TimeWindow {
   }
   val UTC: ZoneOffset        = ZoneOffset.UTC
 
+  def withZone(zoneName:String): TimeWindowBuilder = {
+    import scala.collection.JavaConverters._
+    val idMap = ZoneId.SHORT_IDS.asScala ++ Map("PDT" -> "-07:00", "EDT" -> "-04:00", "CDT" -> "-05:00", "MDT" -> "-06:00")
+    val zoneId = idMap
+                 .get(zoneName)
+                 .map(ZoneId.of(_))
+                 .getOrElse { ZoneId.of(zoneName) }
+
+    val offset = ZonedDateTime.now(zoneId).getOffset
+    of(offset)
+  }
+
   def of(zoneId:ZoneOffset): TimeWindowBuilder = new TimeWindowBuilder(zoneId)
   def ofUTC: TimeWindowBuilder = of(UTC)
   def ofSystem: TimeWindowBuilder = of(systemZone)
@@ -102,7 +114,6 @@ object TimeWindow {
 }
 
 class TimeWindowBuilder(val zone:ZoneOffset, currentTime:Option[ZonedDateTime]=None) extends LogSupport {
-
 
   def withCurrentTime(t:ZonedDateTime): TimeWindowBuilder = new TimeWindowBuilder(zone, Some(t))
   def withCurrentTime(dateTimeStr:String): TimeWindowBuilder = {

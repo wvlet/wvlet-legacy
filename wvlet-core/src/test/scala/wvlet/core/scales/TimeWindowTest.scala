@@ -133,7 +133,18 @@ class TimeWindowTest extends WvletSpec {
 
       val days = t.parse("thisMonth").splitIntoWeeks
       info(days.mkString("\n"))
+    }
 
+    "parse timezone" in {
+      // Sanity tests
+      TimeWindow.withZone("UTC")
+      TimeWindow.withZone("PST")
+      TimeWindow.withZone("PDT")
+      TimeWindow.withZone("JST")
+      TimeWindow.withZone("EDT")
+      TimeWindow.withZone("BST")
+      TimeWindow.withZone("CDT")
+      TimeWindow.withZone("MDT")
     }
   }
 
