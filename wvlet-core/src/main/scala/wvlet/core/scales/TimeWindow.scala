@@ -82,7 +82,9 @@ object TimeWindow {
 
   def withZone(zoneName:String): TimeWindowBuilder = {
     import scala.collection.JavaConverters._
-    val idMap = ZoneId.SHORT_IDS.asScala ++ Map("PDT" -> "-07:00", "EDT" -> "-04:00", "CDT" -> "-05:00", "MDT" -> "-06:00")
+    // Add commonly used daylight saving times
+    val idMap = ZoneId.SHORT_IDS.asScala ++
+      Map("PDT" -> "-07:00", "EDT" -> "-04:00", "CDT" -> "-05:00", "MDT" -> "-06:00")
     val zoneId = idMap
                  .get(zoneName)
                  .map(ZoneId.of(_))

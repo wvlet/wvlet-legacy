@@ -10,7 +10,7 @@ import wvlet.test.WvletSpec
   */
 class TimeWindowTest extends WvletSpec {
 
-  val t = TimeWindow.ofSystem.withCurrentTime("2016-06-26 01:23:45-0700")
+  val t = TimeWindow.withZone("PDT").withCurrentTime("2016-06-26 01:23:45-0700")
   val zone = t.zone
   info(s"now: ${t.now}")
 
@@ -27,7 +27,7 @@ class TimeWindowTest extends WvletSpec {
   def parse(s:String, expected:String): TimeWindow = {
     val w = t.parse(s)
     info(s"str:${s}, window:${w}")
-    w.toString shouldBe expected
+    w.toStringAt(zone) shouldBe expected
     w
   }
 
