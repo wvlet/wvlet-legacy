@@ -15,8 +15,8 @@ object DateTimeParser extends LogSupport{
   val localDateTimePattern = DateTimeFormatter.ofPattern("yyyy-MM-dd[ HH:mm:ss[.SSS]]")
 
   val zonedDateTimePatterns: List[DateTimeFormatter] = List(
-    "yyyy-MM-dd HH:mm:ss[.SSS][OOOO][O][ z][XXXXX][XXXX]['['VV']']",
-    "yyyy-MM-dd'T'HH:mm:ss[.SSS][OOOO][O][ z][XXXXX][XXXX]['['VV']']"
+    "yyyy-MM-dd HH:mm:ss[.SSS][ z][XXXXX][XXXX]['['VV']']",
+    "yyyy-MM-dd'T'HH:mm:ss[.SSS][ z][XXXXX][XXXX]['['VV']']"
   ).map(DateTimeFormatter.ofPattern(_))
 
 
