@@ -72,13 +72,31 @@ object TimeWindow {
   def of(zoneId:ZoneOffset): TimeWindowBuilder = new TimeWindowBuilder(zoneId)
   def ofUTC: TimeWindowBuilder = of(UTC)
   def ofSystem: TimeWindowBuilder = of(systemZone)
+
+  def truncateTo(t:ZonedDateTime, unit:ChronoUnit): ZonedDateTime = {
+    unit match {
+      case ChronoUnit.SECONDS | ChronoUnit.MINUTES |  ChronoUnit.HOURS | ChronoUnit.DAYS =>
+        t.truncatedTo(unit)
+      case ChronoUnit.WEEKS =>
+        t.truncatedTo(ChronoUnit.DAYS).`with`(DayOfWeek.MONDAY)
+      case ChronoUnit.MONTHS =>
+        t.withDayOfMonth(1).truncatedTo(ChronoUnit.DAYS)
+      case ChronoUnit.YEARS =>
+        t.withDayOfYear(1).truncatedTo(ChronoUnit.DAYS)
+      case other =>
+        throw new UnsupportedOperationException(s"${other} is not supported")
+    }
+  }
+
 }
 
-class TimeWindowBuilder(zone:ZoneOffset) extends LogSupport {
+class TimeWindowBuilder(zone:ZoneOffset, currentTime:Option[ZonedDateTime]=None) extends LogSupport {
+
+  def withCurrentTime(t:ZonedDateTime): TimeWindowBuilder = new TimeWindowBuilder(zone, Some(t))
 
   private def parseOffset(o:String, unit:ChronoUnit): ZonedDateTime = {
     o match {
-      case null => now.truncatedTo(unit)
+      case null => TimeWindow.truncateTo(now, unit)
       case "now" => now
       case other =>
         Try(TimeDuration(o)) match {
@@ -104,5 +122,5 @@ class TimeWindowBuilder(zone:ZoneOffset) extends LogSupport {
     }
   }
 
-  def now = ZonedDateTime.now(zone)
+  def now = currentTime.getOrElse(ZonedDateTime.now(zone))
 }

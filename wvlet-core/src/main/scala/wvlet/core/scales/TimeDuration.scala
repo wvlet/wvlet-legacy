@@ -13,27 +13,15 @@
  */
 package wvlet.core.scales
 
-import java.time.{DayOfWeek, ZonedDateTime}
+import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
 
+case class TimeDuration(x: Long, unit: ChronoUnit) {
 
-case class TimeDuration(x:Long, unit:ChronoUnit) {
-
-  def fromOffset(offset:ZonedDateTime): TimeWindow = {
-    val base = unit match {
-      case ChronoUnit.SECONDS | ChronoUnit.MINUTES |  ChronoUnit.HOURS | ChronoUnit.DAYS =>
-        offset.truncatedTo(unit)
-      case ChronoUnit.WEEKS =>
-        offset.truncatedTo(ChronoUnit.DAYS).`with`(DayOfWeek.MONDAY)
-      case ChronoUnit.MONTHS =>
-        offset.withDayOfMonth(1).truncatedTo(ChronoUnit.DAYS)
-      case ChronoUnit.YEARS =>
-        offset.withDayOfYear(1).truncatedTo(ChronoUnit.DAYS)
-      case other =>
-        throw new UnsupportedOperationException(s"${other} is not supported")
-    }
+  def fromOffset(offset: ZonedDateTime): TimeWindow = {
+    val base = TimeWindow.truncateTo(offset, unit)
     val next = base.plus(x, unit)
-    if(x <= 0) {
+    if (x <= 0) {
       TimeWindow(next, offset)
     }
     else {
@@ -45,7 +33,7 @@ case class TimeDuration(x:Long, unit:ChronoUnit) {
 
 object TimeDuration {
 
-  def apply(s:String): TimeDuration = {
+  def apply(s: String): TimeDuration = {
     val durationPattern = "^([+-]|last|next)?([0-9]+)(s|m|d|h|w|M|y)".r("prefix", "num", "unit", "o")
 
     durationPattern.findFirstMatchIn(s) match {
@@ -68,14 +56,14 @@ object TimeDuration {
   private val unitTable: Map[String, ChronoUnit] = Map(
     "s" -> ChronoUnit.SECONDS,
     "m" -> ChronoUnit.MINUTES,
-    "d"-> ChronoUnit.DAYS,
+    "d" -> ChronoUnit.DAYS,
     "h" -> ChronoUnit.HOURS,
     "w" -> ChronoUnit.WEEKS,
     "M" -> ChronoUnit.MONTHS,
     "y" -> ChronoUnit.YEARS
   )
 
-  private[scales] def unitOf(s:String) : ChronoUnit = {
+  private[scales] def unitOf(s: String): ChronoUnit = {
     unitTable.getOrElse(s, throw new IllegalArgumentException(s"Unknown unit type ${s}"))
   }
 

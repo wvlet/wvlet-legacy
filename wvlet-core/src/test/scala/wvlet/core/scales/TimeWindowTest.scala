@@ -88,6 +88,15 @@ class TimeWindowTest extends WvletSpec {
       parse("-1h/2017-01-23 01:23:45")
       parse("60m/2017-01-23 01:23:45")
     }
+
+    "split time windows" in {
+      val weeks = t.parse("5w").splitIntoWeeks
+      info(weeks.mkString("\n"))
+
+      val weeks2 = t.parse("5w/2017-06-01").splitIntoWeeks
+      info(weeks2.mkString("\n"))
+
+    }
   }
 
 }

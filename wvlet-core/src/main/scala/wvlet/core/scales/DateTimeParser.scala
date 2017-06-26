@@ -12,11 +12,12 @@ import scala.util.{Failure, Success, Try}
   */
 object DateTimeParser extends LogSupport{
 
-  def localDateTimePattern = "yyyy[-MM[-dd[ HH:mm:ss[.SSS]]]]"
+  def localDateTimePattern = "yyyy-MM-dd[ HH:mm:ss[.SSS]]"
 
   def zonedDateTimePatterns: Seq[String] = Seq(
-    "yyyy-MM[-dd[ HH:mm:ss[.SSS]]]Z",
-    "yyyy-MM[-dd[ HH:mm:ss[.SSS]]] z"
+    "yyyy-MM-dd z",
+    "yyyy-MM-dd[ HH:mm:ss[.SSS]]Z",
+    "yyyy-MM-dd[ HH:mm:ss[.SSS]] z"
   )
 
   def zonedPatterns = DateTimeFormatter.ofPattern(
