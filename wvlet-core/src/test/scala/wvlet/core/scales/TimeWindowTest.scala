@@ -9,7 +9,7 @@ import wvlet.test.WvletSpec
   */
 class TimeWindowTest extends WvletSpec {
 
-  val t = TimeWindow.ofSystem.withCurrentTime(ZonedDateTime.parse("2016-06-26T01:23:45-07:00"))
+  val t = TimeWindow.ofSystem.withCurrentTime("2016-06-26 01:23:45-0700")
   val zone = t.zone
   info(s"now: ${t.now}")
 
@@ -32,6 +32,8 @@ class TimeWindowTest extends WvletSpec {
       // RANGE    := (DURATION) (/ (OFFSET))?
       // DATE_TIME := yyyy-MM-dd( HH:mm:ss(.ZZZ| ' ' z)?)?
       //
+
+      // The following tests are the results if the current time is 2016-06-26 01:23:45-0700
 
       // The default offset is 0(UNIT) (the beginning of the given time unit)
 

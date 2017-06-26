@@ -44,6 +44,10 @@ object TimeStampFormatter {
                                         .appendOffset("+HHMM", "Z")
                                         .toFormatter(Locale.US)
 
+  def formatTimestamp(time:ZonedDateTime): String = {
+    humanReadableTimestampFormatter.format(time)
+  }
+
   def formatTimestamp(timeMillis: Long, zone:ZoneOffset=TimeWindow.systemZone): String = {
     val timestamp = ZonedDateTime.ofInstant(Instant.ofEpochMilli(timeMillis), zone)
     humanReadableTimestampFormatter.format(timestamp)
@@ -53,4 +57,5 @@ object TimeStampFormatter {
     val timestamp = ZonedDateTime.ofInstant(Instant.ofEpochMilli(timeMillis), TimeWindow.systemZone)
     noSpaceTimestampFormat.format(timestamp)
   }
+
 }

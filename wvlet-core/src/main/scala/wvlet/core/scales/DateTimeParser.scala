@@ -12,21 +12,16 @@ import scala.util.{Failure, Success, Try}
   */
 object DateTimeParser extends LogSupport{
 
-  def localDateTimePattern = "yyyy-MM-dd[ HH:mm:ss[.SSS]]"
+  val localDateTimePattern = DateTimeFormatter.ofPattern("yyyy-MM-dd[ HH:mm:ss[.SSS]]")
 
-  def zonedDateTimePatterns: Seq[String] = Seq(
-    "yyyy-MM-dd z",
-    "yyyy-MM-dd[ HH:mm:ss[.SSS]]Z",
-    "yyyy-MM-dd[ HH:mm:ss[.SSS]] z"
-  )
+  val zonedDateTimePatterns: List[DateTimeFormatter] = List(
+    "yyyy-MM-dd HH:mm:ss[.SSS][OOOO][O][ z][XXXXX][XXXX]['['VV']']",
+    "yyyy-MM-dd'T'HH:mm:ss[.SSS][OOOO][O][ z][XXXXX][XXXX]['['VV']']"
+  ).map(DateTimeFormatter.ofPattern(_))
 
-  def zonedPatterns = DateTimeFormatter.ofPattern(
-    zonedDateTimePatterns.map(s => s"[$s]").mkString("")
-  )
 
   def parseLocalDateTime(s: String, zone: ZoneOffset): Option[ZonedDateTime] = {
-    val p = DateTimeFormatter.ofPattern(localDateTimePattern)
-    Try(p.parseBest(s, LocalDateTime.from(_), LocalDate.from(_))) match {
+    Try(localDateTimePattern.parseBest(s, LocalDateTime.from(_), LocalDate.from(_))) match {
       case Success(t) => {
         t match {
           case d: LocalDateTime =>
@@ -42,10 +37,28 @@ object DateTimeParser extends LogSupport{
     }
   }
 
+  def parseZonedDateTime(s:String): Option[ZonedDateTime] = {
+    def loop(lst:List[DateTimeFormatter]): Option[ZonedDateTime] = {
+      if(lst.isEmpty)
+        None
+      else {
+        val formatter = lst.head
+        Try(ZonedDateTime.parse(s, formatter)) match {
+          case Success(dt) => Some(dt)
+          case Failure(e) =>
+            loop(lst.tail)
+        }
+      }
+    }
+    loop(zonedDateTimePatterns.toList)
+  }
+
+  def parseLocal(s:String) = parse(s, TimeWindow.systemZone)
+
   def parse(s: String, zone: ZoneOffset): Option[ZonedDateTime] = {
     parseLocalDateTime(s, zone)
     .orElse {
-      Try(java.time.ZonedDateTime.parse(s, zonedPatterns)).toOption
+      parseZonedDateTime(s)
     }
   }
 }

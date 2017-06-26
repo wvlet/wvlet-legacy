@@ -21,8 +21,8 @@ case class TimeWindow(start:ZonedDateTime, end:ZonedDateTime) {
   def endEpochMillis = instantOfEnd.toEpochMilli
 
   override def toString = {
-    val s = TimeStampFormatter.formatTimestamp(startEpochMillis)
-    val e = TimeStampFormatter.formatTimestamp(endEpochMillis)
+    val s = TimeStampFormatter.formatTimestamp(start)
+    val e = TimeStampFormatter.formatTimestamp(end)
     s"[${s},${e})"
   }
 
@@ -103,7 +103,15 @@ object TimeWindow {
 
 class TimeWindowBuilder(val zone:ZoneOffset, currentTime:Option[ZonedDateTime]=None) extends LogSupport {
 
+
   def withCurrentTime(t:ZonedDateTime): TimeWindowBuilder = new TimeWindowBuilder(zone, Some(t))
+  def withCurrentTime(dateTimeStr:String): TimeWindowBuilder = {
+    DateTimeParser.parse(dateTimeStr, TimeWindow.systemZone)
+    .map(d => withCurrentTime(d))
+    .getOrElse {
+      throw new IllegalArgumentException(s"Invalid datetime: ${dateTimeStr}")
+    }
+  }
   def withCurrentUnixTime(unixTime:Long): TimeWindowBuilder = {
     withCurrentTime(ZonedDateTime.ofInstant(Instant.ofEpochSecond(unixTime), TimeWindow.UTC))
   }
