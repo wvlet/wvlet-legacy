@@ -13,7 +13,8 @@
  */
 package wvlet.core.scales
 
-import java.time.ZonedDateTime
+import java.time.{ZoneOffset, ZonedDateTime}
+import java.util.TimeZone
 
 import wvlet.test.WvletSpec
 
@@ -60,6 +61,21 @@ class TimeParserTest extends WvletSpec {
       // Datetime without time zone
       parse("2016-12-01 08:00:01", "2016-12-01T08:00:01Z")
       parse("2016-12-01 08:00:01", "2016-12-01T08:00:01Z")
+    }
+
+    "use proper time zone" in {
+      val default = TimeZone.getDefault
+      try {
+        TimeZone.setDefault(TimeZone.getTimeZone("UTC"))
+        val t = TimeParser.parse("2017-04-04", ZoneOffset.of("-07:00"))
+        info(t)
+        val w = TimeWindow.withZone("PDT")
+        val d = w.parse("3d/2017-04-07")
+        info(d)
+      }
+      finally {
+        TimeZone.setDefault(default)
+      }
     }
 
 

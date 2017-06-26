@@ -1,6 +1,7 @@
 package wvlet.core.scales
 
 import java.time.ZonedDateTime
+import java.util.TimeZone
 
 import wvlet.test.WvletSpec
 
@@ -12,6 +13,16 @@ class TimeWindowTest extends WvletSpec {
   val t = TimeWindow.ofSystem.withCurrentTime("2016-06-26 01:23:45-0700")
   val zone = t.zone
   info(s"now: ${t.now}")
+
+  val defaultTimeZone = TimeZone.getDefault
+
+  override protected def beforeAll(): Unit = {
+    TimeZone.setDefault(TimeZone.getTimeZone("UTC"))
+  }
+
+  override protected def afterAll(): Unit = {
+    TimeZone.setDefault(defaultTimeZone)
+  }
 
   def parse(s:String, expected:String): TimeWindow = {
     val w = t.parse(s)
