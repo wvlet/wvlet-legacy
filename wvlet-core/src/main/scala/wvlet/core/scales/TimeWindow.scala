@@ -9,6 +9,7 @@ import scala.util.{Failure, Success, Try}
 
 
 case class TimeWindow(start:ZonedDateTime, end:ZonedDateTime) {
+  assert(start.compareTo(end) <= 0)
 
   private def instantOfStart = start.toInstant
   private def instantOfEnd = end.toInstant
@@ -56,6 +57,10 @@ case class TimeWindow(start:ZonedDateTime, end:ZonedDateTime) {
   def splitIntoDays: Seq[TimeWindow] = splitInto(ChronoUnit.DAYS)
   def splitIntoMonths: Seq[TimeWindow] = splitInto(ChronoUnit.MONTHS)
   def splitIntoWeeks: Seq[TimeWindow] = splitInto(ChronoUnit.WEEKS)
+
+
+  def plus(n:Long, unit:ChronoUnit) = TimeWindow(start.plus(n, unit), end.plus(n, unit))
+  def minus(n:Long, unit:ChronoUnit) = plus(-n, unit)
 }
 
 
@@ -112,6 +117,8 @@ class TimeWindowBuilder(zone:ZoneOffset, currentTime:Option[ZonedDateTime]=None)
   def thisMonth = TimeWindow(beginningOfTheMonth, endOfTheMonth)
   def thisYear = TimeWindow(beginningOfTheYear, endOfTheYear)
 
+  def yesterday = today.minus(1, ChronoUnit.DAYS)
+
   private def parseOffset(o:String, unit:ChronoUnit): ZonedDateTime = {
     o match {
       case null => TimeWindow.truncateTo(now, unit)
@@ -128,43 +135,52 @@ class TimeWindowBuilder(zone:ZoneOffset, currentTime:Option[ZonedDateTime]=None)
     }
   }
 
-  private def parsePrimitiveDuration(d:String): Option[TimeWindow] = {
-    val result = d match {
-      // current
-      case "thisHour" => thisHour
-      case "today" => today
-      case "thisWeek" => thisWeek
-      case "thisMonth" => thisMonth
-      case "thisYear" => thisYear
-      // past
-      case "lastHour" => TimeWindow(beginningOfTheHour.minusHours(1), beginningOfTheHour)
-      case "yesterday" => TimeWindow(beginningOfTheDay.minusDays(1), beginningOfTheDay)
-      case "lastWeek" => TimeWindow(beginningOfTheWeek.minusWeeks(1), beginningOfTheWeek)
-      case "lastMonth" => TimeWindow(beginningOfTheMonth.minusMonths(1), beginningOfTheMonth)
-      case "lastYear" => TimeWindow(beginningOfTheYear.minusYears(1), beginningOfTheYear)
-      // future
-      case "nextHour" => TimeWindow(endOfTheHour, endOfTheHour.plusHours(1))
-      case "tomorrow" => TimeWindow(endOfTheDay, endOfTheDay.plusDays(1))
-      case "nextWeek" => TimeWindow(endOfTheWeek, endOfTheWeek.plusWeeks(1))
-      case "nextMonth" => TimeWindow(endOfTheMonth, endOfTheMonth.plusMonths(1))
-      case "nextYear" => TimeWindow(endOfTheYear, endOfTheYear.plusYears(1))
-      case other => null
-    }
-    Option(result)
-  }
-
   def parse(str:String): TimeWindow = {
-    val pattern = s"^([^/]+)(/(.*))?".r("duration", "sep", "offset")
-    pattern.findFirstMatchIn(str) match {
-      case Some(m) =>
-        val d = m.group("duration")
-        parsePrimitiveDuration(d).getOrElse {
-          val duration = TimeDuration(d)
-          val offset = parseOffset(m.group("offset"), duration.unit)
-          duration.fromOffset(offset)
+    str match {
+      case "today" => today
+      case "today/now" => TimeWindow(beginningOfTheDay, now)
+      case "thisHour" => thisHour
+      case "thisHour/now" => TimeWindow(beginningOfTheHour, now)
+      case "thisWeek" => thisWeek
+      case "thisWeek/now" => TimeWindow(beginningOfTheWeek, now)
+      case "thisMonth" => thisMonth
+      case "thisMonth/now" => TimeWindow(beginningOfTheMonth, now)
+      case "thisYear" => thisYear
+      case "thisYear/now" => TimeWindow(beginningOfTheYear, now)
+
+      case "yesterday" => today.minus(1, ChronoUnit.DAYS)
+      case "yesterday/now" => TimeWindow(yesterday.start, now)
+      case "lastHour" => TimeWindow(beginningOfTheHour.minusHours(1), beginningOfTheHour)
+      case "lastHour/now" => TimeWindow(beginningOfTheHour.minusHours(1), now)
+      case "lastWeek" => TimeWindow(beginningOfTheWeek.minusWeeks(1), beginningOfTheWeek)
+      case "lastWeek/now" => TimeWindow(beginningOfTheWeek.minusWeeks(1), now)
+      case "lastMonth" => TimeWindow(beginningOfTheMonth.minusMonths(1), beginningOfTheMonth)
+      case "lastMonth/now" => TimeWindow(beginningOfTheMonth.minusMonths(1), now)
+      case "lastYear" => TimeWindow(beginningOfTheYear.minusYears(1), beginningOfTheYear)
+      case "lastYear/now" => TimeWindow(beginningOfTheYear.minusYears(1), now)
+
+      case "tomorrow" => today.plus(1, ChronoUnit.DAYS)
+      case "tomorrow/now" => TimeWindow(now, endOfTheDay.plusDays(1))
+      case "nextHour" => TimeWindow(endOfTheHour, endOfTheHour.plusHours(1))
+      case "nextHour/now" => TimeWindow(now, endOfTheHour.plusHours(1))
+      case "nextWeek" => TimeWindow(endOfTheWeek, endOfTheWeek.plusWeeks(1))
+      case "nextWeek/now" => TimeWindow(now, endOfTheWeek.plusWeeks(1))
+      case "nextMonth" => thisMonth.plus(1, ChronoUnit.MONTHS)
+      case "nextMonth/now" => TimeWindow(endOfTheMonth, endOfTheMonth.plusMonths(1))
+      case "nextYear" => thisYear.plus(1, ChronoUnit.YEARS)
+      case "nextYear/now" => TimeWindow(now,endOfTheYear)
+
+      case other =>
+        val pattern = s"^([^/]+)(/(.*))?".r("duration", "sep", "offset")
+        pattern.findFirstMatchIn(str) match {
+          case Some(m) =>
+            val d = m.group("duration")
+            val duration = TimeDuration(d)
+            val offset = parseOffset(m.group("offset"), duration.unit)
+            duration.fromOffset(offset)
+          case None =>
+            throw new IllegalArgumentException(s"TimeRange.of(${str})")
         }
-      case None =>
-        throw new IllegalArgumentException(s"TimeRange.of(${str})")
     }
   }
 }

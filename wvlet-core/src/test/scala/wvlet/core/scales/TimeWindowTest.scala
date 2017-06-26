@@ -64,7 +64,7 @@ class TimeWindowTest extends WvletSpec {
       parse("1h/now")
 
 
-      // -12h/now  (last 12 hours + fraction until now. U is effective only for negative duration)
+      // -12h/now  (last 12 hours + fraction until now)
 
       parse("-12h/now")
       parse("-12h")
@@ -89,6 +89,30 @@ class TimeWindowTest extends WvletSpec {
       parse("60m/2017-01-23 01:23:45")
     }
 
+    "support human-friendly range" in {
+      parse("today")
+      parse("today/now")
+      parse("thisHour")
+      parse("thisWeek")
+      parse("thisMonth")
+      parse("thisMonth/now")
+      parse("thisYear")
+
+      parse("yesterday")
+      parse("yesterday/now")
+      parse("lastHour")
+      parse("lastWeek")
+      parse("lastMonth")
+      parse("lastYear")
+
+      parse("tomorrow")
+      parse("tomorrow/now")
+      parse("nextHour")
+      parse("nextWeek")
+      parse("nextMonth")
+      parse("nextYear")
+    }
+
     "split time windows" in {
       val weeks = t.parse("5w").splitIntoWeeks
       info(weeks.mkString("\n"))
@@ -96,10 +120,10 @@ class TimeWindowTest extends WvletSpec {
       val weeks2 = t.parse("5w/2017-06-01").splitIntoWeeks
       info(weeks2.mkString("\n"))
 
-      val months = t.parse("thisYear/now").splitIntoMonths
+      val months = t.parse("thisYear/thisMonth").splitIntoMonths
       info(months.mkString("\n"))
 
-      val days = t.parse("thisMonth").splitIntoDays
+      val days = t.parse("thisMonth").splitIntoWeeks
       info(days.mkString("\n"))
 
     }

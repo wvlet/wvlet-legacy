@@ -16,12 +16,13 @@ package wvlet.core.scales
 import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
 
-case class TimeDuration(x: Long, unit: ChronoUnit) {
+case class TimeDuration(x: Long, unit: ChronoUnit, baseOffset:Long = 0L) {
 
   def fromOffset(offset: ZonedDateTime): TimeWindow = {
     val base = TimeWindow.truncateTo(offset, unit)
-    val next = base.plus(x, unit)
-    if (x <= 0) {
+    val diff = baseOffset + x
+    val next = base.plus(diff, unit)
+    if (diff <= 0) {
       TimeWindow(next, offset)
     }
     else {
@@ -34,20 +35,42 @@ case class TimeDuration(x: Long, unit: ChronoUnit) {
 object TimeDuration {
 
   def apply(s: String): TimeDuration = {
-    val durationPattern = "^([+-]|last|next)?([0-9]+)(s|m|d|h|w|M|y)".r("prefix", "num", "unit", "o")
-    durationPattern.findFirstMatchIn(s) match {
-      case None =>
-        throw new IllegalArgumentException(s"Invalid duration: ${s}")
-      case Some(m) =>
-        val length = m.group("num").toInt
-        val unit = unitOf(m.group("unit"))
-        m.group("prefix") match {
-          case null | "-" | "last" =>
-            TimeDuration(-length, unit)
-          case "+" | "next" =>
-            TimeDuration(length, unit)
-          case other =>
-            throw new IllegalArgumentException(s"Unknown duration prefix: ${other}")
+    s match {
+      // current
+      case "thisHour" => TimeDuration(1, ChronoUnit.HOURS)
+      case "today" => TimeDuration(1, ChronoUnit.DAYS)
+      case "thisWeek" => TimeDuration(1, ChronoUnit.WEEKS)
+      case "thisMonth" => TimeDuration(1, ChronoUnit.MONTHS)
+      case "thisYear" => TimeDuration(1, ChronoUnit.YEARS)
+      // past
+      case "lastHour" => TimeDuration(-1, ChronoUnit.HOURS)
+      case "yesterday" => TimeDuration(-1, ChronoUnit.DAYS)
+      case "lastWeek" => TimeDuration(-1, ChronoUnit.WEEKS)
+      case "lastMonth" => TimeDuration(-1, ChronoUnit.MONTHS)
+      case "lastYear" => TimeDuration(-1, ChronoUnit.YEARS)
+      // future
+      case "nextHour" => TimeDuration(1, ChronoUnit.HOURS, 1)
+      case "tomorrow" => TimeDuration(1, ChronoUnit.DAYS, 1)
+      case "nextWeek" => TimeDuration(1, ChronoUnit.WEEKS, 1)
+      case "nextMonth" => TimeDuration(1, ChronoUnit.MONTHS, 1)
+      case "nextYear" => TimeDuration(1, ChronoUnit.YEARS, 1)
+
+      case other =>
+        val durationPattern = "^([+-]|last|next)?([0-9]+)(s|m|d|h|w|M|y)".r("prefix", "num", "unit", "o")
+        durationPattern.findFirstMatchIn(s) match {
+          case None =>
+            throw new IllegalArgumentException(s"Invalid duration: ${s}")
+          case Some(m) =>
+            val length = m.group("num").toInt
+            val unit = unitOf(m.group("unit"))
+            m.group("prefix") match {
+              case null | "-" | "last" =>
+                TimeDuration(-length, unit)
+              case "+" | "next" =>
+                TimeDuration(length, unit)
+              case other =>
+                throw new IllegalArgumentException(s"Unknown duration prefix: ${other}")
+            }
         }
     }
   }
