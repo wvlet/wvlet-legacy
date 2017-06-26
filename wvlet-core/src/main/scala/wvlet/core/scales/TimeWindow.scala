@@ -23,7 +23,13 @@ case class TimeWindow(start:ZonedDateTime, end:ZonedDateTime) {
   override def toString = {
     val s = TimeStampFormatter.formatTimestamp(startEpochMillis)
     val e = TimeStampFormatter.formatTimestamp(endEpochMillis)
-    s"[${s}, ${e})"
+    s"[${s},${e})"
+  }
+
+  def toStringAt(zone:ZoneOffset) = {
+    val s = TimeStampFormatter.formatTimestamp(startEpochMillis, zone)
+    val e = TimeStampFormatter.formatTimestamp(endEpochMillis, zone)
+    s"[${s},${e})"
   }
 
   private def splitInto(unit: ChronoUnit): Seq[TimeWindow] = {
@@ -95,9 +101,12 @@ object TimeWindow {
 
 }
 
-class TimeWindowBuilder(zone:ZoneOffset, currentTime:Option[ZonedDateTime]=None) extends LogSupport {
+class TimeWindowBuilder(val zone:ZoneOffset, currentTime:Option[ZonedDateTime]=None) extends LogSupport {
 
   def withCurrentTime(t:ZonedDateTime): TimeWindowBuilder = new TimeWindowBuilder(zone, Some(t))
+  def withCurrentUnixTime(unixTime:Long): TimeWindowBuilder = {
+    withCurrentTime(ZonedDateTime.ofInstant(Instant.ofEpochSecond(unixTime), TimeWindow.UTC))
+  }
 
   def now = currentTime.getOrElse(ZonedDateTime.now(zone))
   def beginningOfTheHour = now.truncatedTo(ChronoUnit.HOURS)
@@ -119,14 +128,13 @@ class TimeWindowBuilder(zone:ZoneOffset, currentTime:Option[ZonedDateTime]=None)
 
   def yesterday = today.minus(1, ChronoUnit.DAYS)
 
-  private def parseOffset(o:String, unit:ChronoUnit): ZonedDateTime = {
+  private def parseOffset(o:String): ZonedDateTime = {
     o match {
-      case null => TimeWindow.truncateTo(now, unit)
       case "now" => now
       case other =>
         Try(TimeDuration(o)) match {
           case Success(x) =>
-            x.fromOffset(now).start
+            x.timeWindowAt(now).start
           case Failure(e) =>
             DateTimeParser.parse(o, zone).getOrElse {
               throw new IllegalArgumentException(s"Invalid offset string: ${o}")
@@ -136,51 +144,22 @@ class TimeWindowBuilder(zone:ZoneOffset, currentTime:Option[ZonedDateTime]=None)
   }
 
   def parse(str:String): TimeWindow = {
-    str match {
-      case "today" => today
-      case "today/now" => TimeWindow(beginningOfTheDay, now)
-      case "thisHour" => thisHour
-      case "thisHour/now" => TimeWindow(beginningOfTheHour, now)
-      case "thisWeek" => thisWeek
-      case "thisWeek/now" => TimeWindow(beginningOfTheWeek, now)
-      case "thisMonth" => thisMonth
-      case "thisMonth/now" => TimeWindow(beginningOfTheMonth, now)
-      case "thisYear" => thisYear
-      case "thisYear/now" => TimeWindow(beginningOfTheYear, now)
-
-      case "yesterday" => today.minus(1, ChronoUnit.DAYS)
-      case "yesterday/now" => TimeWindow(yesterday.start, now)
-      case "lastHour" => TimeWindow(beginningOfTheHour.minusHours(1), beginningOfTheHour)
-      case "lastHour/now" => TimeWindow(beginningOfTheHour.minusHours(1), now)
-      case "lastWeek" => TimeWindow(beginningOfTheWeek.minusWeeks(1), beginningOfTheWeek)
-      case "lastWeek/now" => TimeWindow(beginningOfTheWeek.minusWeeks(1), now)
-      case "lastMonth" => TimeWindow(beginningOfTheMonth.minusMonths(1), beginningOfTheMonth)
-      case "lastMonth/now" => TimeWindow(beginningOfTheMonth.minusMonths(1), now)
-      case "lastYear" => TimeWindow(beginningOfTheYear.minusYears(1), beginningOfTheYear)
-      case "lastYear/now" => TimeWindow(beginningOfTheYear.minusYears(1), now)
-
-      case "tomorrow" => today.plus(1, ChronoUnit.DAYS)
-      case "tomorrow/now" => TimeWindow(now, endOfTheDay.plusDays(1))
-      case "nextHour" => TimeWindow(endOfTheHour, endOfTheHour.plusHours(1))
-      case "nextHour/now" => TimeWindow(now, endOfTheHour.plusHours(1))
-      case "nextWeek" => TimeWindow(endOfTheWeek, endOfTheWeek.plusWeeks(1))
-      case "nextWeek/now" => TimeWindow(now, endOfTheWeek.plusWeeks(1))
-      case "nextMonth" => thisMonth.plus(1, ChronoUnit.MONTHS)
-      case "nextMonth/now" => TimeWindow(endOfTheMonth, endOfTheMonth.plusMonths(1))
-      case "nextYear" => thisYear.plus(1, ChronoUnit.YEARS)
-      case "nextYear/now" => TimeWindow(now,endOfTheYear)
-
-      case other =>
-        val pattern = s"^([^/]+)(/(.*))?".r("duration", "sep", "offset")
-        pattern.findFirstMatchIn(str) match {
-          case Some(m) =>
-            val d = m.group("duration")
-            val duration = TimeDuration(d)
-            val offset = parseOffset(m.group("offset"), duration.unit)
-            duration.fromOffset(offset)
-          case None =>
-            throw new IllegalArgumentException(s"TimeRange.of(${str})")
+    val pattern = s"^([^/]+)(/(.*))?".r("duration", "sep", "offset")
+    pattern.findFirstMatchIn(str) match {
+      case Some(m) =>
+        val d = m.group("duration")
+        val duration = TimeDuration(d)
+        m.group("offset") match {
+          case null =>
+            // When offset is not given, use the truncated time
+            val context = TimeWindow.truncateTo(now, duration.unit)
+            duration.timeWindowAt(context)
+          case offsetStr =>
+            val offset = parseOffset(offsetStr)
+            duration.timeWindowAt(offset)
         }
+      case None =>
+        throw new IllegalArgumentException(s"TimeRange.of(${str})")
     }
   }
 }

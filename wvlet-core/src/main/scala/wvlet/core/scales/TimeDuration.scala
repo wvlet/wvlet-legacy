@@ -16,17 +16,27 @@ package wvlet.core.scales
 import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
 
-case class TimeDuration(x: Long, unit: ChronoUnit, baseOffset:Long = 0L) {
+import wvlet.log.LogSupport
 
-  def fromOffset(offset: ZonedDateTime): TimeWindow = {
-    val base = TimeWindow.truncateTo(offset, unit)
-    val diff = baseOffset + x
-    val next = base.plus(diff, unit)
-    if (diff <= 0) {
-      TimeWindow(next, offset)
+case class TimeDuration(x: Long, unit: ChronoUnit, offset: Long=0) extends LogSupport {
+
+  def timeWindowAt(context: ZonedDateTime): TimeWindow = {
+    val grid = TimeWindow.truncateTo(context, unit)
+    val base = grid.plus(offset, unit)
+    val theOtherEnd = base.plus(x, unit)
+
+
+    if (x <= 0) {
+      if(grid.compareTo(context) == 0)
+        TimeWindow(theOtherEnd, base)
+      else
+        TimeWindow(theOtherEnd, context)
     }
     else {
-      TimeWindow(offset, next)
+      if(grid.compareTo(context) == 0)
+        TimeWindow(base, theOtherEnd)
+      else
+        TimeWindow(context, theOtherEnd)
     }
   }
 
@@ -37,11 +47,11 @@ object TimeDuration {
   def apply(s: String): TimeDuration = {
     s match {
       // current
-      case "thisHour" => TimeDuration(1, ChronoUnit.HOURS)
-      case "today" => TimeDuration(1, ChronoUnit.DAYS)
-      case "thisWeek" => TimeDuration(1, ChronoUnit.WEEKS)
-      case "thisMonth" => TimeDuration(1, ChronoUnit.MONTHS)
-      case "thisYear" => TimeDuration(1, ChronoUnit.YEARS)
+      case "thisHour" => TimeDuration(-1, ChronoUnit.HOURS, 1)
+      case "today" => TimeDuration(-1, ChronoUnit.DAYS, 1)
+      case "thisWeek" => TimeDuration(-1, ChronoUnit.WEEKS, 1)
+      case "thisMonth" => TimeDuration(-1, ChronoUnit.MONTHS, 1)
+      case "thisYear" => TimeDuration(-1, ChronoUnit.YEARS, 1)
       // past
       case "lastHour" => TimeDuration(-1, ChronoUnit.HOURS)
       case "yesterday" => TimeDuration(-1, ChronoUnit.DAYS)
