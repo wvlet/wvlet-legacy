@@ -1,0 +1,29 @@
+sudo: false
+
+cache:
+  directories:
+    - $HOME/.ivy2/cache
+    - $HOME/.sbt
+    - $HOME/.coursier
+
+before_cache:
+  # Cleanup the cached directories to avoid unnecessary cache updates
+  - find $HOME/.ivy2/cache -name "ivydata-*.properties" -print -delete
+  - find $HOME/.sbt        -name "*.lock"               -print -delete
+
+language: scala
+
+scala:
+  - 2.12.2
+  - 2.11.11
+
+jdk:
+  - oraclejdk8
+
+script:
+  - if [ "$TRAVIS_SCALA_VERSION" == "2.12.2" ]; then
+      ./sbt ++$TRAVIS_SCALA_VERSION "; coverage; test; coverageReport";
+      ./sbt coverageAggregate && bash <(curl -s https://codecov.io/bash);
+    else
+      ./sbt ++$TRAVIS_SCALA_VERSION test;
+    fi
