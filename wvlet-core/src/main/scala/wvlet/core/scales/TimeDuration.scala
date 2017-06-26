@@ -35,7 +35,6 @@ object TimeDuration {
 
   def apply(s: String): TimeDuration = {
     val durationPattern = "^([+-]|last|next)?([0-9]+)(s|m|d|h|w|M|y)".r("prefix", "num", "unit", "o")
-
     durationPattern.findFirstMatchIn(s) match {
       case None =>
         throw new IllegalArgumentException(s"Invalid duration: ${s}")

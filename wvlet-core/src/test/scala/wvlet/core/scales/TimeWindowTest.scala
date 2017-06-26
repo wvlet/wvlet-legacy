@@ -36,20 +36,22 @@ class TimeWindowTest extends WvletSpec {
       // [-7d, 0d)
       parse("7d")
 
+      // 7d and -7d have the same meaning
       // [-7d, 0d)
       // |-------------|
       // -7d -- ... -- 0d ---- now  ------
       parse("-7d")
 
-      // [0d, +7d)
-      //      |------------------------------|
-      // ---  0d --- now --- 1d ---  ... --- 7d
-      parse("+7d")
-
       // Since 7 days ago + time fragment from [-7d, now)
       //  |-------------------|
       // -7d - ... - 0d ---- now  ------
       parse("7d/now")
+
+      // '+' indicates forward time range
+      // +7d = [0d, +7d)
+      //      |------------------------------|
+      // ---  0d --- now --- 1d ---  ... --- 7d
+      parse("+7d")
 
       // [now, +7d)
       //         |---------------------|
@@ -62,9 +64,7 @@ class TimeWindowTest extends WvletSpec {
       parse("1h/now")
 
 
-      // -12hU:now  (last 12 hours + fraction until now. U is effective only for negative duration)
-      // -12hF:now  (-12 hours from now. No trunctation)
-      // +12hF:now  (+12 hours from now)
+      // -12h/now  (last 12 hours + fraction until now. U is effective only for negative duration)
 
       parse("-12h/now")
       parse("-12h")
@@ -95,6 +95,12 @@ class TimeWindowTest extends WvletSpec {
 
       val weeks2 = t.parse("5w/2017-06-01").splitIntoWeeks
       info(weeks2.mkString("\n"))
+
+      val months = t.parse("thisYear/now").splitIntoMonths
+      info(months.mkString("\n"))
+
+      val days = t.parse("thisMonth").splitIntoDays
+      info(days.mkString("\n"))
 
     }
   }
