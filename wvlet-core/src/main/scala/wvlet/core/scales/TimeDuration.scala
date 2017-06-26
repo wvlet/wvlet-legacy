@@ -13,17 +13,32 @@
  */
 package wvlet.core.scales
 
-import java.time.ZonedDateTime
+import java.time.{DayOfWeek, ZonedDateTime}
 import java.time.temporal.ChronoUnit
 
 
 case class TimeDuration(x:Long, unit:ChronoUnit) {
 
   def fromOffset(offset:ZonedDateTime): TimeWindow = {
-
-
-
-
+    val base = unit match {
+      case ChronoUnit.SECONDS | ChronoUnit.MINUTES |  ChronoUnit.HOURS | ChronoUnit.DAYS =>
+        offset.truncatedTo(unit)
+      case ChronoUnit.WEEKS =>
+        offset.truncatedTo(ChronoUnit.DAYS).`with`(DayOfWeek.MONDAY)
+      case ChronoUnit.MONTHS =>
+        offset.withDayOfMonth(1).truncatedTo(ChronoUnit.DAYS)
+      case ChronoUnit.YEARS =>
+        offset.withDayOfYear(1).truncatedTo(ChronoUnit.DAYS)
+      case other =>
+        throw new UnsupportedOperationException(s"${other} is not supported")
+    }
+    val next = base.plus(x, unit)
+    if(x <= 0) {
+      TimeWindow(next, offset)
+    }
+    else {
+      TimeWindow(offset, next)
+    }
   }
 
 }

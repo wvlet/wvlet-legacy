@@ -10,7 +10,6 @@ import java.util.Locale
 object TimeStampFormatter {
   import java.time.temporal.ChronoField._
 
-  val systemZone             = ZoneId.systemDefault().normalized()
   val noSpaceTimestampFormat = new DateTimeFormatterBuilder()
                                .parseCaseInsensitive()
                                .appendValue(YEAR, 4, 10, SignStyle.EXCEEDS_PAD)
@@ -46,12 +45,12 @@ object TimeStampFormatter {
                                         .toFormatter(Locale.US)
 
   def formatTimestamp(timeMillis: Long): String = {
-    val timestamp = ZonedDateTime.ofInstant(Instant.ofEpochMilli(timeMillis), systemZone)
+    val timestamp = ZonedDateTime.ofInstant(Instant.ofEpochMilli(timeMillis), TimeWindow.systemZone)
     humanReadableTimestampFormatter.format(timestamp)
   }
 
   def formatTimestampWithNoSpaace(timeMillis:Long) : String = {
-    val timestamp = ZonedDateTime.ofInstant(Instant.ofEpochMilli(timeMillis), systemZone)
+    val timestamp = ZonedDateTime.ofInstant(Instant.ofEpochMilli(timeMillis), TimeWindow.systemZone)
     noSpaceTimestampFormat.format(timestamp)
   }
 }
