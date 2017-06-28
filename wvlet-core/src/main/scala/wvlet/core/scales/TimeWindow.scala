@@ -14,8 +14,8 @@ case class TimeWindow(start:ZonedDateTime, end:ZonedDateTime) {
   private def instantOfStart = start.toInstant
   private def instantOfEnd = end.toInstant
 
-  def startUnixTime = instantOfStart.getEpochSecond
-  def endUnixTime = instantOfEnd.getEpochSecond
+  def startUnixTime = start.toEpochSecond
+  def endUnixTime = end.toEpochSecond
 
   def startEpochMillis = instantOfStart.toEpochMilli
   def endEpochMillis = instantOfEnd.toEpochMilli
