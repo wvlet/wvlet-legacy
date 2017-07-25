@@ -67,6 +67,11 @@ case class TimeWindow(start:ZonedDateTime, end:ZonedDateTime) {
 
   def plus(n:Long, unit:ChronoUnit) = TimeWindow(start.plus(n, unit), end.plus(n, unit))
   def minus(n:Long, unit:ChronoUnit) = plus(-n, unit)
+
+
+  def intersectsWith(other:TimeWindow): Boolean = {
+    start.compareTo(other.end) <= 0 && end.compareTo(other.start) >= 0
+  }
 }
 
 
@@ -183,4 +188,9 @@ class TimeWindowBuilder(val zone:ZoneOffset, currentTime:Option[ZonedDateTime]=N
         throw new IllegalArgumentException(s"TimeRange.of(${str})")
     }
   }
+
+  def fromRange(startUnixTime:Long, endUnixTime:Long): TimeWindow = {
+    TimeWindow(Instant.ofEpochSecond(startUnixTime).atZone(zone), Instant.ofEpochSecond(endUnixTime).atZone(zone))
+  }
+
 }
