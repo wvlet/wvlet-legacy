@@ -7,7 +7,11 @@ import wvlet.log.LogSupport
 
 import scala.util.{Failure, Success, Try}
 
-
+/**
+  * TimeWindow of [statrt, end) range. The end-side is open. start <= time < end
+  * @param start
+  * @param end
+  */
 case class TimeWindow(start:ZonedDateTime, end:ZonedDateTime) {
   assert(start.compareTo(end) <= 0)
 
@@ -70,7 +74,7 @@ case class TimeWindow(start:ZonedDateTime, end:ZonedDateTime) {
 
 
   def intersectsWith(other:TimeWindow): Boolean = {
-    start.compareTo(other.end) <= 0 && end.compareTo(other.start) >= 0
+    start.compareTo(other.end) < 0 && end.compareTo(other.start) > 0
   }
 }
 
