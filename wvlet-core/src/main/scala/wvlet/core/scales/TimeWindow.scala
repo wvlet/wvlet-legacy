@@ -9,10 +9,11 @@ import scala.util.{Failure, Success, Try}
 
 /**
   * TimeWindow of [statrt, end) range. The end-side is open. start <= time < end
+  *
   * @param start
   * @param end
   */
-case class TimeWindow(start:ZonedDateTime, end:ZonedDateTime) {
+case class TimeWindow(start: ZonedDateTime, end: ZonedDateTime) {
   assert(start.compareTo(end) <= 0)
 
   private def instantOfStart = start.toInstant
@@ -30,7 +31,7 @@ case class TimeWindow(start:ZonedDateTime, end:ZonedDateTime) {
     s"[${s},${e})"
   }
 
-  def toStringAt(zone:ZoneOffset) = {
+  def toStringAt(zone: ZoneOffset) = {
     val s = TimeStampFormatter.formatTimestamp(startEpochMillis, zone)
     val e = TimeStampFormatter.formatTimestamp(endEpochMillis, zone)
     s"[${s},${e})"
@@ -68,28 +69,35 @@ case class TimeWindow(start:ZonedDateTime, end:ZonedDateTime) {
   def splitIntoMonths: Seq[TimeWindow] = splitInto(ChronoUnit.MONTHS)
   def splitIntoWeeks: Seq[TimeWindow] = splitInto(ChronoUnit.WEEKS)
 
+  def splitAt(date: ZonedDateTime): Seq[TimeWindow] = {
+    import TimeWindow._
+    if (date.compareTo(start) <= 0 || date.compareTo(end) > 0) {
+      // date is out of range
+      Seq(this)
+    }
+    else {
+      Seq(TimeWindow(start, date), TimeWindow(date, end))
+    }
+  }
 
-  def plus(n:Long, unit:ChronoUnit) = TimeWindow(start.plus(n, unit), end.plus(n, unit))
-  def minus(n:Long, unit:ChronoUnit) = plus(-n, unit)
+  def plus(n: Long, unit: ChronoUnit) = TimeWindow(start.plus(n, unit), end.plus(n, unit))
+  def minus(n: Long, unit: ChronoUnit) = plus(-n, unit)
 
-
-  def intersectsWith(other:TimeWindow): Boolean = {
+  def intersectsWith(other: TimeWindow): Boolean = {
     start.compareTo(other.end) < 0 && end.compareTo(other.start) > 0
   }
 }
 
-
 object TimeWindow {
-
   val systemZone: ZoneOffset = {
     // Need to get the current ZoneOffset to resolve PDT, etc.
     // because ZoneID of America/Los Angels (PST) is -0800 while PDT zone offset is -0700
     val z = ZoneId.systemDefault().normalized() // This returns America/Los Angels (PST)
     ZonedDateTime.now(z).getOffset
   }
-  val UTC: ZoneOffset        = ZoneOffset.UTC
+  val UTC       : ZoneOffset = ZoneOffset.UTC
 
-  def withZone(zoneName:String): TimeWindowBuilder = {
+  def withZone(zoneName: String): TimeWindowBuilder = {
     import scala.collection.JavaConverters._
     // Add commonly used daylight saving times
     val idMap = ZoneId.SHORT_IDS.asScala ++
@@ -97,19 +105,19 @@ object TimeWindow {
     val zoneId = idMap
                  .get(zoneName)
                  .map(ZoneId.of(_))
-                 .getOrElse { ZoneId.of(zoneName) }
+                 .getOrElse {ZoneId.of(zoneName)}
 
     val offset = ZonedDateTime.now(zoneId).getOffset
     of(offset)
   }
 
-  def of(zoneId:ZoneOffset): TimeWindowBuilder = new TimeWindowBuilder(zoneId)
+  def of(zoneId: ZoneOffset): TimeWindowBuilder = new TimeWindowBuilder(zoneId)
   def ofUTC: TimeWindowBuilder = of(UTC)
   def ofSystem: TimeWindowBuilder = of(systemZone)
 
-  def truncateTo(t:ZonedDateTime, unit:ChronoUnit): ZonedDateTime = {
+  def truncateTo(t: ZonedDateTime, unit: ChronoUnit): ZonedDateTime = {
     unit match {
-      case ChronoUnit.SECONDS | ChronoUnit.MINUTES |  ChronoUnit.HOURS | ChronoUnit.DAYS =>
+      case ChronoUnit.SECONDS | ChronoUnit.MINUTES | ChronoUnit.HOURS | ChronoUnit.DAYS =>
         t.truncatedTo(unit)
       case ChronoUnit.WEEKS =>
         t.truncatedTo(ChronoUnit.DAYS).`with`(DayOfWeek.MONDAY)
@@ -124,17 +132,17 @@ object TimeWindow {
 
 }
 
-class TimeWindowBuilder(val zone:ZoneOffset, currentTime:Option[ZonedDateTime]=None) extends LogSupport {
+class TimeWindowBuilder(val zone: ZoneOffset, currentTime: Option[ZonedDateTime] = None) extends LogSupport {
 
-  def withCurrentTime(t:ZonedDateTime): TimeWindowBuilder = new TimeWindowBuilder(zone, Some(t))
-  def withCurrentTime(dateTimeStr:String): TimeWindowBuilder = {
+  def withCurrentTime(t: ZonedDateTime): TimeWindowBuilder = new TimeWindowBuilder(zone, Some(t))
+  def withCurrentTime(dateTimeStr: String): TimeWindowBuilder = {
     TimeParser.parse(dateTimeStr, TimeWindow.systemZone)
     .map(d => withCurrentTime(d))
     .getOrElse {
       throw new IllegalArgumentException(s"Invalid datetime: ${dateTimeStr}")
     }
   }
-  def withCurrentUnixTime(unixTime:Long): TimeWindowBuilder = {
+  def withCurrentUnixTime(unixTime: Long): TimeWindowBuilder = {
     withCurrentTime(ZonedDateTime.ofInstant(Instant.ofEpochSecond(unixTime), TimeWindow.UTC))
   }
 
@@ -158,7 +166,7 @@ class TimeWindowBuilder(val zone:ZoneOffset, currentTime:Option[ZonedDateTime]=N
 
   def yesterday = today.minus(1, ChronoUnit.DAYS)
 
-  private def parseOffset(o:String): ZonedDateTime = {
+  private def parseOffset(o: String): ZonedDateTime = {
     o match {
       case "now" => now
       case other =>
@@ -173,7 +181,7 @@ class TimeWindowBuilder(val zone:ZoneOffset, currentTime:Option[ZonedDateTime]=N
     }
   }
 
-  def parse(str:String): TimeWindow = {
+  def parse(str: String): TimeWindow = {
     val pattern = s"^([^/]+)(/(.*))?".r("duration", "sep", "offset")
     pattern.findFirstMatchIn(str) match {
       case Some(m) =>
@@ -193,7 +201,7 @@ class TimeWindowBuilder(val zone:ZoneOffset, currentTime:Option[ZonedDateTime]=N
     }
   }
 
-  def fromRange(startUnixTime:Long, endUnixTime:Long): TimeWindow = {
+  def fromRange(startUnixTime: Long, endUnixTime: Long): TimeWindow = {
     TimeWindow(Instant.ofEpochSecond(startUnixTime).atZone(zone), Instant.ofEpochSecond(endUnixTime).atZone(zone))
   }
 
