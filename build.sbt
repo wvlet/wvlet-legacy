@@ -35,6 +35,12 @@ val buildSettings = Seq[Setting[_]](
       </developer>
     </developers>
   },
+  publishTo := Some(
+    if (isSnapshot.value)
+      Opts.resolver.sonatypeSnapshots
+    else
+      Opts.resolver.sonatypeStaging
+  ),
   // Use sonatype resolvers
   resolvers ++= Seq(
     Resolver.sonatypeRepo("releases"),
