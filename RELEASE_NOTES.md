@@ -1,5 +1,12 @@
 Release Notes
 ====
+0.28
+ * Removed obsolete projects (wvlet-cui, wvlet-rest)
+ * Moved wvlet-config to airframe-config
+ * Add workflow utilities
+ * Add MessageFormater to convert objects into msgpack 
+ * Add TimeWindow, TimeParser etc.
+
 0.27
  * Support Scala 2.12.0
  * Upgrade to wvlet-log 1.1
