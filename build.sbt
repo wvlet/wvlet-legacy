@@ -5,6 +5,8 @@ val AIRFRAME_VERSION = "20.4.0"
 
 scalaVersion in ThisBuild := SCALA_2_12
 
+Global / onChangedBuildSource := ReloadOnSourceChanges
+
 val buildSettings = Seq[Setting[_]](
   crossScalaVersions := Seq(SCALA_2_12, SCALA_2_13),
   organization := "org.wvlet",
@@ -32,8 +34,8 @@ val buildSettings = Seq[Setting[_]](
   testFrameworks += new TestFramework("wvlet.airspec.Framework")
 )
 
-lazy val projectJVM = project.aggregate(core)
-lazy val projectJS  = project.aggregate()
+lazy val projectJVM = project.aggregate(core, server, main, apiJVM)
+lazy val projectJS  = project.aggregate(apiJS, ui)
 
 lazy val wvlet =
   project
@@ -44,7 +46,7 @@ lazy val wvlet =
       publishArtifact := false,
       publish := {},
       publishLocal := {}
-    ).aggregate(core)
+    ).aggregate(core, apiJVM, apiJS, server, main, ui)
 
 lazy val core =
   project
@@ -57,3 +59,59 @@ lazy val core =
         "org.wvlet.airframe" %% "airframe" % AIRFRAME_VERSION
       )
     )
+
+lazy val main =
+  project
+    .in(file("wvlet-main"))
+    .settings(
+      buildSettings,
+      name := "wvlet-main",
+      description := "wvlet main module",
+      libraryDependencies ++= Seq(
+        "org.wvlet.airframe" %% "airframe-launcher" % AIRFRAME_VERSION
+      )
+    ).dependsOn(server)
+
+lazy val server =
+  project
+    .in(file("wvlet-server"))
+    .settings(
+      buildSettings,
+      name := "wvlet-server",
+      description := "wvlet server",
+      libraryDependencies ++= Seq(
+        "org.wvlet.airframe" %% "airframe-http-finagle" % AIRFRAME_VERSION
+      )
+    )
+    .dependsOn(core)
+
+lazy val api =
+  crossProject(JSPlatform, JVMPlatform)
+    .crossType(CrossType.Pure)
+    .in(file("wvlet-api"))
+    .settings(
+      buildSettings,
+      name := "wvlet-api",
+      description := "wvlet API interface and model classes",
+      libraryDependencies ++= Seq(
+        "org.wvlet.airframe" %%% "airframe-http" % AIRFRAME_VERSION
+      )
+    )
+
+lazy val apiJVM = api.jvm
+lazy val apiJS  = api.js
+
+lazy val ui =
+  project
+    .enablePlugins(ScalaJSPlugin, AirframeHttpPlugin)
+    .in(file("wvlet-ui"))
+    .settings(
+      buildSettings,
+      name := "wvlet-ui",
+      description := "wvlet web UI",
+      libraryDependencies ++= Seq(
+        "org.wvlet.airframe" %%% "airframe"         % AIRFRAME_VERSION,
+        "org.wvlet.airframe" %%% "airframe-http-rx" % AIRFRAME_VERSION
+      )
+    )
+    .dependsOn(apiJS)
