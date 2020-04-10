@@ -9,12 +9,11 @@ Global / onChangedBuildSource := ReloadOnSourceChanges
 
 val buildSettings = Seq[Setting[_]](
   crossScalaVersions := Seq(SCALA_2_12, SCALA_2_13),
-  organization := "org.wvlet",
+  organization := "org.wvlet.dataflow",
   description := "A framework for managing data flows",
   crossPaths := true,
   publishMavenStyle := true,
   logBuffered in Test := false,
-  updateOptions := updateOptions.value.withCachedResolution(true),
   sonatypeProfileName := "org.wvlet",
   licenses += ("Apache-2.0", url("https://www.apache.org/licenses/LICENSE-2.0.html")),
   homepage := Some(url("https://wvlet.org/wvlet")),
@@ -27,6 +26,7 @@ val buildSettings = Seq[Setting[_]](
   developers := List(
     Developer(id = "leo", name = "Taro L. Saito", email = "leo@xerial.org", url = url("http://xerial.org/leo"))
   ),
+  sonatypeProfileName := "org.wvlet",
   publishTo := sonatypePublishToBundle.value,
   libraryDependencies ++= Seq(
     "org.wvlet.airframe" %% "airspec" % AIRFRAME_VERSION % "test"
@@ -68,8 +68,7 @@ lazy val main =
       name := "wvlet-main",
       description := "wvlet main module",
       libraryDependencies ++= Seq(
-        "org.wvlet.airframe" %% "airframe-launcher" % AIRFRAME_VERSION
-      )
+        )
     ).dependsOn(server)
 
 lazy val server =
@@ -80,7 +79,8 @@ lazy val server =
       name := "wvlet-server",
       description := "wvlet server",
       libraryDependencies ++= Seq(
-        "org.wvlet.airframe" %% "airframe-http-finagle" % AIRFRAME_VERSION
+        "org.wvlet.airframe" %% "airframe-http-finagle" % AIRFRAME_VERSION,
+        "org.wvlet.airframe" %% "airframe-launcher"     % AIRFRAME_VERSION
       )
     )
     .dependsOn(core)
@@ -103,15 +103,34 @@ lazy val apiJS  = api.js
 
 lazy val ui =
   project
-    .enablePlugins(ScalaJSPlugin, AirframeHttpPlugin)
+    .enablePlugins(ScalaJSPlugin, ScalaJSBundlerPlugin, AirframeHttpPlugin)
     .in(file("wvlet-ui"))
     .settings(
       buildSettings,
       name := "wvlet-ui",
       description := "wvlet web UI",
+      airframeHttpClients := Seq("wvlet.dataflow.api:scalajs"),
+      airframeHttpGeneratorOption := "-l debug",
       libraryDependencies ++= Seq(
         "org.wvlet.airframe" %%% "airframe"         % AIRFRAME_VERSION,
-        "org.wvlet.airframe" %%% "airframe-http-rx" % AIRFRAME_VERSION
-      )
+        "org.wvlet.airframe" %%% "airframe-http-rx" % AIRFRAME_VERSION,
+        "org.scala-js" %%% "scalajs-dom" % "1.0.0"
+      ),
+      scalaJSUseMainModuleInitializer := true,
+      webpackConfigFile := Some(baseDirectory.value / "webpack.config.js"),
+      npmDependencies in Compile += "monaco-editor" -> "0.20.0",
+      npmDevDependencies in Compile ++= Seq(
+        "import-loader" -> "1.0.1",
+        "expose-loader" -> "0.7.5",
+        "style-loader" -> "1.1.3",
+        "file-loader" -> "5.1.0",
+        "css-loader" -> "3.4.2",
+        "monaco-editor-webpack-plugin" -> "1.9.0",
+        "webpack-merge" -> "4.2.2"
+      ),
+      useYarn := true,
+      webpackEmitSourceMaps := false,
+      webpackBundlingMode := BundlingMode.LibraryOnly()
+
     )
     .dependsOn(apiJS)
