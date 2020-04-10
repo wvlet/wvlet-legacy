@@ -20,10 +20,10 @@ object TaskGraph {
 
   def apply(leaf: Task): TaskGraph = {
 
-    var numNodes = 0
-    val idTable = scala.collection.mutable.Map[Task, Int]()
-    val edgeTable = scala.collection.mutable.Set[(Int, Int)]()
-    def getId(s: Task) = idTable.getOrElseUpdate(s, {numNodes += 1; numNodes - 1})
+    var numNodes       = 0
+    val idTable        = scala.collection.mutable.Map[Task, Int]()
+    val edgeTable      = scala.collection.mutable.Set[(Int, Int)]()
+    def getId(s: Task) = idTable.getOrElseUpdate(s, { numNodes += 1; numNodes - 1 })
 
     def traverse(s: Task, visited: Set[Int]): Unit = {
       val id = getId(s)
@@ -46,8 +46,8 @@ object TaskGraph {
 }
 
 /**
- *
- */
+  *
+  */
 case class TaskGraph(nodes: Seq[Task], dependencies: Map[Int, Seq[Int]]) {
 
   override def toString = {
@@ -67,16 +67,23 @@ case class TaskGraph(nodes: Seq[Task], dependencies: Map[Int, Seq[Int]]) {
     val s = new ByteArrayOutputStream()
     val g = new GraphvizWriter(s, Map("fontname" -> "Roboto"))
 
-    g.digraph("G") {
-      dg =>
-        for ((n, id) <- nodes.zipWithIndex) {
-          val label = s"${n.shortName}"
-          dg
-          .node(id.toString, Map("label" -> label, "shape" -> "box", "color" -> "\"#5cc2c9\"", "fontcolor" -> "white", "style" -> "filled"))
-        }
-        for ((srcId, destIdLst: Seq[Int]) <- dependencies; dstId <- destIdLst) {
-          dg.arrow(dstId.toString, srcId.toString)
-        }
+    g.digraph("G") { dg =>
+      for ((n, id) <- nodes.zipWithIndex) {
+        val label = s"${n.shortName}"
+        dg.node(
+            id.toString,
+            Map(
+              "label"     -> label,
+              "shape"     -> "box",
+              "color"     -> "\"#5cc2c9\"",
+              "fontcolor" -> "white",
+              "style"     -> "filled"
+            )
+          )
+      }
+      for ((srcId, destIdLst: Seq[Int]) <- dependencies; dstId <- destIdLst) {
+        dg.arrow(dstId.toString, srcId.toString)
+      }
     }
     g.close
     new String(s.toByteArray, StandardCharsets.UTF_8)

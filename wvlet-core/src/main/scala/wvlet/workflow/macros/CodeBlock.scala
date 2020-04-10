@@ -14,17 +14,17 @@
 package wvlet.workflow.macros
 
 /**
- * This class is used for wrapping a code block since case class does not allow having
- * a code block as a named parameter.
- *
- * @param body
- */
+  * This class is used for wrapping a code block since case class does not allow having
+  * a code block as a named parameter.
+  *
+  * @param body
+  */
 class CodeBlock[Context](body: Context => Unit, lazyF0: Option[LazyF0[Unit]] = None) {
   def this(body: Context => Unit) = this(body, None)
 
-  def this(body: => Unit) = this({ context : Context => body }, Some(LazyF0[Unit](body)))
+  def this(body: => Unit) = this({ context: Context => body }, Some(LazyF0[Unit](body)))
 
-  def runSolely(context:Context) = body(context)
+  def runSolely(context: Context) = body(context)
 
   def codeBlockClass: Class[_] = lazyF0.map(_.functionClass).getOrElse(body.getClass)
 

@@ -23,34 +23,35 @@ object CodeRef {
     import c.universe._
 
     /**
-     * Find a function/variable/class context where the expression is used
-     * @return
-     */
+      * Find a function/variable/class context where the expression is used
+      * @return
+      */
     def createRef: c.Expr[CodeRef] = {
       // Find the enclosing method.
       val owner = c.internal.enclosingOwner
       val name = if (owner.fullName.endsWith("$anonfun")) {
         owner.fullName.replaceAll("\\$anonfun$", "") + getNewName()
-      }
-      else {
+      } else {
         owner.fullName
       }
 
       val selfCl = c.Expr[AnyRef](This(typeNames.EMPTY))
-      val pos = c.enclosingPosition
-      c.Expr[CodeRef](q"wvlet.workflow.macros.CodeRef($selfCl.getClass, ${name}, ${pos.source.path}, ${pos.line}, ${pos.column})")
+      val pos    = c.enclosingPosition
+      c.Expr[CodeRef](
+        q"wvlet.workflow.macros.CodeRef($selfCl.getClass, ${name}, ${pos.source.path}, ${pos.line}, ${pos.column})"
+      )
     }
   }
 
-  private val counter = new AtomicInteger(0)
+  private val counter      = new AtomicInteger(0)
   def getNewName(): String = s"t${counter.getAndIncrement()}"
 
   def ref(c: Context) = new MacroHelper[c.type](c).createRef
 }
 
 /**
- *
- */
+  *
+  */
 case class CodeRef(owner: Class[_], name: String, sourcePath: String, line: Int, column: Int) {
   def baseTrait: Class[_] = {
 
@@ -59,12 +60,11 @@ case class CodeRef(owner: Class[_], name: String, sourcePath: String, line: Int,
     val isAnonFun = owner.getSimpleName.contains("$anon")
     if (!isAnonFun) {
       owner
-    }
-    else {
+    } else {
       // If the owner is a mix-in class
-      owner.getInterfaces
-      .headOption.orElse(Option(owner.getSuperclass))
-      .getOrElse(owner)
+      owner.getInterfaces.headOption
+        .orElse(Option(owner.getSuperclass))
+        .getOrElse(owner)
     }
   }
 

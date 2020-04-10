@@ -19,7 +19,7 @@ class GraphvizWriter(out: OutputStream, options: Map[String, String]) {
 
   def this(out: OutputStream) = this(out, Map.empty)
 
-  private val g = new PrintStream(out, true, "UTF-8")
+  private val g           = new PrintStream(out, true, "UTF-8")
   private var indentLevel = 0
 
   if (!options.isEmpty) {

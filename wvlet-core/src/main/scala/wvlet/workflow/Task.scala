@@ -41,7 +41,6 @@ object TaskState {
     def isDone = true
   }
 
-
 }
 
 object TaskConfig {
@@ -57,6 +56,7 @@ object TaskContext {
 case class TaskContext(config: TaskConfig)
 
 case class TaskConfig(param: mutable.Map[String, Any] = mutable.Map.empty) extends Dynamic {
+
   /**
     * Merge two config parameters and return a new TaskConfig object.
     * @param other
@@ -68,15 +68,13 @@ case class TaskConfig(param: mutable.Map[String, Any] = mutable.Map.empty) exten
 
   private[wvlet] def updateDynamic(key: String)(v: Any) { param.put(key, v) }
 
-  override def toString = param.map { case (k, v) => s"${ k }:${ v }" }.mkString(", ")
+  override def toString = param.map { case (k, v) => s"${k}:${v}" }.mkString(", ")
 }
 
 /**
   * Task is a special case of Flow which does not pass any data object
   */
-class Task(val name: String,
-           val config: TaskConfig,
-           var dependencies: Seq[Task] = Seq.empty) { self =>
+class Task(val name: String, val config: TaskConfig, var dependencies: Seq[Task] = Seq.empty) { self =>
 //
 //  def apply() : Unit = { runSolely() }
 //
@@ -95,14 +93,15 @@ class Task(val name: String,
 
   def shortName = Option(name.split("\\.")).map(a => a(a.length - 1)).getOrElse(name)
 
-  override def toString() = s"Task(${ shortName }, ${ config })"
+  override def toString() = s"Task(${shortName}, ${config})"
 
   def objectId: String = "%8x".format(super.hashCode())
 }
 
 object Task extends LogSupport {
 
-  def apply(name: String, config: TaskConfig = TaskConfig())(body: => Unit): Task = new Task(name, config, Seq.empty[Task])
+  def apply(name: String, config: TaskConfig = TaskConfig())(body: => Unit): Task =
+    new Task(name, config, Seq.empty[Task])
 
   def newTask(codeRef: CodeRef, body: => Unit, config: TaskConfig = TaskConfig.empty): Task =
     new Task(codeRef.name, config.merge(TaskConfig("codeRef" -> codeRef)), Seq.empty)
@@ -114,4 +113,3 @@ object Task extends LogSupport {
     newTaskWithContext(codeRef, TaskConfig("command" -> command))
 
 }
-

@@ -32,6 +32,9 @@ val buildSettings = Seq[Setting[_]](
   testFrameworks += new TestFramework("wvlet.airspec.Framework")
 )
 
+lazy val projectJVM = project.aggregate(core)
+lazy val projectJS  = project.aggregate()
+
 lazy val wvlet =
   project
     .in(file("."))
@@ -51,6 +54,6 @@ lazy val core =
       name := "wvlet-core",
       description := "wvlet core module",
       libraryDependencies ++= Seq(
-        "org.wvlet.airframe" %% "airframe" % AIRFRAME_VERSION,
+        "org.wvlet.airframe" %% "airframe" % AIRFRAME_VERSION
       )
     )

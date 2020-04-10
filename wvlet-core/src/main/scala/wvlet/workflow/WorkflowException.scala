@@ -14,11 +14,11 @@
 package wvlet.workflow
 
 /**
- *
- */
+  *
+  */
 object WorkflowException {
   def NA = {
-    val t = new Throwable
+    val t      = new Throwable
     val caller = t.getStackTrace()(1)
     throw new Exception(s"${caller.getMethodName} (${caller.getFileName}:${caller.getLineNumber})")
   }
