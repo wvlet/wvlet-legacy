@@ -71,15 +71,15 @@ case class TaskGraph(nodes: Seq[Task], dependencies: Map[Int, Seq[Int]]) {
       for ((n, id) <- nodes.zipWithIndex) {
         val label = s"${n.shortName}"
         dg.node(
-            id.toString,
-            Map(
-              "label"     -> label,
-              "shape"     -> "box",
-              "color"     -> "\"#5cc2c9\"",
-              "fontcolor" -> "white",
-              "style"     -> "filled"
-            )
+          id.toString,
+          Map(
+            "label"     -> label,
+            "shape"     -> "box",
+            "color"     -> "\"#5cc2c9\"",
+            "fontcolor" -> "white",
+            "style"     -> "filled"
           )
+        )
       }
       for ((srcId, destIdLst: Seq[Int]) <- dependencies; dstId <- destIdLst) {
         dg.arrow(dstId.toString, srcId.toString)
