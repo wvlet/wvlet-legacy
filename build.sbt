@@ -1,101 +1,56 @@
-import ReleaseTransformations._
+val SCALA_2_12 = "2.12.11"
+val SCALA_2_13 = "2.13.1"
 
-scalaVersion in ThisBuild := "2.12.2"
+val AIRFRAME_VERSION = "20.4.0"
+
+scalaVersion in ThisBuild := SCALA_2_12
 
 val buildSettings = Seq[Setting[_]](
-  crossScalaVersions := Seq("2.11.11", "2.12.2"),
+  crossScalaVersions := Seq(SCALA_2_12, SCALA_2_13),
   organization := "org.wvlet",
-  description := "A framework for structured data mapping",
+  description := "A framework for managing data flows",
   crossPaths := true,
   publishMavenStyle := true,
-  // For performance testing, ensure each test run one-by-one
-  concurrentRestrictions in Global := Seq(Tags.limit(Tags.Test, 1)),
-  incOptions := incOptions.value.withNameHashing(true),
   logBuffered in Test := false,
   updateOptions := updateOptions.value.withCachedResolution(true),
   sonatypeProfileName := "org.wvlet",
-  pomExtra := {
-  <url>https://github.com/xerial/wvlet</url>
-    <licenses>
-      <license>
-        <name>Apache 2</name>
-        <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-      </license>
-    </licenses>
-    <scm>
-      <connection>scm:git:github.com/wvlet/wvlet.git</connection>
-      <developerConnection>scm:git:git@github.com:wvlet/wvlet.git</developerConnection>
-      <url>github.com/wvlet/wvlet.git</url>
-    </scm>
-    <developers>
-      <developer>
-        <id>leo</id>
-        <name>Taro L. Saito</name>
-        <url>http://xerial.org/leo</url>
-      </developer>
-    </developers>
-  },
-  publishTo := Some(
-    if (isSnapshot.value)
-      Opts.resolver.sonatypeSnapshots
-    else
-      Opts.resolver.sonatypeStaging
+  licenses += ("Apache-2.0", url("https://www.apache.org/licenses/LICENSE-2.0.html")),
+  homepage := Some(url("https://wvlet.org/wvlet")),
+  scmInfo := Some(
+    ScmInfo(
+      browseUrl = url("https://github.com/wvlet/wvlet"),
+      connection = "scm:git@github.com:wvlet/wvlet.git"
+    )
   ),
-  // Use sonatype resolvers
-  resolvers ++= Seq(
-    Resolver.sonatypeRepo("releases"),
-    Resolver.sonatypeRepo("snapshots")
+  developers := List(
+    Developer(id = "leo", name = "Taro L. Saito", email = "leo@xerial.org", url = url("http://xerial.org/leo"))
   ),
-  // Release settings
-  releaseTagName := { (version in ThisBuild).value },
-  releaseProcess := Seq[ReleaseStep](
-    checkSnapshotDependencies,
-    inquireVersions,
-    runClean,
-    runTest,
-    setReleaseVersion,
-    commitReleaseVersion,
-    tagRelease,
-    ReleaseStep(action = Command.process("publishSigned", _), enableCrossBuild = true),
-    setNextVersion,
-    commitNextVersion,
-    ReleaseStep(action = Command.process("sonatypeReleaseAll", _), enableCrossBuild = true),
-    pushChanges
+  publishTo := sonatypePublishToBundle.value,
+  libraryDependencies ++= Seq(
+    "org.wvlet.airframe" %% "airspec" % AIRFRAME_VERSION % "test"
   ),
-  releaseCrossBuild := true
+  testFrameworks += new TestFramework("wvlet.airspec.Framework")
 )
 
 lazy val wvlet =
-  Project(id = "wvlet", base = file(".")).settings(
-    buildSettings,
-    publishArtifact := false,
-    publish := {},
-    publishLocal := {}
-  ).aggregate(wvletCore, wvletTest)
+  project
+    .in(file("."))
+    .settings(
+      buildSettings,
+      name := "wvlet",
+      publishArtifact := false,
+      publish := {},
+      publishLocal := {}
+    ).aggregate(core)
 
-val wvletLog = "org.wvlet" %% "wvlet-log" % "1.2.3"
-
-lazy val wvletCore =
-  Project(id = "wvlet-core", base = file("wvlet-core")).settings(
-    buildSettings,
-    description := "wvlet core module",
-    libraryDependencies ++= Seq(
-      wvletLog,
-      "org.wvlet" %% "object-schema" % "1.0",
-      "org.msgpack" % "msgpack-core" % "0.8.11",
-      "org.scala-lang" % "scala-reflect" % scalaVersion.value,
-      "org.scala-lang" % "scalap" % scalaVersion.value,
-      "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.4"
+lazy val core =
+  project
+    .in(file("wvlet-core"))
+    .settings(
+      buildSettings,
+      name := "wvlet-core",
+      description := "wvlet core module",
+      libraryDependencies ++= Seq(
+        "org.wvlet.airframe" %% "airframe" % AIRFRAME_VERSION,
+      )
     )
-  ).dependsOn(wvletTest % "test->compile")
-
-lazy val wvletTest =
-  Project(id = "wvlet-test", base = file("wvlet-test")).settings(
-    buildSettings,
-    description := "wvlet testing module",
-    libraryDependencies ++= Seq(
-      wvletLog,
-      "org.scalatest" %% "scalatest" % "3.0.0",
-      "org.scalacheck" %% "scalacheck" % "1.12.6"
-    )
-  )
