@@ -124,6 +124,7 @@ class MenuHeader extends RxElement {
         ),
         div(
           cls -> "sidebar-menu",
+          navItem("Projects", "fas fa-th-list"),
           navItem("Databases", "fas fa-database"),
           navItem("Queries", "fas fa-binoculars"),
           navItem("Notebooks", "fas fa-book-open")
