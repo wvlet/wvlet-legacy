@@ -57,9 +57,7 @@ class ServerMain(@option(prefix = "-h,--help", description = "Show help messages
 
   @command(description = "Start wvlet server")
   def server = {
-    ServerMain.design.withProductionMode.build[FinagleServer] { server =>
-      server.waitServerTermination
-    }
+    ServerMain.design.withProductionMode.build[FinagleServer] { server => server.waitServerTermination }
   }
 
 }

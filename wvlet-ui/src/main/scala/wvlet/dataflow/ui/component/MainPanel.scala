@@ -29,9 +29,7 @@ trait MainPanel extends RxElement with RPCService {
 
   private val serviceInfo = Rx.variable[Option[ServiceInfo]](None)
 
-  rpc.serviceApi.serviceInfo().map { x =>
-    serviceInfo := Some(x)
-  }
+  rpc.serviceApi.serviceInfo().map { x => serviceInfo := Some(x) }
 
   override def render: RxElement = {
     div(
@@ -39,15 +37,15 @@ trait MainPanel extends RxElement with RPCService {
       div(
         cls -> "d-flex flex-row",
         div(cls -> "p-0", menuHeader),
-        div(cls -> "p-0 container-fluid",
-            header,
-            div(
-              "Hello wvlet: ",
-              serviceInfo.map { x =>
-                x.map(_.version)
-              },
-              hr()
-            ))
+        div(
+          cls -> "p-0 container-fluid",
+          header,
+          div(
+            "Hello wvlet: ",
+            serviceInfo.map { x => x.map(_.version) },
+            hr()
+          )
+        )
       )
     )
   }
@@ -118,10 +116,12 @@ class MenuHeader extends RxElement {
             )
           )
         ),
-        div(cls -> "sidebar-menu",
-            navItem("Databases", "fas fa-database"),
-            navItem("Queries", "fas fa-binoculars"),
-            navItem("Notebooks", "fas fa-book-open")),
+        div(
+          cls -> "sidebar-menu",
+          navItem("Databases", "fas fa-database"),
+          navItem("Queries", "fas fa-binoculars"),
+          navItem("Notebooks", "fas fa-book-open")
+        )
 //
 //        div(
 //          cls   -> "sidebar-footer py-2",
