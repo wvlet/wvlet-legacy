@@ -9,3 +9,7 @@ target
 result
 log-test.properties
 .DS_Store
+.metals
+.bloop
+metals.sbt
+
