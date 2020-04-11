@@ -29,7 +29,9 @@ trait MainPanel extends RxElement with RPCService {
 
   private val serviceInfo = Rx.variable[Option[ServiceInfo]](None)
 
-  rpc.serviceApi.serviceInfo().map { x => serviceInfo := Some(x) }
+  rpc.serviceApi.serviceInfo().map { x =>
+    serviceInfo := Some(x)
+  }
 
   override def render: RxElement = {
     div(
@@ -42,7 +44,9 @@ trait MainPanel extends RxElement with RPCService {
           header,
           div(
             "Hello wvlet: ",
-            serviceInfo.map { x => x.map(_.version) },
+            serviceInfo.map { x =>
+              x.map(_.version)
+            },
             hr()
           )
         )
@@ -52,25 +56,27 @@ trait MainPanel extends RxElement with RPCService {
 }
 
 class Header extends RxElement {
+
+  def icon(name: String, iconCls: String) = {
+    li(cls -> "nav-item",
+       a(
+         cls   -> "nav-link px-2",
+         style -> "text-decoration: none;",
+         href  -> s"#${name}",
+         i(cls -> iconCls, style -> "width: 20px;"),
+         s" ${name}"
+       ))
+  }
+
   override def render: RxElement = {
     div(
-      cls -> "container-fluid sidebar-menu",
+      cls -> "container-fluid",
       div(
-        cls -> "d-flex justify-content-end",
-        a(
-          cls   -> "nav-link",
-          style -> "text-decoration: none; color: #97909F;",
-          href  -> "#login",
-          i(cls -> s"fas fa-cog", style -> "width: 20px;"),
-          " Settings"
-        ),
-        a(
-          cls   -> "nav-link",
-          style -> "text-decoration: none; color: #97909F;",
-          href  -> "#login",
-          i(cls -> s"fas fa-user-circle", style -> "width: 20px;"),
-          " Login"
-        )
+        cls -> "sidebar-menu d-flex justify-content-end",
+        ul(cls -> "nav",
+           icon("Help", "fas fa-question-circle"),
+           icon("Settings", "fas fa-cog"),
+           icon("Login", "fas fa-user-circle"))
       )
     )
   }
@@ -87,8 +93,8 @@ class MenuHeader extends RxElement {
         style -> "white-space: nowrap;",
         a(
           cls   -> "nav-link pl-2 pr-4",
-          style -> "text-decoration: none; color: #97909F; list-style-type: none; ",
-          href  -> "#settings",
+          style -> "text-decoration: none; list-style-type: none; ",
+          href  -> s"#${name}",
           i(cls -> iconCls, style -> "width: 20px;"),
           s" ${name}"
         )

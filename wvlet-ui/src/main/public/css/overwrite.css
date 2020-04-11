@@ -16,8 +16,23 @@
     background-color: #07405b;
 }
 
+body {
+    font-family: Roboto, Noto, sans-serif;
+    font-size: 14px;
+}
 
-.sidebar-menu .nav-item a:hover, .sidebar-menu .nav-link a:hover {
-    color: #3399CC !important;
-    /*background: #1e909f;*/
+
+.text-monospace {
+    font-family: Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace !important;
+    font-size: 0.9em;
+}
+
+
+.sidebar-menu .nav-item > a {
+    color: #138496;
+}
+
+.sidebar-menu .nav-item > a:hover {
+    color: #104759;
+    background-color: #d8dbdf;
 }
