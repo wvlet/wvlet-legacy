@@ -11,13 +11,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package wvlet.dataflow.ui.component
 
-.navbar-dark {
-    background-color: #07405b;
-}
+import wvlet.dataflow.api.ServiceJSClient
+import wvlet.airframe._
 
+/**
+  *
+  */
+trait RPCService {
+  protected implicit val queue = scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 
-.sidebar-menu .nav-item a:hover, .sidebar-menu .nav-link a:hover {
-    color: #3399CC !important;
-    /*background: #1e909f;*/
+  protected val rpc = bind[ServiceJSClient]
 }

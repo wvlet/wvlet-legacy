@@ -11,13 +11,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package wvlet.dataflow.api.v1
 
-.navbar-dark {
-    background-color: #07405b;
-}
+import wvlet.airframe.http.RPC
+import wvlet.dataflow.api.BuildInfo
 
+case class ServiceInfo(version: String = BuildInfo.version, buildTime: String = BuildInfo.builtAtString)
 
-.sidebar-menu .nav-item a:hover, .sidebar-menu .nav-link a:hover {
-    color: #3399CC !important;
-    /*background: #1e909f;*/
+/**
+  *
+  */
+@RPC
+class ServiceApi {
+  def serviceInfo: ServiceInfo = ServiceInfo()
 }

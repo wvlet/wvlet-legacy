@@ -17,6 +17,7 @@ import wvlet.airframe.Design
 import wvlet.airframe.http.Router
 import wvlet.airframe.http.finagle.{Finagle, FinagleServer}
 import wvlet.airframe.launcher.{Launcher, command, option}
+import wvlet.dataflow.api.v1.ServiceApi
 import wvlet.dataflow.server.api.ServerApi
 import wvlet.log.{LogSupport, Logger}
 
@@ -29,7 +30,10 @@ object ServerMain {
     Launcher.of[ServerMain].execute(args)
   }
 
-  def router = Router.add[ServerApi]
+  def router =
+    Router
+      .add[ServiceApi]
+      .add[ServerApi]
 
   def design =
     Design.newDesign

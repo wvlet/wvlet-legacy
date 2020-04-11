@@ -83,14 +83,18 @@ lazy val server =
         "org.wvlet.airframe" %% "airframe-launcher"     % AIRFRAME_VERSION
       )
     )
-    .dependsOn(core)
+    .dependsOn(core, apiJVM)
 
 lazy val api =
   crossProject(JSPlatform, JVMPlatform)
     .crossType(CrossType.Pure)
+    .enablePlugins(BuildInfoPlugin)
     .in(file("wvlet-api"))
     .settings(
       buildSettings,
+      buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion),
+      buildInfoOptions += BuildInfoOption.BuildTime,
+      buildInfoPackage := "wvlet.dataflow.api",
       name := "wvlet-api",
       description := "wvlet API interface and model classes",
       libraryDependencies ++= Seq(
@@ -114,23 +118,22 @@ lazy val ui =
       libraryDependencies ++= Seq(
         "org.wvlet.airframe" %%% "airframe"         % AIRFRAME_VERSION,
         "org.wvlet.airframe" %%% "airframe-http-rx" % AIRFRAME_VERSION,
-        "org.scala-js" %%% "scalajs-dom" % "1.0.0"
+        "org.scala-js"       %%% "scalajs-dom"      % "1.0.0"
       ),
       scalaJSUseMainModuleInitializer := true,
       webpackConfigFile := Some(baseDirectory.value / "webpack.config.js"),
       npmDependencies in Compile += "monaco-editor" -> "0.20.0",
       npmDevDependencies in Compile ++= Seq(
-        "import-loader" -> "1.0.1",
-        "expose-loader" -> "0.7.5",
-        "style-loader" -> "1.1.3",
-        "file-loader" -> "5.1.0",
-        "css-loader" -> "3.4.2",
+        "import-loader"                -> "1.0.1",
+        "expose-loader"                -> "0.7.5",
+        "style-loader"                 -> "1.1.3",
+        "file-loader"                  -> "5.1.0",
+        "css-loader"                   -> "3.4.2",
         "monaco-editor-webpack-plugin" -> "1.9.0",
-        "webpack-merge" -> "4.2.2"
+        "webpack-merge"                -> "4.2.2"
       ),
       useYarn := true,
       webpackEmitSourceMaps := false,
       webpackBundlingMode := BundlingMode.LibraryOnly()
-
     )
     .dependsOn(apiJS)

@@ -15,11 +15,24 @@ package wvlet.dataflow.ui.component
 
 import wvlet.airframe.http.rx.html.RxElement
 import wvlet.airframe.http.rx.html.all._
+import wvlet.airframe._
+import wvlet.airframe.http.rx.Rx
+import wvlet.dataflow.api.v1.ServiceInfo
 
 /**
   *
   */
-class MainPanel(menuHeader: MenuHeader, header: Header) extends RxElement {
+trait MainPanel extends RxElement with RPCService {
+
+  private val menuHeader = bind[MenuHeader]
+  private val header     = bind[Header]
+
+  private val serviceInfo = Rx.variable[Option[ServiceInfo]](None)
+
+  rpc.serviceApi.serviceInfo().map { x =>
+    serviceInfo := Some(x)
+  }
+
   override def render: RxElement = {
     div(
       cls -> "container-fluid p-0",
@@ -29,7 +42,10 @@ class MainPanel(menuHeader: MenuHeader, header: Header) extends RxElement {
         div(cls -> "p-0 container-fluid",
             header,
             div(
-              "Hello wvlet",
+              "Hello wvlet: ",
+              serviceInfo.map { x =>
+                x.map(_.version)
+              },
               hr()
             ))
       )
@@ -40,7 +56,7 @@ class MainPanel(menuHeader: MenuHeader, header: Header) extends RxElement {
 class Header extends RxElement {
   override def render: RxElement = {
     div(
-      cls -> "container-fluid",
+      cls -> "container-fluid sidebar-menu",
       div(
         cls -> "d-flex justify-content-end",
         a(
