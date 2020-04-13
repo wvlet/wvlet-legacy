@@ -37,6 +37,8 @@ sed \
    -e '/ type \(FindEditorOptionsKeyById\|\ComputedEditorOptionValue\).*/d' \
    -e 's/Latest = ESNext,/Latest = 99,/' \
    -e '/findRenameLocations(fileName: string, /d' \
+   -e 's/IEditorOption<EditorOption.\w+,/IEditorOption<Int,/' \
+   -e 's/Readonly<Required<\(.*\)>>/\1/ \
    < "$NPM_MONACO_D_TS" \
    > "$MONACO_D_TS"
 
