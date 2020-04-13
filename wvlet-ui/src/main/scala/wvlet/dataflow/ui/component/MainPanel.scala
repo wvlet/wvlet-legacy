@@ -41,7 +41,7 @@ trait MainPanel extends RxElement with RPCService {
         cls -> "d-flex flex-row",
         div(cls -> "p-0", sideNav),
         div(
-          cls -> "p-0 container-fluid",
+          cls -> "container-fluid p-0 flex-fill",
           header,
           div(
             "Hello wvlet: ",
@@ -74,7 +74,7 @@ class Header extends RxElement {
     div(
       cls -> "container-fluid",
       div(
-        cls -> "sidebar-menu d-flex justify-content-end",
+        cls -> "sidebar-menu justify-content-end",
         ul(cls -> "nav",
            icon("Help", "fas fa-question-circle"),
            icon("Settings", "fas fa-cog"),

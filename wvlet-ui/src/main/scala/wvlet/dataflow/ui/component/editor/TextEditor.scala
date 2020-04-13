@@ -17,17 +17,19 @@ import scalajs.js
 import org.scalajs.dom.document
 import org.scalajs.dom.raw.HTMLElement
 import wvlet.airframe.http.rx.html.RxElement
-import wvlet.dataflow.ui.component.editor.facade.monaco.editor.{
+import wvlet.dataflow.ui.component.editor.importedjs.monaco.editor.{
   Editor,
   IEditorConstructionOptions,
   IEditorMinimapOptions,
   IModelDecorationsChangedEvent,
+  IStandaloneEditorConstructionOptions,
   ITextModel
 }
-import wvlet.dataflow.ui.component.editor.facade._
-import wvlet.dataflow.ui.component.editor.facade.monaco.{IKeyboardEvent, KeyCode}
+import wvlet.dataflow.ui.component.editor.importedjs._
+import wvlet.dataflow.ui.component.editor.importedjs.monaco.{IKeyboardEvent, KeyCode}
 import wvlet.log.LogSupport
 import wvlet.airframe.http.rx.html.all._
+import wvlet.dataflow.ui.component.editor.importedjs.monaco.editor.EditorLayoutInfo
 
 class TextEditor(initialValue: String = "", onEnter: String => Unit = { x: String =>
   }) extends RxElement
@@ -38,7 +40,7 @@ class TextEditor(initialValue: String = "", onEnter: String => Unit = { x: Strin
   }
 
   private val editor = {
-    val option = new scalajs.js.Object().asInstanceOf[IEditorConstructionOptions]
+    val option = new scalajs.js.Object().asInstanceOf[IStandaloneEditorConstructionOptions]
     option.value = initialValue
     option.language = "sql"
     option.theme = "vs-dark"
@@ -76,6 +78,7 @@ class TextEditor(initialValue: String = "", onEnter: String => Unit = { x: Strin
     editor.getDomNode() match {
       case el: HTMLElement =>
         el.parentElement.style.height = s"${height}px"
+
         editor.layout()
       case _ =>
     }
@@ -85,10 +88,13 @@ class TextEditor(initialValue: String = "", onEnter: String => Unit = { x: Strin
     editor.onDidChangeModelDecorations { e: IModelDecorationsChangedEvent =>
       updateLayout
     }
+    editor.onDidLayoutChange { e: EditorLayoutInfo =>
+      //updateLayout
+    }
     updateLayout
 
     div(
-      cls -> "pl-0 pr-2",
+      cls -> "pl-0 mx-auto",
       editorNode
     )
   }
