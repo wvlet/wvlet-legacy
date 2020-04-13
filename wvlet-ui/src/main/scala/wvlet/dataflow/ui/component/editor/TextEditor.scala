@@ -34,7 +34,6 @@ class TextEditor(initialValue: String = "", onEnter: String => Unit = { x: Strin
     with LogSupport {
   private val editorNode = {
     val editorNode: HTMLElement = document.createElement("div").asInstanceOf[HTMLElement]
-    editorNode.style = "width:100%; height:100%;"
     editorNode
   }
 
@@ -42,9 +41,11 @@ class TextEditor(initialValue: String = "", onEnter: String => Unit = { x: Strin
     val option = new scalajs.js.Object().asInstanceOf[IEditorConstructionOptions]
     option.value = initialValue
     option.language = "sql"
-    //option.theme = "vs-dark"
+    option.theme = "vs-dark"
     option.scrollBeyondLastLine = false
     option.automaticLayout = true
+    option.fontFamily = "Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace"
+    //option.fontSize = 14
     val minimapOptions = new js.Object().asInstanceOf[IEditorMinimapOptions]
     minimapOptions.enabled = false
     option.minimap = minimapOptions
@@ -87,8 +88,7 @@ class TextEditor(initialValue: String = "", onEnter: String => Unit = { x: Strin
     updateLayout
 
     div(
-      cls -> "w-95 pl-0 pr-2",
-      //style -> "width: 700px;",
+      cls -> "pl-0 pr-2",
       editorNode
     )
   }
