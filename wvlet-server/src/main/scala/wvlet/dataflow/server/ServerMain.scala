@@ -20,6 +20,7 @@ import wvlet.airframe.launcher.{Launcher, command, option}
 import wvlet.dataflow.api.v1.ServiceApi
 import wvlet.dataflow.server.api.ServerApi
 import wvlet.log.{LogSupport, Logger}
+import wvlet.log.LogLevel
 
 /**
   *
