@@ -18,14 +18,15 @@ import wvlet.airframe.http.rx.html.all._
 import wvlet.airframe._
 import wvlet.airframe.http.rx.Rx
 import wvlet.dataflow.api.v1.ServiceInfo
+import wvlet.dataflow.ui.component.editor.TextEditor
 
 /**
   *
   */
 trait MainPanel extends RxElement with RPCService {
 
-  private val menuHeader = bind[MenuHeader]
-  private val header     = bind[Header]
+  private val sideNav = bind[SideNav]
+  private val header  = bind[Header]
 
   private val serviceInfo = Rx.variable[Option[ServiceInfo]](None)
 
@@ -37,17 +38,19 @@ trait MainPanel extends RxElement with RPCService {
     div(
       cls -> "container-fluid p-0",
       div(
-        cls -> "d-flex flex-row",
-        div(cls -> "p-0", menuHeader),
+        cls -> "d-flex",
+        div(cls -> "p-0", sideNav),
         div(
-          cls -> "p-0 container-fluid",
-          header,
+          cls -> "flex-fill p-0",
+          div(cls -> "d-flex", div(cls -> "ml-auto", header)),
           div(
+            cls -> "container-fluid",
             "Hello wvlet: ",
             serviceInfo.map { x =>
               x.map(_.version)
             },
-            hr()
+            hr(),
+            div(style -> "width: 95%;", new TextEditor("Hello Wvlet"))
           )
         )
       )
@@ -70,9 +73,8 @@ class Header extends RxElement {
 
   override def render: RxElement = {
     div(
-      cls -> "container-fluid",
+      cls -> "sidebar-menu",
       div(
-        cls -> "sidebar-menu d-flex justify-content-end",
         ul(cls -> "nav",
            icon("Help", "fas fa-question-circle"),
            icon("Settings", "fas fa-cog"),
@@ -82,7 +84,7 @@ class Header extends RxElement {
   }
 }
 
-class MenuHeader extends RxElement {
+class SideNav extends RxElement {
 
   def navItem(name: String, iconCls: String) = {
     ul(
@@ -104,7 +106,7 @@ class MenuHeader extends RxElement {
 
   override def render: RxElement = {
     nav(
-      cls -> "collapse navbar-collapse d-block",
+      cls -> "d-block sidebar-menu",
       div(
         cls -> "sidebar-content",
         div(
@@ -123,13 +125,11 @@ class MenuHeader extends RxElement {
           )
         ),
         div(
-          cls -> "sidebar-menu",
           navItem("Projects", "fas fa-th-list"),
           navItem("Databases", "fas fa-database"),
           navItem("Queries", "fas fa-binoculars"),
           navItem("Notebooks", "fas fa-book-open")
-        )
-//
+        ),
 //        div(
 //          cls   -> "sidebar-footer py-2",
 //          style -> "position: absolute; bottom: 0px; display: flex;",
