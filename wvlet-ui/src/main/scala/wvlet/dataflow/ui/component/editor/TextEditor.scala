@@ -13,27 +13,19 @@
  */
 package wvlet.dataflow.ui.component.editor
 
-import scalajs.js
 import org.scalajs.dom.document
 import org.scalajs.dom.raw.HTMLElement
 import wvlet.airframe.http.rx.html.RxElement
-import wvlet.dataflow.ui.component.editor.importedjs.monaco.editor.{
-  Editor,
-  IEditorConstructionOptions,
-  IEditorMinimapOptions,
-  IModelDecorationsChangedEvent,
-  IStandaloneEditorConstructionOptions,
-  ITextModel
-}
-import wvlet.dataflow.ui.component.editor.importedjs._
+import wvlet.dataflow.ui.component.editor.importedjs.monaco.editor._
 import wvlet.dataflow.ui.component.editor.importedjs.monaco.{IKeyboardEvent, KeyCode}
 import wvlet.log.LogSupport
-import wvlet.airframe.http.rx.html.all._
-import wvlet.dataflow.ui.component.editor.importedjs.monaco.editor.EditorLayoutInfo
+
+import scala.scalajs.js
 
 class TextEditor(initialValue: String = "", onEnter: String => Unit = { x: String =>
   }) extends RxElement
     with LogSupport {
+
   private val editorNode = {
     val editorNode: HTMLElement = document.createElement("div").asInstanceOf[HTMLElement]
     editorNode
@@ -45,6 +37,7 @@ class TextEditor(initialValue: String = "", onEnter: String => Unit = { x: Strin
     option.language = "sql"
     option.theme = "vs-dark"
     option.scrollBeyondLastLine = false
+    option.lineHeight = 18
     option.automaticLayout = true
     option.fontFamily = "Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace"
     //option.fontSize = 14
@@ -69,17 +62,20 @@ class TextEditor(initialValue: String = "", onEnter: String => Unit = { x: Strin
   }
 
   def updateLayout: Unit = {
-    val lineHeight    = 18 // editor.editorOptions.lineHeight
+    val lineHeight    = editor.getRawOptions().lineHeight
     val lineCount     = editor.getModel().asInstanceOf[ITextModel].getLineCount().max(1)
     val topLineNumber = editor.getTopForLineNumber(lineCount + 1)
     val height        = topLineNumber.max(lineHeight * lineCount)
 
-    //info(s"${lineHeight}, ${lineCount}, ${topLineNumber}, ${height}")
     editor.getDomNode() match {
       case el: HTMLElement =>
-        el.parentElement.style.height = s"${height}px"
-
-        editor.layout()
+        val newWidth = editorNode.clientWidth
+        val d        = new js.Object().asInstanceOf[IDimension]
+        d.height = height
+        if (newWidth > 0) {
+          d.width = newWidth
+        }
+        editor.layout(d)
       case _ =>
     }
   }
@@ -88,14 +84,8 @@ class TextEditor(initialValue: String = "", onEnter: String => Unit = { x: Strin
     editor.onDidChangeModelDecorations { e: IModelDecorationsChangedEvent =>
       updateLayout
     }
-    editor.onDidLayoutChange { e: EditorLayoutInfo =>
-      //updateLayout
-    }
-    updateLayout
 
-    div(
-      cls -> "pl-0 mx-auto",
-      editorNode
-    )
+    updateLayout
+    editorNode
   }
 }

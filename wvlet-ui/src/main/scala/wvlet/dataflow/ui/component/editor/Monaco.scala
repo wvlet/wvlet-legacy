@@ -899,14 +899,14 @@ package importedjs {
                         matchCase: Boolean,
                         wordSeparators: String | Null,
                         captureMatches: Boolean,
-                        limitResultCount: Double = ???): js.Array[FindMatch] = js.native
-//        def findMatches(searchString: String,
-//                        searchScope: IRange,
-//                        isRegex: Boolean,
-//                        matchCase: Boolean,
-//                        wordSeparators: String | Null,
-//                        captureMatches: Boolean,
-//                        limitResultCount: Double = ???): js.Array[FindMatch] = js.native
+                        limitResultCount: Double): js.Array[FindMatch] = js.native
+        def findMatches(searchString: String,
+                        searchScope: IRange,
+                        isRegex: Boolean,
+                        matchCase: Boolean,
+                        wordSeparators: String | Null,
+                        captureMatches: Boolean,
+                        limitResultCount: Double): js.Array[FindMatch] = js.native
         def findNextMatch(searchString: String,
                           searchStart: IPosition,
                           isRegex: Boolean,

@@ -38,18 +38,19 @@ trait MainPanel extends RxElement with RPCService {
     div(
       cls -> "container-fluid p-0",
       div(
-        cls -> "d-flex flex-row",
+        cls -> "d-flex",
         div(cls -> "p-0", sideNav),
         div(
-          cls -> "container-fluid p-0 flex-fill",
-          header,
+          cls -> "flex-fill p-0",
+          div(cls -> "d-flex", div(cls -> "ml-auto", header)),
           div(
+            cls -> "container-fluid",
             "Hello wvlet: ",
             serviceInfo.map { x =>
               x.map(_.version)
             },
             hr(),
-            new TextEditor("Hello Wvlet")
+            div(style -> "width: 95%;", new TextEditor("Hello Wvlet"))
           )
         )
       )
@@ -72,9 +73,8 @@ class Header extends RxElement {
 
   override def render: RxElement = {
     div(
-      cls -> "container-fluid",
+      cls -> "sidebar-menu",
       div(
-        cls -> "sidebar-menu justify-content-end",
         ul(cls -> "nav",
            icon("Help", "fas fa-question-circle"),
            icon("Settings", "fas fa-cog"),
