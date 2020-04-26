@@ -17,7 +17,7 @@ import wvlet.airframe.http.rx.html.RxElement
 import wvlet.airframe.http.rx.html.all._
 import wvlet.airframe._
 import wvlet.airframe.http.rx.Rx
-import wvlet.dataflow.api.v1.ServiceInfo
+import wvlet.dataflow.api.v1.ServiceApi.ServiceInfo
 import wvlet.dataflow.ui.component.editor.TextEditor
 
 /**

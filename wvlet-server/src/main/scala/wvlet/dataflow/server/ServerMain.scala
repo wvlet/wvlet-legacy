@@ -13,14 +13,12 @@
  */
 package wvlet.dataflow.server
 
-import wvlet.airframe.Design
 import wvlet.airframe.http.Router
 import wvlet.airframe.http.finagle.{Finagle, FinagleServer}
 import wvlet.airframe.launcher.{Launcher, command, option}
 import wvlet.dataflow.api.v1.ServiceApi
 import wvlet.dataflow.server.api.ServerApi
 import wvlet.log.{LogSupport, Logger}
-import wvlet.log.LogLevel
 
 /**
   *
@@ -37,14 +35,11 @@ object ServerMain {
       .add[ServerApi]
 
   def design =
-    Design.newDesign
-      .add {
-        Finagle.server
-          .withName("wvlet-server")
-          .withPort(8080)
-          .withRouter(router)
-          .design
-      }
+    Finagle.server
+      .withName("wvlet-server")
+      .withPort(8080)
+      .withRouter(router)
+      .design
 
 }
 
@@ -58,7 +53,9 @@ class ServerMain(@option(prefix = "-h,--help", description = "Show help messages
 
   @command(description = "Start wvlet server")
   def server = {
-    ServerMain.design.withProductionMode.build[FinagleServer] { server => server.waitServerTermination }
+    ServerMain.design.withProductionMode.build[FinagleServer] { server =>
+      server.waitServerTermination
+    }
   }
 
 }

@@ -16,7 +16,11 @@ package wvlet.dataflow.api.v1
 import wvlet.airframe.http.RPC
 import wvlet.dataflow.api.BuildInfo
 
-case class ServiceInfo(version: String = BuildInfo.version, buildTime: String = BuildInfo.builtAtString)
+object ServiceApi {
+  case class ServiceInfo(version: String = BuildInfo.version, buildTime: String = BuildInfo.builtAtString)
+}
+
+import ServiceApi._
 
 /**
   *

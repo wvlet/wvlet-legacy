@@ -19,11 +19,14 @@ import wvlet.airframe.http.RPC
 
 @RPC
 trait EditorApi {
+  import EditorApi._
   def listProjects: Seq[Project]
   def addProject(request: CreateProjectRequest): Project
   def listFiles(project: Project): ListFilesResponse
 }
 
-case class Project(id: String, name: String)
-case class CreateProjectRequest(name: String, requestId: UUID = UUID.randomUUID())
-case class ListFilesResponse(project: Project)
+object EditorApi {
+  case class Project(id: String, name: String)
+  case class CreateProjectRequest(name: String, requestId: UUID = UUID.randomUUID())
+  case class ListFilesResponse(project: Project)
+}

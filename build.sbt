@@ -1,7 +1,7 @@
 val SCALA_2_12 = "2.12.11"
 val SCALA_2_13 = "2.13.1"
 
-val AIRFRAME_VERSION = "20.4.0"
+val AIRFRAME_VERSION = "20.4.1"
 
 scalaVersion in ThisBuild := SCALA_2_12
 
