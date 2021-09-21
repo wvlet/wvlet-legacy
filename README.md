@@ -14,5 +14,5 @@ wvlet [![Maven Central][central-badge]][central-link] [![GitHub Actions][gha-bad
 ![wvlet](logos/wvlet-banner-white-tiny.png)
 
 
-wvlet, pronounced as _weave-let_, is an open-source dataflow editor.
+wvlet, pronounced as _weave-let_, is an open-source functional dataflow builder.
 

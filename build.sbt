@@ -1,19 +1,19 @@
-val SCALA_2_13          = "2.13.4"
+val SCALA_2_13 = "2.13.4"
 
 val AIRFRAME_VERSION    = "21.9.0"
 val SCALAJS_DOM_VERSION = "1.2.0"
 
-scalaVersion in ThisBuild := SCALA_2_13
+ThisBuild / scalaVersion := SCALA_2_13
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
 
 val buildSettings = Seq[Setting[_]](
-  crossScalaVersions := Seq(SCALA_2_13),
-  organization := "org.wvlet.flow",
-  description := "A framework for building functional data flows",
-  crossPaths := true,
-  publishMavenStyle := true,
-  Test / logBuffered := false,
+  crossScalaVersions  := Seq(SCALA_2_13),
+  organization        := "org.wvlet.flow",
+  description         := "A framework for building functional data flows",
+  crossPaths          := true,
+  publishMavenStyle   := true,
+  Test / logBuffered  := false,
   sonatypeProfileName := "org.wvlet",
   licenses += ("Apache-2.0", url("https://www.apache.org/licenses/LICENSE-2.0.html")),
   homepage := Some(url("https://wvlet.org/wvlet")),
@@ -27,7 +27,7 @@ val buildSettings = Seq[Setting[_]](
     Developer(id = "leo", name = "Taro L. Saito", email = "leo@xerial.org", url = url("http://xerial.org/leo"))
   ),
   sonatypeProfileName := "org.wvlet",
-  publishTo := sonatypePublishToBundle.value,
+  publishTo           := sonatypePublishToBundle.value,
   libraryDependencies ++= Seq(
     "org.wvlet.airframe" %% "airspec" % AIRFRAME_VERSION % "test"
   ),
@@ -39,18 +39,18 @@ lazy val wvlet =
     .in(file("."))
     .settings(
       buildSettings,
-      name := "wvlet",
+      name            := "wvlet",
       publishArtifact := false,
-      publish := {},
-      publishLocal := {}
-    ).aggregate(core, api, server, main)
+      publish         := {},
+      publishLocal    := {}
+    ).aggregate(core, api, apiClient, server, main)
 
 lazy val core =
   project
     .in(file("wvlet-core"))
     .settings(
       buildSettings,
-      name := "wvlet-core",
+      name        := "wvlet-core",
       description := "wvlet core module",
       libraryDependencies ++= Seq(
         "org.wvlet.airframe" %% "airframe" % AIRFRAME_VERSION
@@ -62,10 +62,10 @@ lazy val main =
     .in(file("wvlet-main"))
     .settings(
       buildSettings,
-      name := "wvlet-main",
+      name        := "wvlet-main",
       description := "wvlet main module",
       libraryDependencies ++= Seq(
-        )
+      )
     ).dependsOn(server)
 
 lazy val server =
@@ -73,17 +73,17 @@ lazy val server =
     .in(file("wvlet-server"))
     .settings(
       buildSettings,
-      name := "wvlet-server",
+      name        := "wvlet-server",
       description := "wvlet server",
       libraryDependencies ++= Seq(
-        "org.wvlet.airframe" %% "airframe-http-finagle" % AIRFRAME_VERSION,
-        "org.wvlet.airframe" %% "airframe-launcher"     % AIRFRAME_VERSION
+        "org.wvlet.airframe" %% "airframe-http-grpc" % AIRFRAME_VERSION,
+        "org.wvlet.airframe" %% "airframe-launcher"  % AIRFRAME_VERSION
       )
     )
-    .dependsOn(core, api)
+    .dependsOn(core, api, apiClient)
 
 lazy val api =
-    project
+  project
     .enablePlugins(BuildInfoPlugin)
     .in(file("wvlet-api"))
     .settings(
@@ -91,9 +91,23 @@ lazy val api =
       buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion),
       buildInfoOptions += BuildInfoOption.BuildTime,
       buildInfoPackage := "wvlet.flow.api",
-      name := "wvlet-api",
-      description := "wvlet API interface and model classes",
+      name             := "wvlet-api",
+      description      := "wvlet API interface and model classes",
       libraryDependencies ++= Seq(
         "org.wvlet.airframe" %%% "airframe-http" % AIRFRAME_VERSION
       )
     )
+
+lazy val apiClient =
+  project
+    .enablePlugins(AirframeHttpPlugin)
+    .in(file("wvlet-api-client"))
+    .settings(
+      buildSettings,
+      name                := "wvlet-api-client",
+      description         := "wvlet API interface client",
+      airframeHttpClients := Seq("wvlet.flow.api:grpc:wvlet.flow.api.WvletGrpcClient"),
+      libraryDependencies ++= Seq(
+        "org.wvlet.airframe" %%% "airframe-http-grpc" % AIRFRAME_VERSION
+      )
+    ).dependsOn(api)

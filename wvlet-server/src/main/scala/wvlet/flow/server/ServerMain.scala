@@ -14,9 +14,9 @@
 package wvlet.flow.server
 
 import wvlet.airframe.http.Router
-import wvlet.airframe.http.finagle.{Finagle, FinagleServer}
+import wvlet.airframe.http.grpc.{GrpcServer, gRPC}
 import wvlet.airframe.launcher.{Launcher, command, option}
-import wvlet.flow.api.v1.ServiceApi
+import wvlet.flow.api.v1.ServiceInfoApi
 import wvlet.log.{LogSupport, Logger}
 
 /**
@@ -29,10 +29,10 @@ object ServerMain {
 
   def router =
     Router
-      .add[ServiceApi]
+      .add[ServiceInfoApi]
 
   def design =
-    Finagle.server
+    gRPC.server
       .withName("wvlet-server")
       .withPort(8080)
       .withRouter(router)
@@ -50,9 +50,9 @@ class ServerMain(@option(prefix = "-h,--help", description = "Show help messages
 
   @command(description = "Start wvlet server")
   def server = {
-    ServerMain.design.withProductionMode.build[FinagleServer] { server =>
-      server.waitServerTermination
-    }
+    ServerMain.design.withProductionMode
+      .build[GrpcServer] { server =>
+        server.awaitTermination
+      }
   }
-
 }
