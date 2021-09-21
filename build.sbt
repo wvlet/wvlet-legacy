@@ -60,10 +60,12 @@ lazy val core =
 lazy val main =
   project
     .in(file("wvlet-main"))
+    .enablePlugins(PackPlugin)
     .settings(
       buildSettings,
       name        := "wvlet-main",
       description := "wvlet main module",
+      packMain    := Map("wvlet-server" -> "wvlet.flow.server.ServerMain"),
       libraryDependencies ++= Seq(
       )
     ).dependsOn(server)

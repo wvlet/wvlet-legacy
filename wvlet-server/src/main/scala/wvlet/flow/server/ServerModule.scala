@@ -85,6 +85,18 @@ object ServerModule {
     ports
   }
 
+  def standaloneDesign(coordinatorPort: Int, workerPort: Int): Design = {
+    coordinatorDesign(CoordinatorConfig(serverAddress = ServerAddress(s"localhost:${coordinatorPort}")))
+      .add(
+        workerDesign(
+          WorkerConfig(
+            serverAddress = ServerAddress(s"localhost:${workerPort}"),
+            coordinatorAddress = ServerAddress(s"localhost:${coordinatorPort}")
+          )
+        )
+      )
+  }
+
   /**
     * Design for launching a test server and client
     * @return

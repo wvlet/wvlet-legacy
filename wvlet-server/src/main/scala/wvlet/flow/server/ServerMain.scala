@@ -13,10 +13,8 @@
  */
 package wvlet.flow.server
 
-import wvlet.airframe.http.Router
-import wvlet.airframe.http.grpc.{GrpcServer, gRPC}
 import wvlet.airframe.launcher.{Launcher, command, option}
-import wvlet.flow.api.v1.ServiceInfoApi
+import wvlet.flow.server.ServerModule.CoordinatorServer
 import wvlet.log.{LogSupport, Logger}
 
 /**
@@ -26,18 +24,6 @@ object ServerMain {
     Logger.init
     Launcher.of[ServerMain].execute(args)
   }
-
-  def router =
-    Router
-      .add[ServiceInfoApi]
-
-  def design =
-    gRPC.server
-      .withName("wvlet-server")
-      .withPort(8080)
-      .withRouter(router)
-      .design
-
 }
 
 class ServerMain(@option(prefix = "-h,--help", description = "Show help messages", isHelp = true) help: Boolean)
@@ -49,9 +35,16 @@ class ServerMain(@option(prefix = "-h,--help", description = "Show help messages
   }
 
   @command(description = "Start wvlet server")
-  def server = {
-    ServerMain.design.withProductionMode
-      .build[GrpcServer] { server =>
+  def server(
+      @option(prefix = "-p", description = "coordinator port")
+      coordinatorPort: Int = 9090,
+      @option(prefix = "-w", description = "worker port")
+      workerPort: Int = 9091
+  ): Unit = {
+    ServerModule
+      .standaloneDesign(coordinatorPort, workerPort)
+      .withProductionMode
+      .build[CoordinatorServer] { server =>
         server.awaitTermination
       }
   }
