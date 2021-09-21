@@ -11,27 +11,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package wvlet.flow.api.v1
+package wvlet.flow.server.api
 
-import wvlet.airframe.http.RPC
-import wvlet.airframe.ulid.ULID
-import wvlet.flow.api.v1.CoordinatorApi.NodeId
 import wvlet.flow.api.v1.TaskRef.TaskId
-
-import java.time.Instant
+import wvlet.flow.api.v1.{TaskList, TaskListRequest, TaskRef, TaskRequest, WorkerApi}
 
 /**
-  * Worker receives a task request from the coordinator and process the task
   */
-@RPC
-trait WorkerApi {
-  import WorkerApi._
-  def runTask(task: TaskRequest): TaskExecutionInfo
-  def getTask(taskId: TaskId): Option[TaskRef]
-  def cancelTask(taskId: TaskId): Option[TaskRef]
-  def listTasks(request: TaskListRequest): TaskList
-}
-
-object WorkerApi {
-  case class TaskExecutionInfo(taskId: TaskId, nodeId: NodeId, createdAt: Instant = Instant.now())
+class WorkerApiImpl extends WorkerApi {
+  override def runTask(task: TaskRequest): WorkerApi.TaskExecutionInfo = ???
+  override def getTask(taskId: TaskId): Option[TaskRef]                = ???
+  override def cancelTask(taskId: TaskId): Option[TaskRef]             = ???
+  override def listTasks(request: TaskListRequest): TaskList           = ???
 }

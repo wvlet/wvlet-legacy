@@ -15,6 +15,7 @@ package wvlet.flow.api.v1
 
 import wvlet.airframe.http.RPC
 import wvlet.airframe.metrics.ElapsedTime
+import wvlet.airframe.ulid.ULID
 import wvlet.flow.api.BuildInfo
 
 import java.time.Instant
@@ -32,7 +33,12 @@ import ServiceInfoApi._
 /**
   */
 @RPC
-class ServiceInfoApi(serviceStartTime: Instant = Instant.now()) {
+class ServiceInfoApi(id: ULID = ULID.newULID, serviceStartTime: Instant = Instant.now()) {
+
+  /**
+    * Return the process identifier that can be used for checking whether the node is retarted or not
+    */
+  def launchId: ULID = id
   def serviceInfo: ServiceInfo = {
     val uptimeMillis = Instant.now().toEpochMilli - serviceStartTime.toEpochMilli
     ServiceInfo(upTime = ElapsedTime.succinctMillis(uptimeMillis))
