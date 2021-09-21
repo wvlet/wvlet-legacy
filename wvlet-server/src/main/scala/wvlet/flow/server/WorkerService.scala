@@ -40,7 +40,7 @@ class WorkerService(
     Node(name = workerConfig.name, address = localAddr, isCoordinator = false, startedAt = Instant.now())
   }
 
-  private lazy val coordinatorClient = rpcClientProvider.getCoordinatorClientFor(workerConfig.coordinatorAddress)
+  private lazy val coordinatorClient = rpcClientProvider.getCoordinatorClient(workerConfig.coordinatorAddress)
 
   // Polling coordinator every 5 seconds
   executor.scheduleAtFixedRate(

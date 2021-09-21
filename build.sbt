@@ -111,7 +111,7 @@ lazy val apiClient =
       airframeHttpClients := Seq(
         "wvlet.flow.api.internal.coordinator:grpc:CoordinatorGrpc",
         "wvlet.flow.api.internal.worker:grpc:WorkerGrpc",
-        "wvlet.flow.api.v1:grpc:TaskGrpc"
+        "wvlet.flow.api.v1:grpc:WvletGrpc"
       ),
       libraryDependencies ++= Seq(
         "org.wvlet.airframe" %%% "airframe-http-grpc" % AIRFRAME_VERSION

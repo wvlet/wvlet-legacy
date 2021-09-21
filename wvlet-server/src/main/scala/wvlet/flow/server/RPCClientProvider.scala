@@ -26,17 +26,17 @@ import scala.annotation.tailrec
 
 /**
   */
-class RPCClientProvider(workerConfig: WorkerConfig) extends LogSupport with AutoCloseable {
+class RPCClientProvider() extends LogSupport with AutoCloseable {
 
   import scala.jdk.CollectionConverters._
 
   private val clientHolder = new ConcurrentHashMap[String, AutoCloseable]().asScala
 
-  def getCoordinatorClientFor(nodeAddress: ServerAddress): CoordinatorClient = {
+  def getCoordinatorClient(nodeAddress: ServerAddress): CoordinatorClient = {
     getClientFor(nodeAddress)(CoordinatorGrpc.newSyncClient(_))
   }
 
-  def getWorkerClientFor(nodeAddress: ServerAddress): WorkerClient = {
+  def getWorkerClient(nodeAddress: ServerAddress): WorkerClient = {
     getClientFor(nodeAddress)(WorkerGrpc.newSyncClient(_))
   }
 
