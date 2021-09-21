@@ -46,7 +46,6 @@ object TaskGraph {
 }
 
 /**
-  *
   */
 case class TaskGraph(nodes: Seq[Task], dependencies: Map[Int, Seq[Int]]) {
 

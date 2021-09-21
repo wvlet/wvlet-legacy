@@ -11,22 +11,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package wvlet.flow.api.v1
 
-import * as monaco from 'monaco-editor'
-// or import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
-// if shipping only a subset of the features & languages is desired
-//
-// monaco.editor.create(document.getElementById('monaco-editor'), {
-//     value: 'select * from table',
-//     language: 'sql',
-//     theme: "vs-dark",
-// });
+import wvlet.airframe.http.RPC
+import wvlet.flow.api.BuildInfo
 
-function createEditor(id, value, lang) {
-    monaco.editor.create(document.getElementById(id), {
-        value: value,
-        language: lang,
-        theme: 'vs-dark',
-    });
+object ServiceApi {
+  case class ServiceInfo(version: String = BuildInfo.version, buildTime: String = BuildInfo.builtAtString)
 }
 
+import ServiceApi._
+
+/**
+  */
+@RPC
+class ServiceApi {
+  def serviceInfo: ServiceInfo = ServiceInfo()
+}

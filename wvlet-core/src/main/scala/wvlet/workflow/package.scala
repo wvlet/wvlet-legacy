@@ -19,7 +19,6 @@ import wvlet.workflow.macros.TaskMacros._
 import scala.language.implicitConversions
 
 /**
-  *
   */
 package object workflow {
 

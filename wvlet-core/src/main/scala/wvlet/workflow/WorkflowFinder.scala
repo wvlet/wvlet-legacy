@@ -5,7 +5,6 @@ import java.lang.reflect.Modifier
 import wvlet.log.io.Resource
 
 /**
-  *
   */
 object WorkflowFinder {
 

@@ -11,17 +11,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package wvlet.dataflow.server
+package wvlet.flow.server
 
 import wvlet.airframe.http.Router
 import wvlet.airframe.http.finagle.{Finagle, FinagleServer}
 import wvlet.airframe.launcher.{Launcher, command, option}
-import wvlet.dataflow.api.v1.ServiceApi
-import wvlet.dataflow.server.api.ServerApi
+import wvlet.flow.api.v1.ServiceApi
 import wvlet.log.{LogSupport, Logger}
 
 /**
-  *
   */
 object ServerMain {
   def main(args: Array[String]): Unit = {
@@ -32,7 +30,6 @@ object ServerMain {
   def router =
     Router
       .add[ServiceApi]
-      .add[ServerApi]
 
   def design =
     Finagle.server

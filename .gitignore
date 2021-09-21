@@ -13,3 +13,4 @@ project/ts-importer
 .metals
 .bloop
 metals.sbt
+.bsp

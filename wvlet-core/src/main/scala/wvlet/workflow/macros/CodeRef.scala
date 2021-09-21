@@ -50,7 +50,6 @@ object CodeRef {
 }
 
 /**
-  *
   */
 case class CodeRef(owner: Class[_], name: String, sourcePath: String, line: Int, column: Int) {
   def baseTrait: Class[_] = {

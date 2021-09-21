@@ -14,8 +14,8 @@
 package wvlet.workflow.macros
 
 /**
-  * This class is used for wrapping a code block since case class does not allow having
-  * a code block as a named parameter.
+  * This class is used for wrapping a code block since case class does not allow having a code block as a named
+  * parameter.
   *
   * @param body
   */

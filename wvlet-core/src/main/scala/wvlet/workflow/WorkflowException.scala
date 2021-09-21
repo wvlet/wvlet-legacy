@@ -14,7 +14,6 @@
 package wvlet.workflow
 
 /**
-  *
   */
 object WorkflowException {
   def NA = {
