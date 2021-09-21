@@ -14,9 +14,13 @@
 package wvlet.flow.server
 
 import wvlet.airspec.AirSpec
+import wvlet.flow.server.ServerModule.CoordinatorClient
 
 /**
   */
 class ServerMainTest extends AirSpec {
-  test("launch server", design = ServerMain.design) {}
+  test("launch server", design = ServerModule.testServerAndClient) { (client: CoordinatorClient) =>
+    val serviceInfo = client.v1.ServiceInfoApi.serviceInfo()
+    info(serviceInfo)
+  }
 }

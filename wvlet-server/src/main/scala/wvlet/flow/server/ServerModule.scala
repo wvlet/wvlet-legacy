@@ -13,11 +13,13 @@
  */
 package wvlet.flow.server
 
-import wvlet.airframe.Design
+import io.grpc.ManagedChannelBuilder
+import wvlet.airframe.{Design, Session, newDesign}
 import wvlet.airframe.http.{Router, ServerAddress}
 import wvlet.airframe.http.grpc.{GrpcServer, GrpcServerConfig, gRPC}
 import wvlet.flow.api.WvletGrpcClient
 import wvlet.flow.api.v1.ServiceInfoApi
+import wvlet.log.io.IOUtil
 
 case class CoordinatorConfig(
     name: String = "coordinator",
@@ -61,6 +63,21 @@ object ServerModule {
 //      .withPort(config.port)
 //      .withRouter(workerRouter)
 
-  def design: Design =
-    coordinatorServer()
+  def testServerAndClient: Design = {
+    val port = IOUtil.randomPort
+
+    newDesign
+      .bind[CoordinatorServer].toProvider { (session: Session) =>
+        coordinatorServer(CoordinatorConfig(serverAddress = ServerAddress(s"localhost:${port}"))).newServer(session)
+      }
+      .bind[CoordinatorClient].toProvider { (server: CoordinatorServer) =>
+        val channel = ManagedChannelBuilder
+          .forTarget(server.localAddress)
+          .maxInboundMessageSize(32 * 1024 * 1024)
+          .usePlaintext()
+          .build()
+        WvletGrpcClient.newSyncClient(channel)
+      }
+
+  }
 }

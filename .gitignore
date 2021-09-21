@@ -14,3 +14,4 @@ project/ts-importer
 .bloop
 metals.sbt
 .bsp
+log
