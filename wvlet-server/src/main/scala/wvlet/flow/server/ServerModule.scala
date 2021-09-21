@@ -14,14 +14,12 @@
 package wvlet.flow.server
 
 import io.grpc.ManagedChannelBuilder
-import wvlet.airframe.control.IO
-import wvlet.airframe.{Design, Session, newDesign}
-import wvlet.airframe.http.{Router, ServerAddress}
 import wvlet.airframe.http.grpc.{GrpcServer, GrpcServerConfig, gRPC}
+import wvlet.airframe.http.{Router, ServerAddress}
+import wvlet.airframe.{Design, Session, newDesign}
 import wvlet.flow.api.WvletGrpcClient
 import wvlet.flow.api.v1.ServiceInfoApi
 import wvlet.flow.server.api.{CoordinatorApiImpl, WorkerApiImpl}
-import wvlet.log.io.IOUtil
 
 import java.net.ServerSocket
 

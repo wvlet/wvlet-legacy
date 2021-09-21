@@ -14,7 +14,6 @@
 package wvlet.flow.server
 
 import wvlet.airframe.Design
-import wvlet.airframe.ulid.ULID
 import wvlet.airspec.AirSpec
 import wvlet.flow.server.ServerModule.CoordinatorClient
 

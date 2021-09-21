@@ -15,7 +15,6 @@ package wvlet.flow.api.v1
 
 import wvlet.airframe.http.RPC
 import CoordinatorApi._
-import wvlet.airframe.ulid.ULID
 import wvlet.flow.api.v1.TaskRef.TaskId
 
 import java.time.Instant
