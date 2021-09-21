@@ -11,36 +11,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package wvlet.flow.api.v1
+package wvlet.flow.api.internal
 
-import wvlet.airframe.http.RPC
 import wvlet.airframe.metrics.ElapsedTime
 import wvlet.airframe.ulid.ULID
 import wvlet.flow.api.BuildInfo
 
 import java.time.Instant
 
-object ServiceInfoApi {
-  case class ServiceInfo(
-      version: String = BuildInfo.version,
-      buildTime: String = BuildInfo.builtAtString,
-      upTime: ElapsedTime
-  )
-}
-
-import ServiceInfoApi._
+case class ServiceInfo(
+    launchId: ULID,
+    version: String = BuildInfo.version,
+    buildTime: String = BuildInfo.builtAtString,
+    upTime: ElapsedTime
+)
 
 /**
+  * A base trait for returning the server process information
   */
-@RPC
-class ServiceInfoApi(id: ULID = ULID.newULID, serviceStartTime: Instant = Instant.now()) {
+trait ServiceInfoApi {
 
   /**
-    * Return the process identifier that can be used for checking whether the node is retarted or not
+    * The process identifier that can be used for checking whether the node is restarted or not
     */
-  def launchId: ULID = id
+  private val id: ULID                  = ULID.newULID
+  private val serviceStartTime: Instant = Instant.now()
+
   def serviceInfo: ServiceInfo = {
     val uptimeMillis = Instant.now().toEpochMilli - serviceStartTime.toEpochMilli
-    ServiceInfo(upTime = ElapsedTime.succinctMillis(uptimeMillis))
+    ServiceInfo(launchId = id, upTime = ElapsedTime.succinctMillis(uptimeMillis))
   }
 }

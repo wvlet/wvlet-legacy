@@ -11,13 +11,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package wvlet.flow.api.v1
+package wvlet.flow.api.internal.coordinator
 
 import wvlet.airframe.http.RPC
-import CoordinatorApi._
-import wvlet.flow.api.v1.TaskRef.TaskId
-
-import java.time.Instant
+import wvlet.flow.api.internal.Cluster.{Node, NodeInfo}
+import wvlet.flow.api.internal.ServiceInfoApi
 
 /**
   * Coordinator is a central manager of task execution control. It receives requests for running tasks.
@@ -25,21 +23,7 @@ import java.time.Instant
   * A coordinator can have multiple worker nodes for distributed processing.
   */
 @RPC
-trait CoordinatorApi {
-  def newTask(request: TaskRequest): TaskRef
-  def getTask(taskId: TaskId): Option[TaskRef]
-  def listTasks(taskListRequest: TaskListRequest): TaskList
-  def cancelTask(taskId: TaskId): Option[TaskRef]
-
+trait CoordinatorApi extends ServiceInfoApi {
   def listNodes: Seq[NodeInfo]
   def register(node: Node): Unit
-}
-
-object CoordinatorApi {
-  type NodeId = String
-
-  case class Node(name: NodeId, address: String, isCoordinator: Boolean, startedAt: Instant)
-  case class NodeInfo(node: Node, lastHeartbeatAt: Instant) {
-    def isCoordinator: Boolean = node.isCoordinator
-  }
 }

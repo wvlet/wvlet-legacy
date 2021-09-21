@@ -11,19 +11,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package wvlet.flow.server.api
+package wvlet.flow.api.internal
 
-import wvlet.flow.api.internal.Cluster.{Node, NodeInfo}
-import wvlet.flow.api.internal.coordinator.CoordinatorApi
-import wvlet.flow.server.NodeManager
+import java.time.Instant
 
 /**
   */
-class CoordinatorApiImpl(nodeManager: NodeManager) extends CoordinatorApi {
-  override def listNodes: Seq[NodeInfo] = {
-    nodeManager.listNodes
-  }
-  override def register(node: Node): Unit = {
-    nodeManager.heartBeat(node)
+object Cluster {
+  type NodeId = String
+
+  case class Node(name: NodeId, address: String, isCoordinator: Boolean, startedAt: Instant)
+  case class NodeInfo(node: Node, lastHeartbeatAt: Instant) {
+    def isCoordinator: Boolean = node.isCoordinator
   }
 }

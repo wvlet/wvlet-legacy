@@ -25,19 +25,15 @@ class ServerMainTest extends AirSpec {
 
   test("launch server") { (client: CoordinatorClient) =>
     test("service info") {
-      val serviceInfo = client.v1.ServiceInfoApi.serviceInfo()
+      val serviceInfo = client.CoordinatorApi.serviceInfo()
       debug(serviceInfo)
+      serviceInfo.launchId.epochMillis <= System.currentTimeMillis() shouldBe true
     }
 
     test("node list") {
-      val list = client.v1.CoordinatorApi.listNodes()
+      val list = client.CoordinatorApi.listNodes()
       list.size > 0 shouldBe true
       list.find(_.isCoordinator) shouldBe defined
-    }
-
-    test("launch id") {
-      val launchId = client.v1.ServiceInfoApi.launchId()
-      launchId.epochMillis <= System.currentTimeMillis() shouldBe true
     }
   }
 

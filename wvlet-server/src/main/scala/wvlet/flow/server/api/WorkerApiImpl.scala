@@ -13,8 +13,8 @@
  */
 package wvlet.flow.server.api
 
-import wvlet.flow.api.v1.TaskRef.TaskId
-import wvlet.flow.api.v1.{TaskList, TaskListRequest, TaskRef, TaskRequest, WorkerApi}
+import wvlet.flow.api.internal.worker.WorkerApi
+import wvlet.flow.api.v1.TaskApi.{TaskId, TaskList, TaskListRequest, TaskRef, TaskRequest}
 
 /**
   */

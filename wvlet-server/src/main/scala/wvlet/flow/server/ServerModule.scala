@@ -17,8 +17,9 @@ import io.grpc.ManagedChannelBuilder
 import wvlet.airframe.http.grpc.{GrpcServer, GrpcServerConfig, gRPC}
 import wvlet.airframe.http.{Router, ServerAddress}
 import wvlet.airframe.{Design, Session, newDesign}
-import wvlet.flow.api.WvletGrpcClient
-import wvlet.flow.api.v1.ServiceInfoApi
+import wvlet.flow.api.internal.ServiceInfoApi
+import wvlet.flow.api.internal.coordinator.CoordinatorGrpc
+import wvlet.flow.api.internal.worker.WorkerGrpc
 import wvlet.flow.server.api.{CoordinatorApiImpl, WorkerApiImpl}
 
 import java.net.ServerSocket
@@ -42,9 +43,10 @@ case class WorkerConfig(
 /**
   */
 object ServerModule {
-  type CoordinatorClient = WvletGrpcClient.SyncClient
+  type CoordinatorClient = CoordinatorGrpc.SyncClient
   type CoordinatorServer = GrpcServer
   type WorkerServer      = GrpcServer
+  type WorkerClient      = WorkerGrpc.SyncClient
 
   def coordinatorRouter = Router
     .add[ServiceInfoApi]
@@ -119,7 +121,7 @@ object ServerModule {
           .maxInboundMessageSize(32 * 1024 * 1024)
           .usePlaintext()
           .build()
-        WvletGrpcClient.newSyncClient(channel)
+        CoordinatorGrpc.newSyncClient(channel)
       }
       // Add this design to start up worker service early
       .bind[WorkerService].toEagerSingleton

@@ -16,7 +16,9 @@ package wvlet.flow.server
 import io.grpc.{ConnectivityState, ManagedChannel, ManagedChannelBuilder}
 import wvlet.airframe.control.Control
 import wvlet.airframe.http.ServerAddress
-import wvlet.flow.api.WvletGrpcClient
+import wvlet.flow.api.internal.coordinator.CoordinatorGrpc
+import wvlet.flow.api.internal.worker.WorkerGrpc
+import wvlet.flow.server.ServerModule.{CoordinatorClient, WorkerClient}
 import wvlet.log.LogSupport
 
 import java.util.concurrent.ConcurrentHashMap
@@ -28,36 +30,43 @@ class RPCClientProvider(workerConfig: WorkerConfig) extends LogSupport with Auto
 
   import scala.jdk.CollectionConverters._
 
-  private val clientHolder = new ConcurrentHashMap[String, WvletGrpcClient.SyncClient]().asScala
+  private val clientHolder = new ConcurrentHashMap[String, AutoCloseable]().asScala
 
-  def getSyncClientFor(nodeAddress: ServerAddress): WvletGrpcClient.SyncClient = {
-    getSyncClientFor(nodeAddress.hostAndPort)
+  def getCoordinatorClientFor(nodeAddress: ServerAddress): CoordinatorClient = {
+    getClientFor(nodeAddress)(CoordinatorGrpc.newSyncClient(_))
   }
 
-  def getSyncClientFor(nodeAddress: String): WvletGrpcClient.SyncClient = {
-    clientHolder.getOrElseUpdate(
-      nodeAddress, {
-        val channel: ManagedChannel = ManagedChannelBuilder.forTarget(nodeAddress).usePlaintext().build()
+  def getWorkerClientFor(nodeAddress: ServerAddress): WorkerClient = {
+    getClientFor(nodeAddress)(WorkerGrpc.newSyncClient(_))
+  }
 
-        @tailrec
-        def loop: Unit = {
-          channel.getState(true) match {
-            case ConnectivityState.READY =>
-              info(s"Channel for ${nodeAddress} is ready")
-            // OK
-            case ConnectivityState.SHUTDOWN =>
-              throw new IllegalStateException(s"Failed to open a channel for ${nodeAddress}")
-            case other =>
-              warn(s"Channel state for ${nodeAddress} is ${other}. Sleeping for 100ms")
-              Thread.sleep(100)
-              loop
+  def getClientFor[ClientType <: AutoCloseable](
+      nodeAddress: ServerAddress
+  )(factory: ManagedChannel => ClientType): ClientType = {
+    clientHolder
+      .getOrElseUpdate(
+        nodeAddress.toString(), {
+          val channel: ManagedChannel = ManagedChannelBuilder.forTarget(nodeAddress.toString()).usePlaintext().build()
+
+          @tailrec
+          def loop: Unit = {
+            channel.getState(true) match {
+              case ConnectivityState.READY =>
+                info(s"Channel for ${nodeAddress} is ready")
+              // OK
+              case ConnectivityState.SHUTDOWN =>
+                throw new IllegalStateException(s"Failed to open a channel for ${nodeAddress}")
+              case other =>
+                warn(s"Channel state for ${nodeAddress} is ${other}. Sleeping for 100ms")
+                Thread.sleep(100)
+                loop
+            }
           }
-        }
 
-        loop
-        WvletGrpcClient.newSyncClient(channel)
-      }
-    )
+          loop
+          factory(channel)
+        }
+      ).asInstanceOf[ClientType]
   }
 
   override def close(): Unit = {

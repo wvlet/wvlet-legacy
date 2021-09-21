@@ -13,7 +13,7 @@
  */
 package wvlet.flow.server
 
-import wvlet.flow.api.v1.CoordinatorApi.{Node, NodeInfo}
+import wvlet.flow.api.internal.Cluster.{Node, NodeInfo}
 import wvlet.log.LogSupport
 
 import java.net.InetAddress

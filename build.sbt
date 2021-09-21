@@ -106,9 +106,13 @@ lazy val apiClient =
     .in(file("wvlet-api-client"))
     .settings(
       buildSettings,
-      name                := "wvlet-api-client",
-      description         := "wvlet API interface client",
-      airframeHttpClients := Seq("wvlet.flow.api:grpc:wvlet.flow.api.WvletGrpcClient"),
+      name        := "wvlet-api-client",
+      description := "wvlet API interface client",
+      airframeHttpClients := Seq(
+        "wvlet.flow.api.internal.coordinator:grpc:CoordinatorGrpc",
+        "wvlet.flow.api.internal.worker:grpc:WorkerGrpc",
+        "wvlet.flow.api.v1:grpc:TaskGrpc"
+      ),
       libraryDependencies ++= Seq(
         "org.wvlet.airframe" %%% "airframe-http-grpc" % AIRFRAME_VERSION
       )

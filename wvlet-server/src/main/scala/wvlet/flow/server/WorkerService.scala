@@ -14,7 +14,7 @@
 package wvlet.flow.server
 
 import wvlet.airframe.{Design, newDesign}
-import wvlet.flow.api.v1.CoordinatorApi.Node
+import wvlet.flow.api.internal.Cluster.Node
 import wvlet.flow.server.ServerModule.WorkerServer
 import wvlet.flow.server.WorkerService.WorkerBackgroundExecutor
 
@@ -40,11 +40,11 @@ class WorkerService(
     Node(name = workerConfig.name, address = localAddr, isCoordinator = false, startedAt = Instant.now())
   }
 
-  private lazy val coordinatorClient = rpcClientProvider.getSyncClientFor(workerConfig.coordinatorAddress.toString())
+  private lazy val coordinatorClient = rpcClientProvider.getCoordinatorClientFor(workerConfig.coordinatorAddress)
 
   // Polling coordinator every 5 seconds
   executor.scheduleAtFixedRate(
-    () => { coordinatorClient.v1.CoordinatorApi.register(self) },
+    () => { coordinatorClient.CoordinatorApi.register(self) },
     0,
     5,
     TimeUnit.SECONDS

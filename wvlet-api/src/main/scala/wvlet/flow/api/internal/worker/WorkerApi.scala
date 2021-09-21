@@ -11,12 +11,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package wvlet.flow.api.v1
+package wvlet.flow.api.internal.worker
 
 import wvlet.airframe.http.RPC
-import wvlet.airframe.ulid.ULID
-import wvlet.flow.api.v1.CoordinatorApi.NodeId
-import wvlet.flow.api.v1.TaskRef.TaskId
+import wvlet.flow.api.internal.Cluster.NodeId
+import wvlet.flow.api.internal.ServiceInfoApi
+import wvlet.flow.api.v1.TaskApi._
 
 import java.time.Instant
 
@@ -24,7 +24,7 @@ import java.time.Instant
   * Worker receives a task request from the coordinator and process the task
   */
 @RPC
-trait WorkerApi {
+trait WorkerApi extends ServiceInfoApi {
   import WorkerApi._
   def runTask(task: TaskRequest): TaskExecutionInfo
   def getTask(taskId: TaskId): Option[TaskRef]
