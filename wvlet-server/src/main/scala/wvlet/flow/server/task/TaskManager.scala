@@ -11,16 +11,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package wvlet.flow.server.api
+package wvlet.flow.server.task
 
-import wvlet.flow.api.internal.worker.WorkerApi
-import wvlet.flow.api.v1.TaskApi.{TaskId, TaskList, TaskListRequest, TaskRef, TaskRequest}
+import TaskManager._
+import wvlet.airframe.Design
+import wvlet.flow.server.ThreadManager
 
 /**
   */
-class WorkerApiImpl extends WorkerApi {
-  override def runTask(task: TaskRequest): WorkerApi.TaskExecutionInfo = ???
-  override def getTask(taskId: TaskId): Option[TaskRef]                = ???
-  override def cancelTask(taskId: TaskId): Option[TaskRef]             = ???
-  override def listTasks(request: TaskListRequest): TaskList           = ???
+class TaskManager(threadManager: TaskManagerThreadManager) {}
+
+object TaskManager {
+  type TaskManagerThreadManager = ThreadManager
+
+  def design: Design =
+    Design.newDesign
+      .bind[TaskManagerThreadManager].toInstance(new ThreadManager(name = "task-manager"))
 }

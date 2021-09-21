@@ -13,14 +13,16 @@
  */
 package wvlet.flow.server
 
-import io.grpc.ManagedChannelBuilder
+import io.grpc.{ManagedChannel, ManagedChannelBuilder}
 import wvlet.airframe.http.grpc.{GrpcServer, GrpcServerConfig, gRPC}
 import wvlet.airframe.http.{Router, ServerAddress}
 import wvlet.airframe.{Design, Session, newDesign}
 import wvlet.flow.api.internal.ServiceInfoApi
 import wvlet.flow.api.internal.coordinator.CoordinatorGrpc
 import wvlet.flow.api.internal.worker.WorkerGrpc
-import wvlet.flow.server.api.{CoordinatorApiImpl, WorkerApiImpl}
+import wvlet.flow.api.v1.WvletGrpc
+import wvlet.flow.server.cluster.{CoordinatorApiImpl, WorkerApiImpl, WorkerService}
+import wvlet.flow.server.task.{TaskApiImpl, TaskManager}
 
 import java.net.ServerSocket
 
@@ -47,10 +49,12 @@ object ServerModule {
   type CoordinatorServer = GrpcServer
   type WorkerServer      = GrpcServer
   type WorkerClient      = WorkerGrpc.SyncClient
+  type ApiClient         = WvletGrpc.SyncClient
 
   def coordinatorRouter = Router
     .add[ServiceInfoApi]
     .add[CoordinatorApiImpl]
+    .add[TaskApiImpl]
 
   def workerRouter = Router
     .add[ServiceInfoApi]
@@ -72,6 +76,7 @@ object ServerModule {
     newDesign
       .bind[CoordinatorConfig].toInstance(config)
       .bind[CoordinatorServer].toProvider { session: Session => coordinatorServer(config).newServer(session) }
+      .add(TaskManager.design)
   }
 
   def workerDesign(config: WorkerConfig): Design = {
@@ -99,6 +104,15 @@ object ServerModule {
       )
   }
 
+  def newGrpcChannel(address: String): ManagedChannel = {
+    val channel = ManagedChannelBuilder
+      .forTarget(address)
+      .maxInboundMessageSize(32 * 1024 * 1024)
+      .usePlaintext()
+      .build()
+    channel
+  }
+
   /**
     * Design for launching a test server and client
     * @return
@@ -116,12 +130,10 @@ object ServerModule {
         )
       )
       .bind[CoordinatorClient].toProvider { (server: CoordinatorServer) =>
-        val channel = ManagedChannelBuilder
-          .forTarget(server.localAddress)
-          .maxInboundMessageSize(32 * 1024 * 1024)
-          .usePlaintext()
-          .build()
-        CoordinatorGrpc.newSyncClient(channel)
+        CoordinatorGrpc.newSyncClient(newGrpcChannel(server.localAddress))
+      }
+      .bind[ApiClient].toProvider { (server: CoordinatorServer) =>
+        WvletGrpc.newSyncClient(newGrpcChannel(server.localAddress))
       }
       // Add this design to start up worker service early
       .bind[WorkerService].toEagerSingleton

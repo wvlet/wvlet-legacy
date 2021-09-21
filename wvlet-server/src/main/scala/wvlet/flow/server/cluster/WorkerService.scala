@@ -11,19 +11,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package wvlet.flow.server
+package wvlet.flow.server.cluster
 
 import wvlet.airframe.{Design, newDesign}
 import wvlet.flow.api.internal.Cluster.Node
 import wvlet.flow.server.ServerModule.WorkerServer
-import wvlet.flow.server.WorkerService.WorkerBackgroundExecutor
+import wvlet.flow.server.cluster.WorkerService.WorkerBackgroundExecutor
+import wvlet.flow.server.{RPCClientProvider, WorkerConfig}
 
 import java.net.InetAddress
 import java.time.Instant
 import java.util.concurrent.{Executors, ScheduledExecutorService, TimeUnit}
 
-/**
-  */
 /**
   */
 class WorkerService(
