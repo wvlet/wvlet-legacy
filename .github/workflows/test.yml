@@ -8,7 +8,7 @@ on:
       - '**.sbt'
   push:
     branches:
-      - master
+      - main
     paths:
       - '**.scala'
       - '**.java'
