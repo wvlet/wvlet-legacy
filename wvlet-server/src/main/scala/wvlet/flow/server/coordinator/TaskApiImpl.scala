@@ -30,8 +30,14 @@ class TaskApiImpl(taskManager: TaskManager) extends TaskApi with LogSupport {
   }
 
   override def listTasks(taskListRequest: TaskApi.TaskListRequest): TaskApi.TaskList = {
+    val tasks = taskManager.getAllTasks
+    val selectedTasks = taskListRequest.limit match {
+      case Some(limit) =>
+        tasks.take(tasks.size.min(limit))
+      case None => tasks
+    }
     TaskList(
-      tasks = taskManager.getAllTasks
+      tasks = selectedTasks
     )
   }
 

@@ -82,6 +82,7 @@ object TaskApi {
     def withStatus(newStatus: TaskStatus): TaskRef = this.copy(status = newStatus)
   }
   case class TaskListRequest(
+      limit: Option[Int] = None
   )
 
   case class TaskList(
