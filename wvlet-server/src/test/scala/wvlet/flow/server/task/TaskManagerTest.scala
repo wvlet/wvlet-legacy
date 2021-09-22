@@ -34,10 +34,9 @@ class TaskManagerTest extends AirSpec {
         tags = Seq(s"service:td")
       )
     )
+    info(ret)
 
     val taskList = client.TaskApi.listTasks(TaskListRequest())
     info(taskList)
-
-    info(ret)
   }
 }
