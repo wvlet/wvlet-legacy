@@ -9,7 +9,7 @@ Global / onChangedBuildSource := ReloadOnSourceChanges
 
 val buildSettings = Seq[Setting[_]](
   crossScalaVersions  := Seq(SCALA_2_13),
-  organization        := "org.wvlet.flow",
+  organization        := "org.wvlet.dataflow",
   description         := "A framework for building functional data flows",
   crossPaths          := true,
   publishMavenStyle   := true,
@@ -66,7 +66,7 @@ lazy val main =
       buildSettings,
       name        := "wvlet-main",
       description := "wvlet main module",
-      packMain    := Map("wvlet-server" -> "wvlet.flow.server.ServerMain"),
+      packMain    := Map("wvlet-server" -> "wvlet.dataflow.server.ServerMain"),
       libraryDependencies ++= Seq(
       )
     ).dependsOn(server)
@@ -113,7 +113,7 @@ lazy val api =
       buildSettings,
       buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion),
       buildInfoOptions += BuildInfoOption.BuildTime,
-      buildInfoPackage := "wvlet.flow.api",
+      buildInfoPackage := "wvlet.dataflow.api",
       name             := "wvlet-api",
       description      := "wvlet API interface and model classes",
       libraryDependencies ++= Seq(
@@ -130,9 +130,9 @@ lazy val apiClient =
       name        := "wvlet-api-client",
       description := "wvlet API interface client",
       airframeHttpClients := Seq(
-        "wvlet.flow.api.internal.coordinator:grpc:CoordinatorGrpc",
-        "wvlet.flow.api.internal.worker:grpc:WorkerGrpc",
-        "wvlet.flow.api.v1:grpc:WvletGrpc"
+        "wvlet.dataflow.api.internal.coordinator:grpc:CoordinatorGrpc",
+        "wvlet.dataflow.api.internal.worker:grpc:WorkerGrpc",
+        "wvlet.dataflow.api.v1:grpc:WvletGrpc"
       ),
       libraryDependencies ++= Seq(
         "org.wvlet.airframe" %% "airframe-http-grpc" % AIRFRAME_VERSION
