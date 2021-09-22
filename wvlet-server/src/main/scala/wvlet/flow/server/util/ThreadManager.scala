@@ -13,12 +13,15 @@
  */
 package wvlet.flow.server.util
 
+import wvlet.log.LogSupport
+
 import java.util.concurrent.ForkJoinPool.ForkJoinWorkerThreadFactory
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.{Executors, ForkJoinPool, ForkJoinWorkerThread, ThreadFactory, TimeUnit}
 
 class ThreadManager(name: String, numThreads: Int = Runtime.getRuntime.availableProcessors() * 2)
-    extends AutoCloseable {
+    extends AutoCloseable
+    with LogSupport {
   private val executorService = {
     new ForkJoinPool(
       // The number of threads
@@ -28,6 +31,7 @@ class ThreadManager(name: String, numThreads: Int = Runtime.getRuntime.available
         override def newThread(pool: ForkJoinPool): ForkJoinWorkerThread = {
           val thread     = ForkJoinPool.defaultForkJoinWorkerThreadFactory.newThread(pool)
           val threadName = s"${name}-${threadCount.getAndIncrement()}"
+          // Using damon threads
           thread.setDaemon(true)
           thread.setName(threadName)
           thread
@@ -46,13 +50,16 @@ class ThreadManager(name: String, numThreads: Int = Runtime.getRuntime.available
     })
   }
 
-  override def close(): Unit = executorService.shutdownNow()
+  override def close(): Unit = {
+    info(s"[${name}] Terminating thread manager")
+    executorService.shutdownNow()
+  }
 }
 
 /**
   * Scheduled thread manager
   */
-class ScheduledThreadManager(name: String, numThreads: Int = 1) extends AutoCloseable {
+class ScheduledThreadManager(name: String, numThreads: Int = 1) extends AutoCloseable with LogSupport {
   private val scheduledExecutorService = Executors.newScheduledThreadPool(numThreads)
 
   def scheduleOneshotTask[U](delay: Long, unit: TimeUnit)(body: => U): Unit = {
@@ -79,6 +86,7 @@ class ScheduledThreadManager(name: String, numThreads: Int = 1) extends AutoClos
   }
 
   override def close(): Unit = {
+    info(s"[${name}] Terminating thread manager")
     scheduledExecutorService.shutdownNow()
   }
 }

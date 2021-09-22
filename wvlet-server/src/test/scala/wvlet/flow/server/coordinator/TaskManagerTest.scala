@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package wvlet.flow.server.task
+package wvlet.flow.server.coordinator
 
 import wvlet.airframe.Design
 import wvlet.airspec.AirSpec
@@ -37,7 +37,7 @@ class TaskManagerTest extends AirSpec {
         tags = Seq(s"service:td")
       )
     )
-    info(ret)
+    debug(ret)
 
     val taskList = client.TaskApi.listTasks(TaskListRequest())
 
@@ -60,6 +60,6 @@ class TaskManagerTest extends AirSpec {
 
     loop(ret.id, 30)
 
-    info(taskList)
+    debug(taskList)
   }
 }

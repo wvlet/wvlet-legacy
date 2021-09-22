@@ -17,7 +17,6 @@ import wvlet.flow.api.internal.Cluster.{Node, NodeInfo}
 import wvlet.flow.api.internal.coordinator.CoordinatorApi
 import wvlet.flow.api.v1.TaskApi.TaskId
 import wvlet.flow.api.v1.TaskStatus
-import wvlet.flow.server.task.TaskManager
 
 /**
   */

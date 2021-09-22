@@ -21,8 +21,8 @@ import wvlet.flow.api.internal.ServiceInfoApi
 import wvlet.flow.api.internal.coordinator.CoordinatorGrpc
 import wvlet.flow.api.internal.worker.WorkerGrpc
 import wvlet.flow.api.v1.WvletGrpc
-import wvlet.flow.server.coordinator.{CoordinatorApiImpl, CoordinatorConfig}
-import wvlet.flow.server.task.{TaskApiImpl, TaskManager}
+import wvlet.flow.server.coordinator.{CoordinatorApiImpl, CoordinatorConfig, TaskApiImpl, TaskManager}
+import wvlet.flow.server.task.TaskManager
 import wvlet.flow.server.worker.{WorkerApiImpl, WorkerService}
 
 import java.net.ServerSocket

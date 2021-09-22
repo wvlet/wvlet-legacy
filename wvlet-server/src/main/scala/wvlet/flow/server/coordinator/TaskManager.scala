@@ -11,21 +11,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package wvlet.flow.server.task
+package wvlet.flow.server.coordinator
 
-import TaskManager._
 import wvlet.airframe.Design
 import wvlet.airframe.metrics.ElapsedTime
 import wvlet.airframe.ulid.ULID
 import wvlet.flow.api.v1.TaskApi.{TaskId, TaskRef, TaskRequest}
 import wvlet.flow.api.v1.TaskStatus
-import wvlet.flow.server.coordinator.NodeManager
-import wvlet.flow.server.util.{RPCClientProvider, ScheduledThreadManager, ThreadManager}
+import wvlet.flow.server.coordinator.TaskManager._
+import wvlet.flow.server.util.{RPCClientProvider, ScheduledThreadManager}
 import wvlet.log.LogSupport
 
 import java.time.Instant
-import java.util.concurrent.{ConcurrentHashMap, ConcurrentMap, TimeUnit}
-import javax.annotation.{PostConstruct, PreDestroy}
+import java.util.concurrent.{ConcurrentHashMap, TimeUnit}
+import javax.annotation.PostConstruct
 import scala.jdk.CollectionConverters._
 import scala.util.Random
 
