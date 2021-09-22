@@ -77,6 +77,8 @@ object TaskApi {
       updatedAt: Instant,
       completedAt: Option[Instant] = None
   ) {
+    override def toString: TaskId = s"[${id}] ${status}: ${taskType}"
+
     def withStatus(newStatus: TaskStatus): TaskRef = this.copy(status = newStatus)
   }
   case class TaskListRequest(

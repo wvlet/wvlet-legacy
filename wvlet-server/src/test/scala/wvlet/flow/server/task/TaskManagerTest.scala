@@ -15,9 +15,12 @@ package wvlet.flow.server.task
 
 import wvlet.airframe.Design
 import wvlet.airspec.AirSpec
-import wvlet.flow.api.v1.TaskApi.{TaskListRequest, TaskRequest}
+import wvlet.flow.api.v1.TaskApi.{TaskId, TaskListRequest, TaskRef, TaskRequest}
+import wvlet.flow.api.v1.TaskStatus
 import wvlet.flow.server.ServerModule
 import wvlet.flow.server.ServerModule.{ApiClient, CoordinatorClient}
+
+import scala.annotation.tailrec
 
 /**
   */
@@ -37,6 +40,26 @@ class TaskManagerTest extends AirSpec {
     info(ret)
 
     val taskList = client.TaskApi.listTasks(TaskListRequest())
+
+    @tailrec
+    def loop(t: TaskId, maxRetry: Int): Unit = {
+      if (maxRetry < 0) {
+        fail("Cannot update the status")
+      } else {
+        client.TaskApi.getTask(t) match {
+          case None =>
+            fail(s"Task ${t} is not found")
+          case Some(ref) if ref.status != TaskStatus.QUEUED =>
+          // ok
+          case Some(ref) =>
+            Thread.sleep(100)
+            loop(t, maxRetry - 1)
+        }
+      }
+    }
+
+    loop(ret.id, 30)
+
     info(taskList)
   }
 }

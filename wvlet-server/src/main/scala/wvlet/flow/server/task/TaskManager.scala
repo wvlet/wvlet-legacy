@@ -19,27 +19,76 @@ import wvlet.airframe.metrics.ElapsedTime
 import wvlet.airframe.ulid.ULID
 import wvlet.flow.api.v1.TaskApi.{TaskId, TaskRef, TaskRequest}
 import wvlet.flow.api.v1.TaskStatus
-import wvlet.flow.server.util.ThreadManager
+import wvlet.flow.server.coordinator.NodeManager
+import wvlet.flow.server.util.{RPCClientProvider, ScheduledThreadManager, ThreadManager}
+import wvlet.log.LogSupport
 
 import java.time.Instant
-import java.util.concurrent.{ConcurrentHashMap, ConcurrentMap}
+import java.util.concurrent.{ConcurrentHashMap, ConcurrentMap, TimeUnit}
+import javax.annotation.{PostConstruct, PreDestroy}
 import scala.jdk.CollectionConverters._
+import scala.util.Random
 
 case class TaskManagerConfig(
-    expiresAfterDone: ElapsedTime = ElapsedTime("10m")
+    expiresAfterDone: ElapsedTime = ElapsedTime("10m"),
+    maxQueueingTime: ElapsedTime = ElapsedTime("1d")
 )
 
 /**
   */
 class TaskManager(
+    config: TaskManagerConfig,
+    nodeManager: NodeManager,
+    rpcClientProvider: RPCClientProvider,
     threadManager: TaskManagerThreadManager,
     listeners: Seq[TaskStateListener] = Seq(TaskStateListener.defaultListener)
-) {
+) extends LogSupport {
 
   // idempotent key -> TaskRef
   private val registeredTasks = new ConcurrentHashMap[ULID, TaskId]().asScala
   private val taskRefs        = new ConcurrentHashMap[TaskId, TaskRef].asScala
   private val taskRequests    = new ConcurrentHashMap[TaskId, TaskRequest].asScala
+
+  @PostConstruct
+  def start: Unit = {
+    threadManager.scheduledAtFixedRate(0, 1, TimeUnit.SECONDS) {
+      checkPendingTasks
+    }
+  }
+
+  private def checkPendingTasks: Unit = {
+    for {
+      queuedTask        <- taskRefs.values.filter(_.status == TaskStatus.QUEUED);
+      queuedTaskRequest <- taskRequests.get(queuedTask.id)
+    } {
+      val queuedTime = ElapsedTime.nanosSince(queuedTask.createdAt.getNano)
+      if (queuedTime.compareTo(config.maxQueueingTime) > 0) {
+        // Fail the task when it exceeds the max queueing time
+        updateTask(queuedTask.id)(_.withStatus(TaskStatus.FAILED))
+      } else {
+        dispatchTask(queuedTaskRequest)
+      }
+    }
+  }
+
+  def dispatchTask(request: TaskRequest): TaskRef = {
+    info(s"New task: ${request}")
+    val taskRef = getOrCreateTask(request)
+
+    val activeWorkerNodes = nodeManager.listWorkerNodes
+    if (activeWorkerNodes.isEmpty) {
+      warn(s"[${taskRef.id}] No worker node is available")
+      taskRef
+    } else {
+      val nodeIndex         = Random.nextInt(activeWorkerNodes.size)
+      val targetWorkerNode  = activeWorkerNodes(nodeIndex)
+      val workerClient      = rpcClientProvider.getWorkerClient(targetWorkerNode.serverAddress)
+      val updatedTask       = updateTask(taskRef.id)(_.withStatus(TaskStatus.STARTING))
+      val taskExecutionInfo = workerClient.WorkerApi.runTask(taskRef.id, request)
+      info(taskExecutionInfo)
+      getTaskRef(taskRef.id).getOrElse(updatedTask)
+    }
+  }
 
   def getTaskRef(taskId: TaskId): Option[TaskRef] = {
     taskRefs.get(taskId)
@@ -91,9 +140,9 @@ class TaskManager(
 }
 
 object TaskManager {
-  type TaskManagerThreadManager = ThreadManager
+  type TaskManagerThreadManager = ScheduledThreadManager
 
   def design: Design =
     Design.newDesign
-      .bind[TaskManagerThreadManager].toInstance(new ThreadManager(name = "task-manager"))
+      .bind[TaskManagerThreadManager].toInstance(new ScheduledThreadManager(name = "task-manager"))
 }

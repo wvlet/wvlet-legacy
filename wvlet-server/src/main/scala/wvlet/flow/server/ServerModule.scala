@@ -21,19 +21,11 @@ import wvlet.flow.api.internal.ServiceInfoApi
 import wvlet.flow.api.internal.coordinator.CoordinatorGrpc
 import wvlet.flow.api.internal.worker.WorkerGrpc
 import wvlet.flow.api.v1.WvletGrpc
-import wvlet.flow.server.coordinator.CoordinatorApiImpl
+import wvlet.flow.server.coordinator.{CoordinatorApiImpl, CoordinatorConfig}
 import wvlet.flow.server.task.{TaskApiImpl, TaskManager}
 import wvlet.flow.server.worker.{WorkerApiImpl, WorkerService}
 
 import java.net.ServerSocket
-
-case class CoordinatorConfig(
-    name: String = "coordinator",
-    // self-address
-    serverAddress: ServerAddress
-) {
-  def port: Int = serverAddress.port
-}
 
 case class WorkerConfig(
     name: String = "worker-1",
@@ -94,7 +86,7 @@ object ServerModule {
   }
 
   def standaloneDesign(coordinatorPort: Int, workerPort: Int): Design = {
-    coordinatorDesign(CoordinatorConfig(serverAddress = ServerAddress(s"localhost:${coordinatorPort}")))
+    coordinatorDesign(coordinator.CoordinatorConfig(serverAddress = ServerAddress(s"localhost:${coordinatorPort}")))
       .add(
         workerDesign(
           WorkerConfig(
@@ -121,7 +113,7 @@ object ServerModule {
   def testServerAndClient: Design = {
     val Seq(coordinatorPort, workerPort) = randomPort(2)
 
-    coordinatorDesign(CoordinatorConfig(serverAddress = ServerAddress(s"localhost:${coordinatorPort}")))
+    coordinatorDesign(coordinator.CoordinatorConfig(serverAddress = ServerAddress(s"localhost:${coordinatorPort}")))
       .add(
         workerDesign(
           WorkerConfig(

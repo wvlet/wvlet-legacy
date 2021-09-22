@@ -14,7 +14,6 @@
 package wvlet.flow.server.coordinator
 
 import wvlet.flow.api.internal.Cluster.{Node, NodeInfo}
-import wvlet.flow.server.CoordinatorConfig
 import wvlet.log.LogSupport
 
 import java.net.InetAddress

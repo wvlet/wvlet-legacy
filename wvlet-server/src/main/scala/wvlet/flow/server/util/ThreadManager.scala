@@ -15,7 +15,7 @@ package wvlet.flow.server.util
 
 import java.util.concurrent.ForkJoinPool.ForkJoinWorkerThreadFactory
 import java.util.concurrent.atomic.AtomicInteger
-import java.util.concurrent.{ForkJoinPool, ForkJoinWorkerThread}
+import java.util.concurrent.{Executors, ForkJoinPool, ForkJoinWorkerThread, ThreadFactory, TimeUnit}
 
 class ThreadManager(name: String, numThreads: Int = Runtime.getRuntime.availableProcessors() * 2)
     extends AutoCloseable {
@@ -39,10 +39,46 @@ class ThreadManager(name: String, numThreads: Int = Runtime.getRuntime.available
       true
     )
   }
+
   def submit[U](body: => U): Unit = {
     executorService.submit(new Runnable {
       override def run(): Unit = body
     })
   }
+
   override def close(): Unit = executorService.shutdownNow()
+}
+
+/**
+  * Scheduled thread manager
+  */
+class ScheduledThreadManager(name: String, numThreads: Int = 1) extends AutoCloseable {
+  private val scheduledExecutorService = Executors.newScheduledThreadPool(numThreads)
+
+  def scheduleOneshotTask[U](delay: Long, unit: TimeUnit)(body: => U): Unit = {
+    scheduledExecutorService.schedule(
+      new Runnable {
+        override def run(): Unit = {
+          body
+        }
+      },
+      delay,
+      unit
+    )
+  }
+
+  def scheduledAtFixedRate[U](initialDelay: Long, period: Long, unit: TimeUnit)(body: => U): Unit = {
+    scheduledExecutorService.scheduleAtFixedRate(
+      new Runnable {
+        override def run(): Unit = body
+      },
+      initialDelay,
+      period,
+      unit
+    )
+  }
+
+  override def close(): Unit = {
+    scheduledExecutorService.shutdownNow()
+  }
 }

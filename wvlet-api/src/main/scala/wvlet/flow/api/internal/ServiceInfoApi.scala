@@ -29,7 +29,7 @@ case class ServiceInfo(
 /**
   * A base trait for returning the server process information
   */
-trait ServiceInfoApi {
+abstract trait ServiceInfoApi {
 
   /**
     * The process identifier that can be used for checking whether the node is restarted or not
