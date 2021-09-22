@@ -48,8 +48,8 @@ class TaskManager(
   def getOrCreateTask(request: TaskRequest): TaskRef = {
     val taskId = registeredTasks.getOrElseUpdate(
       request.idempotentKey, {
-        // Add "T:" prefix for the readability of taskId
-        val taskId = s"T:${ULID.newULIDString}"
+        // Add "T" prefix for the readability of taskId
+        val taskId = s"T_${ULID.newULIDString}"
         val now    = Instant.now
 
         val ref = TaskRef(
