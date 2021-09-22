@@ -21,12 +21,24 @@ sealed trait TaskStatus {
 }
 
 object TaskStatus {
+
+  /**
+    * Task is queued at the coordinator
+    */
   case object QUEUED extends TaskStatus {
     override def isDone: Boolean = false
   }
+
+  /**
+    * Task is starting at the coordinator
+    */
   case object STARTING extends TaskStatus {
     override def isDone: Boolean = false
   }
+
+  /**
+    * Task is running at a worker
+    */
   case object RUNNING extends TaskStatus {
     override def isDone: Boolean = false
   }

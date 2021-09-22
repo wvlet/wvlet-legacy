@@ -25,6 +25,7 @@ import java.util.concurrent.ConcurrentHashMap
 import scala.annotation.tailrec
 
 /**
+  * Provide gRPC clients and closes created clients when closing this provider
   */
 class RPCClientProvider() extends LogSupport with AutoCloseable {
 
@@ -40,7 +41,7 @@ class RPCClientProvider() extends LogSupport with AutoCloseable {
     getClientFor(nodeAddress)(WorkerGrpc.newSyncClient(_))
   }
 
-  def getClientFor[ClientType <: AutoCloseable](
+  private def getClientFor[ClientType <: AutoCloseable](
       nodeAddress: ServerAddress
   )(factory: ManagedChannel => ClientType): ClientType = {
     clientHolder

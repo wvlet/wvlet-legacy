@@ -13,6 +13,8 @@
  */
 package wvlet.flow.api.internal
 
+import wvlet.airframe.http.ServerAddress
+
 import java.time.Instant
 
 /**
@@ -22,6 +24,7 @@ object Cluster {
 
   case class Node(name: NodeId, address: String, isCoordinator: Boolean, startedAt: Instant)
   case class NodeInfo(node: Node, lastHeartbeatAt: Instant) {
-    def isCoordinator: Boolean = node.isCoordinator
+    def isCoordinator: Boolean       = node.isCoordinator
+    def serverAddress: ServerAddress = ServerAddress(node.address)
   }
 }

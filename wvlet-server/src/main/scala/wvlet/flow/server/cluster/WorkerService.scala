@@ -23,39 +23,41 @@ import java.net.InetAddress
 import java.time.Instant
 import java.util.concurrent.{Executors, ScheduledExecutorService, TimeUnit}
 
+import WorkerService._
+
 /**
   */
 class WorkerService(
     workerConfig: WorkerConfig,
+    self: WorkerSelf,
     // Adding this dependency to start WorkerServer
     workerServer: WorkerServer,
     rpcClientProvider: RPCClientProvider,
     executor: WorkerBackgroundExecutor
 ) {
 
-  private val self: Node = {
-    val localHost = InetAddress.getLocalHost
-    val localAddr = s"${localHost.getHostAddress}:${workerConfig.serverAddress.port}"
-    Node(name = workerConfig.name, address = localAddr, isCoordinator = false, startedAt = Instant.now())
-  }
-
   private lazy val coordinatorClient = rpcClientProvider.getCoordinatorClient(workerConfig.coordinatorAddress)
 
-  // Polling coordinator every 5 seconds
+  // Polling coordinator every 5 seconds for heartbeat
   executor.scheduleAtFixedRate(
     () => { coordinatorClient.CoordinatorApi.register(self) },
     0,
     5,
     TimeUnit.SECONDS
   )
-
 }
 
 object WorkerService {
 
   type WorkerBackgroundExecutor = ScheduledExecutorService
+  type WorkerSelf               = Node
 
   def design: Design = newDesign
+    .bind[WorkerSelf].toProvider { (workerConfig: WorkerConfig) =>
+      val localHost = InetAddress.getLocalHost
+      val localAddr = s"${localHost.getHostAddress}:${workerConfig.serverAddress.port}"
+      Node(name = workerConfig.name, address = localAddr, isCoordinator = false, startedAt = Instant.now())
+    }
     .bind[WorkerBackgroundExecutor].toInstance(
       Executors.newSingleThreadScheduledExecutor()
     )

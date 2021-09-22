@@ -51,4 +51,5 @@ class NodeManager(coordinatorConfig: CoordinatorConfig) extends LogSupport {
     b.result()
   }
 
+  def listWorkerNodes: Seq[NodeInfo] = listNodes.filterNot(_.isCoordinator)
 }

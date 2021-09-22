@@ -26,12 +26,12 @@ import java.time.Instant
 @RPC
 trait WorkerApi extends ServiceInfoApi {
   import WorkerApi._
-  def runTask(task: TaskRequest): TaskExecutionInfo
+  def runTask(taskId: TaskId, task: TaskRequest): TaskExecutionInfo
   def getTask(taskId: TaskId): Option[TaskRef]
   def cancelTask(taskId: TaskId): Option[TaskRef]
   def listTasks(request: TaskListRequest): TaskList
 }
 
 object WorkerApi {
-  case class TaskExecutionInfo(taskId: TaskId, nodeId: NodeId, createdAt: Instant = Instant.now())
+  case class TaskExecutionInfo(taskId: TaskId, nodeId: NodeId, startedAt: Instant = Instant.now())
 }

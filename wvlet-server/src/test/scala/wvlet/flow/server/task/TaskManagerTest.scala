@@ -15,7 +15,7 @@ package wvlet.flow.server.task
 
 import wvlet.airframe.Design
 import wvlet.airspec.AirSpec
-import wvlet.flow.api.v1.TaskApi.TaskRequest
+import wvlet.flow.api.v1.TaskApi.{TaskListRequest, TaskRequest}
 import wvlet.flow.server.ServerModule
 import wvlet.flow.server.ServerModule.{ApiClient, CoordinatorClient}
 
@@ -34,6 +34,10 @@ class TaskManagerTest extends AirSpec {
         tags = Seq(s"service:td")
       )
     )
+
+    val taskList = client.TaskApi.listTasks(TaskListRequest())
+    info(taskList)
+
     info(ret)
   }
 }

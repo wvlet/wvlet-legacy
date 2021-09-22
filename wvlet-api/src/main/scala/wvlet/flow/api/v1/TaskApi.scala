@@ -70,17 +70,20 @@ object TaskApi {
   case class TaskRef(
       parentId: Option[TaskId],
       id: TaskId,
+      taskType: String,
       status: TaskStatus,
       tags: Tags,
       createdAt: Instant,
       updatedAt: Instant,
       completedAt: Option[Instant] = None
-  )
+  ) {
+    def withStatus(newStatus: TaskStatus): TaskRef = this.copy(status = newStatus)
+  }
   case class TaskListRequest(
   )
 
   case class TaskList(
       tasks: Seq[TaskRef],
-      timestamp: Instant
+      timestamp: Instant = Instant.now()
   )
 }

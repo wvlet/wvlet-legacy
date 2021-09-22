@@ -14,13 +14,22 @@
 package wvlet.flow.server.cluster
 
 import wvlet.flow.api.internal.worker.WorkerApi
+import wvlet.flow.api.internal.worker.WorkerApi.TaskExecutionInfo
 import wvlet.flow.api.v1.TaskApi._
+import wvlet.flow.server.cluster.WorkerService.WorkerSelf
+import wvlet.log.LogSupport
+
+import java.time.Instant
 
 /**
   */
-class WorkerApiImpl extends WorkerApi {
-  override def runTask(task: TaskRequest): WorkerApi.TaskExecutionInfo = ???
-  override def getTask(taskId: TaskId): Option[TaskRef]                = ???
-  override def cancelTask(taskId: TaskId): Option[TaskRef]             = ???
-  override def listTasks(request: TaskListRequest): TaskList           = ???
+class WorkerApiImpl(node: WorkerSelf) extends WorkerApi with LogSupport {
+  override def runTask(taskId: TaskId, task: TaskRequest): WorkerApi.TaskExecutionInfo = {
+    info(s"Run task: ${taskId}, ${task}")
+
+    TaskExecutionInfo(taskId, nodeId = node.name, startedAt = Instant.now())
+  }
+  override def getTask(taskId: TaskId): Option[TaskRef]      = ???
+  override def cancelTask(taskId: TaskId): Option[TaskRef]   = ???
+  override def listTasks(request: TaskListRequest): TaskList = ???
 }

@@ -13,14 +13,13 @@
  */
 package wvlet.flow.server.task
 
-import wvlet.airframe.ulid.ULID
+import wvlet.flow.api.v1.TaskApi.{TaskId, TaskList}
 import wvlet.flow.api.v1.{TaskApi, TaskStatus}
-import wvlet.flow.api.v1.TaskApi.{TaskId, TaskRef}
 import wvlet.flow.server.RPCClientProvider
 import wvlet.flow.server.cluster.NodeManager
 import wvlet.log.LogSupport
 
-import java.time.Instant
+import scala.util.Random
 
 /**
   */
@@ -30,25 +29,28 @@ class TaskApiImpl(taskManager: TaskManager, nodeManager: NodeManager, rpcClientP
 
   override def newTask(request: TaskApi.TaskRequest): TaskApi.TaskRef = {
     info(s"New task: ${request}")
+    val taskRef = taskManager.getOrCreateTask(request)
 
-    // Add "T:" prefix for the readability of taskId
-    val taskId = s"T:${ULID.newULIDString}"
-    val now    = Instant.now
-
-    TaskRef(
-      parentId = request.parentId,
-      id = taskId,
-      status = TaskStatus.QUEUED,
-      tags = request.tags,
-      createdAt = now,
-      updatedAt = now,
-      completedAt = None
-    )
+    val activeWorkerNodes = nodeManager.listWorkerNodes
+    if (activeWorkerNodes.isEmpty) {
+      throw new IllegalStateException(s"No worker node available")
+    } else {
+      val nodeIndex        = Random.nextInt(activeWorkerNodes.size)
+      val targetWorkerNode = activeWorkerNodes(nodeIndex)
+      val workerClient     = rpcClientProvider.getWorkerClient(targetWorkerNode.serverAddress)
+      workerClient.WorkerApi.runTask(taskRef.id, request)
+      taskManager.updateTask(taskRef.id)(_.withStatus(TaskStatus.STARTING))
+    }
+    taskRef
   }
 
   override def getTask(taskId: TaskId): Option[TaskApi.TaskRef] = ???
 
-  override def listTasks(taskListRequest: TaskApi.TaskListRequest): TaskApi.TaskList = ???
+  override def listTasks(taskListRequest: TaskApi.TaskListRequest): TaskApi.TaskList = {
+    TaskList(
+      tasks = taskManager.getAllTasks
+    )
+  }
 
   override def cancelTask(taskId: TaskId): Option[TaskApi.TaskRef] = ???
 }
