@@ -22,7 +22,6 @@ import wvlet.flow.api.internal.coordinator.CoordinatorGrpc
 import wvlet.flow.api.internal.worker.WorkerGrpc
 import wvlet.flow.api.v1.WvletGrpc
 import wvlet.flow.server.coordinator.{CoordinatorApiImpl, CoordinatorConfig, TaskApiImpl, TaskManager}
-import wvlet.flow.server.task.TaskManager
 import wvlet.flow.server.worker.{WorkerApiImpl, WorkerService}
 
 import java.net.ServerSocket
@@ -76,6 +75,7 @@ object ServerModule {
     WorkerService.design
       .bind[WorkerConfig].toInstance(config)
       .bind[WorkerServer].toProvider { session: Session => workerServer(config).newServer(session) }
+      .add(PluginManager.design)
   }
 
   private def randomPort(num: Int): Seq[Int] = {

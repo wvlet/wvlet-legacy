@@ -52,8 +52,10 @@ object TaskApi {
   case class TaskRequest(
       // TaskId of the parent if exists
       parentId: Option[TaskId],
-      // Task types
-      taskType: String,
+      // Task plugin name
+      taskPlugin: String,
+      // A method name to execute in the plugin
+      methodName: String,
       // taskBody is a serializable key:String -> value:Any pairs
       taskBody: TaskBody,
       // Tags attached to the task
@@ -70,14 +72,15 @@ object TaskApi {
   case class TaskRef(
       parentId: Option[TaskId],
       id: TaskId,
-      taskType: String,
+      taskPlugin: String,
+      methodName: String,
       status: TaskStatus,
       tags: Tags,
       createdAt: Instant,
       updatedAt: Instant,
       completedAt: Option[Instant] = None
   ) {
-    override def toString: TaskId = s"[${id}] ${status}: ${taskType}"
+    override def toString: TaskId = s"[${id}] ${status}: ${taskPlugin}.${methodName}"
 
     def withStatus(newStatus: TaskStatus): TaskRef = this.copy(status = newStatus)
   }

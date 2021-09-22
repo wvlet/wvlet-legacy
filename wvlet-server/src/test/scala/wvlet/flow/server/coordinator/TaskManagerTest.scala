@@ -32,7 +32,8 @@ class TaskManagerTest extends AirSpec {
     val ret = client.TaskApi.newTask(
       TaskRequest(
         parentId = None,
-        taskType = "trino",
+        taskPlugin = "trino",
+        methodName = "runQuery",
         taskBody = Map("query" -> "select 1", "service" -> "TD (US)"),
         tags = Seq(s"service:td")
       )

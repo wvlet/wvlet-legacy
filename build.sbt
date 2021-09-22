@@ -43,7 +43,7 @@ lazy val wvlet =
       publishArtifact := false,
       publish         := {},
       publishLocal    := {}
-    ).aggregate(core, api, apiClient, server, main)
+    ).aggregate(core, api, apiClient, server, plugin, main)
 
 lazy val core =
   project
@@ -56,6 +56,7 @@ lazy val core =
         "org.wvlet.airframe" %% "airframe" % AIRFRAME_VERSION
       )
     )
+    .dependsOn(api)
 
 lazy val main =
   project
@@ -82,7 +83,27 @@ lazy val server =
         "org.wvlet.airframe" %% "airframe-launcher"  % AIRFRAME_VERSION
       )
     )
-    .dependsOn(core, api, apiClient)
+    .dependsOn(core, plugin, api, apiClient, plugin)
+
+val TRINO_VERSION = "361"
+
+lazy val plugin =
+  project
+    .in(file("wvlet-plugin"))
+    .settings(
+      buildSettings,
+      name        := "wvlet-plugin",
+      description := "wvlet standard plugins",
+      libraryDependencies ++= Seq(
+        // For Trino plugin
+        "io.trino"            % "trino-cli"     % TRINO_VERSION,
+        "io.trino"            % "trino-jdbc"    % TRINO_VERSION,
+        "io.trino"            % "trino-spi"     % TRINO_VERSION,
+        "org.wvlet.airframe" %% "airframe-jdbc" % AIRFRAME_VERSION,
+        "org.xerial.snappy"   % "snappy-java"   % "1.1.8.4"
+      )
+    )
+    .dependsOn(api, core)
 
 lazy val api =
   project
@@ -114,6 +135,6 @@ lazy val apiClient =
         "wvlet.flow.api.v1:grpc:WvletGrpc"
       ),
       libraryDependencies ++= Seq(
-        "org.wvlet.airframe" %%% "airframe-http-grpc" % AIRFRAME_VERSION
+        "org.wvlet.airframe" %% "airframe-http-grpc" % AIRFRAME_VERSION
       )
     ).dependsOn(api)

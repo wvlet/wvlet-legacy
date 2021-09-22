@@ -103,7 +103,8 @@ class TaskManager(
         val ref = TaskRef(
           parentId = request.parentId,
           id = taskId,
-          taskType = request.taskType,
+          taskPlugin = request.taskPlugin,
+          methodName = request.methodName,
           status = TaskStatus.QUEUED,
           tags = request.tags,
           createdAt = now,
