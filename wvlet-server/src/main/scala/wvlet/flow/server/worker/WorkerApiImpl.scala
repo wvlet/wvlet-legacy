@@ -11,12 +11,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package wvlet.flow.server.cluster
+package wvlet.flow.server.worker
 
 import wvlet.flow.api.internal.worker.WorkerApi
 import wvlet.flow.api.internal.worker.WorkerApi.TaskExecutionInfo
 import wvlet.flow.api.v1.TaskApi._
-import wvlet.flow.server.cluster.WorkerService.WorkerSelf
+import wvlet.flow.server.worker.WorkerService.WorkerSelf
 import wvlet.log.LogSupport
 
 import java.time.Instant

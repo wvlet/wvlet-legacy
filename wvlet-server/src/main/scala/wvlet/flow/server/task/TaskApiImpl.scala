@@ -15,8 +15,8 @@ package wvlet.flow.server.task
 
 import wvlet.flow.api.v1.TaskApi.{TaskId, TaskList}
 import wvlet.flow.api.v1.{TaskApi, TaskStatus}
-import wvlet.flow.server.RPCClientProvider
-import wvlet.flow.server.cluster.NodeManager
+import wvlet.flow.server.coordinator.NodeManager
+import wvlet.flow.server.util.RPCClientProvider
 import wvlet.log.LogSupport
 
 import scala.util.Random

@@ -19,7 +19,7 @@ import wvlet.airframe.metrics.ElapsedTime
 import wvlet.airframe.ulid.ULID
 import wvlet.flow.api.v1.TaskApi.{TaskId, TaskRef, TaskRequest}
 import wvlet.flow.api.v1.TaskStatus
-import wvlet.flow.server.ThreadManager
+import wvlet.flow.server.util.ThreadManager
 
 import java.time.Instant
 import java.util.concurrent.{ConcurrentHashMap, ConcurrentMap}

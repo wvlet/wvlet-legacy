@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package wvlet.flow.server.cluster
+package wvlet.flow.server.coordinator
 
 import wvlet.flow.api.internal.Cluster.{Node, NodeInfo}
 import wvlet.flow.server.CoordinatorConfig

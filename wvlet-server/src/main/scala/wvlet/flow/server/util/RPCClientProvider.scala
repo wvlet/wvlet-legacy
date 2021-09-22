@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package wvlet.flow.server
+package wvlet.flow.server.util
 
 import io.grpc.{ConnectivityState, ManagedChannel, ManagedChannelBuilder}
 import wvlet.airframe.control.Control
