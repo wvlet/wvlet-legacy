@@ -16,6 +16,8 @@ package wvlet.flow.server.worker
 import wvlet.flow.api.internal.worker.WorkerApi
 import wvlet.flow.api.internal.worker.WorkerApi.TaskExecutionInfo
 import wvlet.flow.api.v1.TaskApi._
+import wvlet.flow.api.v1.TaskStatus
+import wvlet.flow.server.ServerModule.CoordinatorClient
 import wvlet.flow.server.worker.WorkerService.WorkerSelf
 import wvlet.log.LogSupport
 
@@ -23,10 +25,10 @@ import java.time.Instant
 
 /**
   */
-class WorkerApiImpl(node: WorkerSelf) extends WorkerApi with LogSupport {
+class WorkerApiImpl(node: WorkerSelf, coordinatorClient: CoordinatorClient) extends WorkerApi with LogSupport {
   override def runTask(taskId: TaskId, task: TaskRequest): WorkerApi.TaskExecutionInfo = {
     info(s"Run task: ${taskId}, ${task}")
-
+    coordinatorClient.CoordinatorApi.setTaskStatus(taskId, TaskStatus.RUNNING)
     TaskExecutionInfo(taskId, nodeId = node.name, startedAt = Instant.now())
   }
   override def getTask(taskId: TaskId): Option[TaskRef]      = ???

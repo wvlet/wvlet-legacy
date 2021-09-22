@@ -31,12 +31,19 @@ case class TaskManagerConfig(
 
 /**
   */
-class TaskManager(threadManager: TaskManagerThreadManager) {
+class TaskManager(
+    threadManager: TaskManagerThreadManager,
+    listeners: Seq[TaskStateListener] = Seq(TaskStateListener.defaultListener)
+) {
 
   // idempotent key -> TaskRef
   private val registeredTasks = new ConcurrentHashMap[ULID, TaskId]().asScala
   private val taskRefs        = new ConcurrentHashMap[TaskId, TaskRef].asScala
   private val taskRequests    = new ConcurrentHashMap[TaskId, TaskRequest].asScala
+
+  def getTaskRef(taskId: TaskId): Option[TaskRef] = {
+    taskRefs.get(taskId)
+  }
 
   def getOrCreateTask(request: TaskRequest): TaskRef = {
     val taskId = registeredTasks.getOrElseUpdate(
@@ -63,10 +70,15 @@ class TaskManager(threadManager: TaskManagerThreadManager) {
     taskRefs(taskId)
   }
 
-  def updateTask(taskId: TaskId)(updater: TaskRef => TaskRef): Unit = {
+  def updateTask(taskId: TaskId)(updater: TaskRef => TaskRef): TaskRef = {
     taskRefs.get(taskId) match {
-      case Some(taskRef) =>
-        taskRefs += taskId -> updater(taskRef)
+      case Some(originalTaskRef) =>
+        val newTask = updater(originalTaskRef)
+        taskRefs += taskId -> newTask
+        if (originalTaskRef.status != newTask.status) {
+          listeners.foreach(_.onStateChange(newTask))
+        }
+        newTask
       case None =>
         throw new IllegalArgumentException(s"Unknown ${taskId}")
     }

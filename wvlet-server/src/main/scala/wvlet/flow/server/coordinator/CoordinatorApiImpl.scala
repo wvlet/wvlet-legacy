@@ -15,14 +15,21 @@ package wvlet.flow.server.coordinator
 
 import wvlet.flow.api.internal.Cluster.{Node, NodeInfo}
 import wvlet.flow.api.internal.coordinator.CoordinatorApi
+import wvlet.flow.api.v1.TaskApi.TaskId
+import wvlet.flow.api.v1.TaskStatus
+import wvlet.flow.server.task.TaskManager
 
 /**
   */
-class CoordinatorApiImpl(nodeManager: NodeManager) extends CoordinatorApi {
+class CoordinatorApiImpl(nodeManager: NodeManager, taskManager: TaskManager) extends CoordinatorApi {
   override def listNodes: Seq[NodeInfo] = {
     nodeManager.listNodes
   }
   override def register(node: Node): Unit = {
     nodeManager.heartBeat(node)
+  }
+
+  override def setTaskStatus(taskId: TaskId, status: TaskStatus): Unit = {
+    taskManager.updateTask(taskId)(_.withStatus(status))
   }
 }

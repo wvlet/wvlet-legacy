@@ -16,6 +16,8 @@ package wvlet.flow.api.internal.coordinator
 import wvlet.airframe.http.RPC
 import wvlet.flow.api.internal.Cluster.{Node, NodeInfo}
 import wvlet.flow.api.internal.ServiceInfoApi
+import wvlet.flow.api.v1.TaskApi.TaskId
+import wvlet.flow.api.v1.TaskStatus
 
 /**
   * Coordinator is a central manager of task execution control. It receives requests for running tasks.
@@ -26,4 +28,6 @@ import wvlet.flow.api.internal.ServiceInfoApi
 trait CoordinatorApi extends ServiceInfoApi {
   def listNodes: Seq[NodeInfo]
   def register(node: Node): Unit
+
+  def setTaskStatus(taskId: TaskId, status: TaskStatus): Unit
 }

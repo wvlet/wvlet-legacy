@@ -33,18 +33,21 @@ class TaskApiImpl(taskManager: TaskManager, nodeManager: NodeManager, rpcClientP
 
     val activeWorkerNodes = nodeManager.listWorkerNodes
     if (activeWorkerNodes.isEmpty) {
-      throw new IllegalStateException(s"No worker node available")
+      throw new IllegalStateException(s"No worker node is available")
     } else {
-      val nodeIndex        = Random.nextInt(activeWorkerNodes.size)
-      val targetWorkerNode = activeWorkerNodes(nodeIndex)
-      val workerClient     = rpcClientProvider.getWorkerClient(targetWorkerNode.serverAddress)
-      workerClient.WorkerApi.runTask(taskRef.id, request)
-      taskManager.updateTask(taskRef.id)(_.withStatus(TaskStatus.STARTING))
+      val nodeIndex         = Random.nextInt(activeWorkerNodes.size)
+      val targetWorkerNode  = activeWorkerNodes(nodeIndex)
+      val workerClient      = rpcClientProvider.getWorkerClient(targetWorkerNode.serverAddress)
+      val updatedTask       = taskManager.updateTask(taskRef.id)(_.withStatus(TaskStatus.STARTING))
+      val taskExecutionInfo = workerClient.WorkerApi.runTask(taskRef.id, request)
+      info(taskExecutionInfo)
+      taskManager.getTaskRef(taskRef.id).getOrElse(updatedTask)
     }
-    taskRef
   }
 
-  override def getTask(taskId: TaskId): Option[TaskApi.TaskRef] = ???
+  override def getTask(taskId: TaskId): Option[TaskApi.TaskRef] = {
+    taskManager.getTaskRef(taskId)
+  }
 
   override def listTasks(taskListRequest: TaskApi.TaskListRequest): TaskApi.TaskList = {
     TaskList(
