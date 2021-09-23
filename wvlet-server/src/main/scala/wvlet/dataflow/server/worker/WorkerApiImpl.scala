@@ -14,10 +14,11 @@
 package wvlet.dataflow.server.worker
 
 import wvlet.airframe.rx.Cancelable
+import wvlet.dataflow.api.internal.coordinator.CoordinatorApi.UpdateTaskRequest
 import wvlet.dataflow.api.internal.worker.WorkerApi
 import wvlet.dataflow.api.internal.worker.WorkerApi.TaskExecutionInfo
 import wvlet.dataflow.api.v1.TaskApi._
-import wvlet.dataflow.api.v1.{TaskList, TaskListRequest, TaskRef, TaskRequest, TaskStatus}
+import wvlet.dataflow.api.v1.{ErrorCode, TaskError, TaskList, TaskListRequest, TaskRef, TaskRequest, TaskStatus}
 import wvlet.dataflow.server.PluginManager
 import wvlet.dataflow.server.ServerModule.CoordinatorClient
 import wvlet.dataflow.server.worker.WorkerService.WorkerSelf
@@ -36,10 +37,16 @@ class WorkerApiImpl(node: WorkerSelf, coordinatorClient: CoordinatorClient, plug
 
     pluginManager.getPlugin(task.taskPlugin) match {
       case Some(plugin) =>
-        coordinatorClient.CoordinatorApi.setTaskStatus(taskId, TaskStatus.RUNNING)
+        coordinatorClient.CoordinatorApi.updateTaskStatus(UpdateTaskRequest(taskId, TaskStatus.RUNNING))
         runTask(plugin, TaskInput(taskId, task))
       case None =>
-        coordinatorClient.CoordinatorApi.setTaskStatus(taskId, TaskStatus.FAILED)
+        coordinatorClient.CoordinatorApi.updateTaskStatus(
+          UpdateTaskRequest(
+            taskId,
+            TaskStatus.FAILED,
+            Some(TaskError(s"Unknown plugin: ${task.taskPlugin}", ErrorCode.UNKNOWN_PLUGIN))
+          )
+        )
     }
     TaskExecutionInfo(taskId, nodeId = node.name, startedAt = Instant.now())
   }
@@ -47,12 +54,20 @@ class WorkerApiImpl(node: WorkerSelf, coordinatorClient: CoordinatorClient, plug
   private def runTask(plugin: TaskPlugin, taskInput: TaskInput): Cancelable = {
     try {
       plugin.run(taskInput)
-      coordinatorClient.CoordinatorApi.setTaskStatus(taskInput.taskId, TaskStatus.FINISHED)
+      coordinatorClient.CoordinatorApi.updateTaskStatus(
+        UpdateTaskRequest(taskInput.taskId, TaskStatus.FINISHED)
+      )
       // TODO Support cancellation
       Cancelable.empty
     } catch {
       case e: Throwable =>
-        coordinatorClient.CoordinatorApi.setTaskStatus(taskInput.taskId, TaskStatus.FAILED)
+        coordinatorClient.CoordinatorApi.updateTaskStatus(
+          UpdateTaskRequest(
+            taskInput.taskId,
+            TaskStatus.FAILED,
+            Some(TaskError(e.getMessage, ErrorCode.INTERNAL_ERROR, cause = Some(e)))
+          )
+        )
         // TODO Supprot cancellation
         Cancelable.empty
     }

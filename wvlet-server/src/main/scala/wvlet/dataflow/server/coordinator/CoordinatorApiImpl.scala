@@ -28,7 +28,14 @@ class CoordinatorApiImpl(nodeManager: NodeManager, taskManager: TaskManager) ext
     nodeManager.heartBeat(node)
   }
 
-  override def setTaskStatus(taskId: TaskId, status: TaskStatus): Unit = {
-    taskManager.updateTask(taskId)(_.withStatus(status))
+  override def updateTaskStatus(request: CoordinatorApi.UpdateTaskRequest): Unit = {
+    taskManager.updateTask(request.taskId) { task =>
+      request.error match {
+        case None =>
+          task.withStatus(request.status)
+        case Some(err) =>
+          task.withError(err)
+      }
+    }
   }
 }

@@ -79,11 +79,13 @@ case class TaskRef(
     tags: Tags,
     createdAt: Instant,
     updatedAt: Instant,
-    completedAt: Option[Instant] = None
+    completedAt: Option[Instant] = None,
+    taskError: Option[TaskError] = None
 ) {
   override def toString: TaskId = s"[${id}] ${status}: ${taskPlugin}.${methodName}"
 
   def withStatus(newStatus: TaskStatus): TaskRef = this.copy(status = newStatus)
+  def withError(error: TaskError): TaskRef       = this.copy(taskError = Some(error), status = TaskStatus.FAILED)
 }
 case class TaskListRequest(
     limit: Option[Int] = None
@@ -94,4 +96,4 @@ case class TaskList(
     timestamp: Instant = Instant.now()
 )
 
-case class TaskError(message: String, errorCode: ErrorCode, cause: Throwable)
+case class TaskError(message: String, errorCode: ErrorCode, cause: Option[Throwable] = None)
