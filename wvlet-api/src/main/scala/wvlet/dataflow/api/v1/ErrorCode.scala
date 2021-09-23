@@ -62,7 +62,7 @@ object ErrorCode extends LogSupport {
   // Deterministic internal errors, which are not retryable
   case object DETERMINISTIC_INTERNAL_ERROR extends NonRetryableError(0x2_0000)
 
-  // External serice errors (e.g., errors in third-party APIs)
+  // External service errors (e.g., errors in third-party APIs)
   case object EXTERNAL_ERROR extends RetryableError(0x3_0000)
 
   // Deterministic external errors, which are not retryable

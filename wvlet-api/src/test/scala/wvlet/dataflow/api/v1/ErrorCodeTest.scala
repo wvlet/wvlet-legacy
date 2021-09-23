@@ -22,14 +22,14 @@ object ErrorCodeTest extends AirSpec {
     val allErrorCodesInTheClassPath = Resource.findClasses("wvlet.dataflow.api.v1", classOf[ErrorCode])
     allErrorCodesInTheClassPath.size shouldBe ErrorCode.all.size
 
-    val expectedErrorCodeNames = allErrorCodesInTheClassPath.map(_.getSimpleName.replaceAll("\\$","")).toSet
-    for(e <- ErrorCode.all) {
+    val expectedErrorCodeNames = allErrorCodesInTheClassPath.map(_.getSimpleName.replaceAll("\\$", "")).toSet
+    for (e <- ErrorCode.all) {
       expectedErrorCodeNames.contains(e.name) shouldBe true
     }
   }
 
   test("Resolve unknown error") {
-    for(i <- 0 to 5) {
+    for (i <- 0 to 5) {
       // This should show warning only once
       ErrorCode.unapply("DUMMY_ERROR_CODE") shouldBe Some(UNKNOWN_ERROR)
     }
