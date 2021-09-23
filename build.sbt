@@ -85,7 +85,7 @@ lazy val server =
     )
     .dependsOn(core, plugin, api, apiClient, plugin)
 
-val TRINO_VERSION = "361"
+val TRINO_VERSION = "362"
 
 lazy val plugin =
   project
