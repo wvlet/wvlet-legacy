@@ -16,7 +16,8 @@ package wvlet.dataflow.api.internal.worker
 import wvlet.airframe.http.RPC
 import wvlet.dataflow.api.internal.Cluster.NodeId
 import wvlet.dataflow.api.internal.ServiceInfoApi
-import wvlet.dataflow.api.v1.TaskApi._
+import wvlet.dataflow.api.v1.TaskApi.TaskId
+import wvlet.dataflow.api.v1._
 
 import java.time.Instant
 

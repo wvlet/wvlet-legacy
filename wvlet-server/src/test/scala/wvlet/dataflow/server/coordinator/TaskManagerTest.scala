@@ -15,7 +15,8 @@ package wvlet.dataflow.server.coordinator
 
 import wvlet.airframe.Design
 import wvlet.airspec.AirSpec
-import wvlet.dataflow.api.v1.TaskApi.{TaskId, TaskListRequest, TaskRef, TaskRequest}
+import wvlet.dataflow.api.v1.TaskApi.TaskId
+import wvlet.dataflow.api.v1.{TaskListRequest, TaskRef, TaskRequest}
 import wvlet.dataflow.api.v1.TaskStatus
 import wvlet.dataflow.server.ServerModule
 import wvlet.dataflow.server.ServerModule.{ApiClient, CoordinatorClient}

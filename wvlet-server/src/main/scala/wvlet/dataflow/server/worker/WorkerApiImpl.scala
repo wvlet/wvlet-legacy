@@ -17,7 +17,7 @@ import wvlet.airframe.rx.Cancelable
 import wvlet.dataflow.api.internal.worker.WorkerApi
 import wvlet.dataflow.api.internal.worker.WorkerApi.TaskExecutionInfo
 import wvlet.dataflow.api.v1.TaskApi._
-import wvlet.dataflow.api.v1.TaskStatus
+import wvlet.dataflow.api.v1.{TaskList, TaskListRequest, TaskRef, TaskRequest, TaskStatus}
 import wvlet.dataflow.server.PluginManager
 import wvlet.dataflow.server.ServerModule.CoordinatorClient
 import wvlet.dataflow.server.worker.WorkerService.WorkerSelf

@@ -13,7 +13,7 @@
  */
 package wvlet.dataflow.server.coordinator
 
-import wvlet.dataflow.api.v1.TaskApi.TaskRef
+import wvlet.dataflow.api.v1.TaskRef
 import wvlet.log.LogSupport
 
 /**

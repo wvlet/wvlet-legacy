@@ -16,7 +16,8 @@ package wvlet.dataflow.server.coordinator
 import wvlet.airframe.Design
 import wvlet.airframe.metrics.ElapsedTime
 import wvlet.airframe.ulid.ULID
-import wvlet.dataflow.api.v1.TaskApi.{TaskId, TaskRef, TaskRequest}
+import wvlet.dataflow.api.v1.TaskApi.{TaskId}
+import wvlet.dataflow.api.v1.{TaskRef, TaskRequest}
 import wvlet.dataflow.api.v1.TaskStatus
 import wvlet.dataflow.server.coordinator.TaskManager._
 import wvlet.dataflow.server.util.{RPCClientProvider, ScheduledThreadManager}

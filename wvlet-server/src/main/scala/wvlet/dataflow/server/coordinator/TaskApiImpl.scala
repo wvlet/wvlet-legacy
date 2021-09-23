@@ -13,23 +13,23 @@
  */
 package wvlet.dataflow.server.coordinator
 
-import wvlet.dataflow.api.v1.TaskApi
-import wvlet.dataflow.api.v1.TaskApi.{TaskId, TaskList}
+import wvlet.dataflow.api.v1.{TaskApi, TaskList, TaskListRequest, TaskRef, TaskRequest}
+import wvlet.dataflow.api.v1.TaskApi.TaskId
 import wvlet.log.LogSupport
 
 /**
   */
 class TaskApiImpl(taskManager: TaskManager) extends TaskApi with LogSupport {
 
-  override def newTask(request: TaskApi.TaskRequest): TaskApi.TaskRef = {
+  override def newTask(request: TaskRequest): TaskRef = {
     taskManager.dispatchTask(request)
   }
 
-  override def getTask(taskId: TaskId): Option[TaskApi.TaskRef] = {
+  override def getTask(taskId: TaskId): Option[TaskRef] = {
     taskManager.getTaskRef(taskId)
   }
 
-  override def listTasks(taskListRequest: TaskApi.TaskListRequest): TaskApi.TaskList = {
+  override def listTasks(taskListRequest: TaskListRequest): TaskList = {
     val tasks = taskManager.getAllTasks
     val selectedTasks = taskListRequest.limit match {
       case Some(limit) => tasks.take(tasks.size.min(limit))
@@ -40,5 +40,5 @@ class TaskApiImpl(taskManager: TaskManager) extends TaskApi with LogSupport {
     )
   }
 
-  override def cancelTask(taskId: TaskId): Option[TaskApi.TaskRef] = ???
+  override def cancelTask(taskId: TaskId): Option[TaskRef] = ???
 }

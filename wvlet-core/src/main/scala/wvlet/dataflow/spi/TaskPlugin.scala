@@ -15,7 +15,8 @@ package wvlet.dataflow.spi
 
 import wvlet.airframe.rx.Cancelable
 import wvlet.airframe.ulid.ULID
-import wvlet.dataflow.api.v1.TaskApi.{Tags, TaskBody, TaskId, TaskRequest, TaskTrigger}
+import wvlet.dataflow.api.v1.TaskApi.{Tags, TaskBody, TaskId}
+import wvlet.dataflow.api.v1.TaskRequest
 import wvlet.log.LogSupport
 
 case class TaskInput(
