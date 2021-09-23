@@ -13,21 +13,43 @@
  */
 package wvlet.dataflow.api.v1
 
+import wvlet.airframe.surface.reflect.ReflectTypeUtil
+import wvlet.log.LogSupport
+import wvlet.log.io.Resource
+
 abstract class ErrorCode(val code: Int, val retryable: Boolean) {
   def name: String = this.toString
-
-  def newException(message: String): DataflowException = {
-    DataflowException(this, message)
-  }
-  def newException(message: String, cause: Throwable): DataflowException = {
-    DataflowException(this, message, Some(cause))
-  }
 }
 
 abstract class RetryableError(code: Int)    extends ErrorCode(code, retryable = true)
 abstract class NonRetryableError(code: Int) extends ErrorCode(code, retryable = false)
 
-object ErrorCode {
+object ErrorCode extends LogSupport {
+
+  lazy val all: Seq[ErrorCode] = {
+    // Retrieve all ErrorCode classes using reflection
+    for {
+      cl  <- Resource.findClasses("wvlet.dataflow.api.v1", classOf[ErrorCode]);
+      obj <- ReflectTypeUtil.companionObject(cl)
+    } yield {
+      obj.asInstanceOf[ErrorCode]
+    }
+  }
+
+  private lazy val errorCodeTable   = all.map(x => x.name -> x).toMap
+  private var unknownErrorCodeNames = Set.empty[String]
+
+  def unapply(s: String): Option[ErrorCode] = {
+    errorCodeTable.get(s).orElse {
+      // Remember the unknown code name to suppress warning messages
+      if (!unknownErrorCodeNames.contains(s)) {
+        warn(s"Unknown error code: ${s}. Use ${UNKNOWN_ERROR} instead")
+        unknownErrorCodeNames += s
+      }
+      Some(UNKNOWN_ERROR)
+    }
+  }
+
   // Errors in user inputs
   case object USER_ERROR     extends NonRetryableError(0x0000)
   case object SYNTAX_ERROR   extends NonRetryableError(0x0001)
@@ -37,6 +59,15 @@ object ErrorCode {
   case object INTERNAL_ERROR    extends RetryableError(0x1_0000)
   case object TOO_MANY_REQUESTS extends RetryableError(0x1_0001)
 
-  // External service errors (e.g., errors in third-party APIs)
-  case object EXTERNAL_ERROR extends RetryableError(0x2_0000)
+  // Deterministic internal errors, which are not retryable
+  case object DETERMINISTIC_INTERNAL_ERROR extends NonRetryableError(0x2_0000)
+
+  // External serice errors (e.g., errors in third-party APIs)
+  case object EXTERNAL_ERROR extends RetryableError(0x3_0000)
+
+  // Deterministic external errors, which are not retryable
+  case object DETERMINISTIC_EXTERNAL_ERROR extends NonRetryableError(0x4_0000)
+
+  case object UNKNOWN_ERROR extends RetryableError(0xf_ffff)
+
 }

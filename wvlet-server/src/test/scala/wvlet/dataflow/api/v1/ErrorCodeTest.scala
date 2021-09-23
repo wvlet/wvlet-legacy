@@ -13,17 +13,6 @@
  */
 package wvlet.dataflow.api.v1
 
-/**
-  * A standard exception class that will be used across wvlet.dataflow modules.
-  *
-  * Usage:
-  * {{{
-  * throw DataFlowException(ErrorCode.SYNTAX_ERROR, "Invalid syntax")
-  * }}}
-  */
-final case class DataflowException(
-    errorCode: ErrorCode,
-    message: String = "",
-    cause: Option[Throwable] = None,
-    metadata: Map[String, Any] = Map.empty
-) extends Exception(s"[${errorCode.name}] ${message}", cause.getOrElse(null))
+import wvlet.airspec.AirSpec
+
+class ErrorCodeTest extends AirSpec {}
