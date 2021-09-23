@@ -28,6 +28,12 @@ object ErrorCodeTest extends AirSpec {
     }
   }
 
+  test("parse error code") {
+    for (e <- ErrorCode.all) {
+      ErrorCode.unapply(e.name) shouldBe Some(e)
+    }
+  }
+
   test("Resolve unknown error") {
     for (i <- 0 to 5) {
       // This should show warning only once
