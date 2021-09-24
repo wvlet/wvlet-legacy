@@ -15,15 +15,17 @@ package wvlet.dataflow.server
 
 import wvlet.airframe.surface.Surface
 import wvlet.airframe.{Design, Session}
-import wvlet.dataflow.api.v1.{TaskRef, TaskRequest}
+import wvlet.dataflow.api.v1.TaskApi.TaskId
+import wvlet.dataflow.api.v1.{DataflowException, ErrorCode, TaskRef, TaskRequest}
 import wvlet.dataflow.plugin.control.ControlPlugin
 import wvlet.dataflow.plugin.sqlite.SQLitePlugin
 import wvlet.dataflow.plugin.trino.TrinoPlugin
-import wvlet.dataflow.server.ServerModule.{ApiClient, CoordinatorClient}
+import wvlet.dataflow.server.ServerModule.ApiClient
 import wvlet.dataflow.spi.{PluginContext, TaskPlugin}
 import wvlet.log.LogSupport
 
 import java.util.concurrent.ConcurrentHashMap
+import scala.annotation.tailrec
 import scala.jdk.CollectionConverters._
 
 class PluginManager(session: Session) extends LogSupport {
@@ -59,8 +61,25 @@ object PluginManager {
       .bind[PluginContext].to[PluginContextImpl]
 }
 
-class PluginContextImpl(client: ApiClient) extends PluginContext {
+class PluginContextImpl(client: ApiClient) extends PluginContext with LogSupport {
   override def newTask(taskRequest: TaskRequest): TaskRef = {
     client.TaskApi.newTask(taskRequest)
+  }
+
+  override def await(taskId: TaskId): TaskRef = {
+    debug(s"Awaiting task completion: ${taskId}")
+    @tailrec
+    def loop(): TaskRef = {
+      client.TaskApi.getTask(taskId) match {
+        case None =>
+          throw DataflowException(ErrorCode.UNKNOWN_TASK, s"Unknown task: ${taskId}")
+        case Some(t) if t.isDone =>
+          t
+        case _ =>
+          Thread.sleep(100)
+          loop()
+      }
+    }
+    loop()
   }
 }

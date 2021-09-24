@@ -39,8 +39,8 @@ class ControlPlugin(pluginContext: PluginContext) extends TaskPlugin {
   }
 
   def runAndThenTask(t: AndThenTask): Unit = {
-    warn(t)
     val firstTaskRef = pluginContext.newTask(t.firstTask)
+    pluginContext.await(firstTaskRef.id)
     // TODO Await
     val nextTaskRef = pluginContext.newTask(t.nextTask)
   }

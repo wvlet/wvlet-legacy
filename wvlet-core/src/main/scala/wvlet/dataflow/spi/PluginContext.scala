@@ -13,8 +13,11 @@
  */
 package wvlet.dataflow.spi
 
+import wvlet.dataflow.api.v1.TaskApi.TaskId
 import wvlet.dataflow.api.v1.{DataflowException, ErrorCode, TaskRef, TaskRequest}
 
 trait PluginContext {
   def newTask(taskRequest: TaskRequest): TaskRef
+
+  def await(taskId: TaskId): TaskRef
 }

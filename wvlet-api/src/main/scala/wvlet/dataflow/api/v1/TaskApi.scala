@@ -31,7 +31,7 @@ trait TaskApi {
 }
 
 object TaskApi {
-  type TaskId   = String
+  type TaskId   = ULID
   type TaskBody = Map[String, Any]
   object TaskBody {
     val empty: TaskBody = Map.empty
@@ -72,27 +72,31 @@ case class TaskRef(
     methodName: String,
     status: TaskStatus,
     tags: Tags,
-    createdAt: Instant,
     updatedAt: Instant,
     completedAt: Option[Instant] = None,
     taskError: Option[TaskError] = None
 ) {
-  override def toString: TaskId = {
+  override def toString: String = {
     taskError match {
       case Some(err) =>
-        s"[${id}] ${status}:${err.errorCode} ${taskPlugin}.${methodName}: ${err.message}"
+        s"[T/${id}] ${status}:${err.errorCode} ${taskPlugin}.${methodName}: ${err.message}"
       case None =>
-        s"[${id}] ${status}: ${taskPlugin}.${methodName}"
+        s"[T/${id}] ${status}: ${taskPlugin}.${methodName}"
     }
   }
-  def isFailed: Boolean = status == TaskStatus.FAILED
+  def createdAt: Instant = id.toInstant
+  def isFailed: Boolean  = status == TaskStatus.FAILED
+  def isDone: Boolean    = status.isDone
+  def hasError: Boolean  = taskError.isDefined
 
-  def withStatus(newStatus: TaskStatus): TaskRef = this.copy(status = newStatus)
-  def withError(error: TaskError): TaskRef       = this.copy(taskError = Some(error), status = TaskStatus.FAILED)
+  def withStatus(newStatus: TaskStatus): TaskRef = this.copy(status = newStatus, updatedAt = Instant.now())
+  def withError(error: TaskError): TaskRef =
+    this.copy(taskError = Some(error), status = TaskStatus.FAILED, updatedAt = Instant.now())
   def withError(errorCode: ErrorCode, message: String): TaskRef =
-    this.copy(taskError = Some(TaskError(errorCode, message)), status = TaskStatus.FAILED)
-  def withError(errorCode: ErrorCode, message: String, cause: Throwable): TaskRef =
-    this.copy(taskError = Some(TaskError(errorCode, message, Option(cause))), status = TaskStatus.FAILED)
+    withError(TaskError(errorCode, message))
+  def withError(errorCode: ErrorCode, message: String, cause: Throwable): TaskRef = withError(
+    TaskError(errorCode, message, Option(cause))
+  )
 }
 case class TaskListRequest(
     limit: Option[Int] = None

@@ -17,18 +17,17 @@ import wvlet.airframe.Design
 import wvlet.airframe.metrics.ElapsedTime
 import wvlet.airframe.ulid.ULID
 import wvlet.dataflow.api.v1.TaskApi.TaskId
-import wvlet.dataflow.api.v1.{ErrorCode, TaskError, TaskRef, TaskRequest, TaskStatus}
-import wvlet.dataflow.server.coordinator.TaskManager._
+import wvlet.dataflow.api.v1.{TaskRef, TaskRequest, TaskStatus}
 import wvlet.dataflow.server.util.{RPCClientProvider, ScheduledThreadManager}
-import wvlet.log.{Guard, LogSupport}
+import wvlet.log.LogSupport
 
-import java.time.Instant
-import java.util.concurrent.{ConcurrentHashMap, ConcurrentLinkedDeque, TimeUnit}
+import java.util.concurrent.{ConcurrentHashMap, LinkedBlockingQueue, TimeUnit}
 import javax.annotation.PostConstruct
 import scala.jdk.CollectionConverters._
 import scala.util.Random
 
 case class TaskManagerConfig(
+    maxTaskHistory: Int = 10000,
     expiresAfterDone: ElapsedTime = ElapsedTime("10m"),
     maxQueueingTime: ElapsedTime = ElapsedTime("1d")
 )
@@ -39,29 +38,41 @@ class TaskManager(
     config: TaskManagerConfig,
     nodeManager: NodeManager,
     rpcClientProvider: RPCClientProvider,
-    threadManager: TaskManagerThreadManager,
     listeners: Seq[TaskStateListener] = Seq(TaskStateListener.defaultListener)
-) extends LogSupport {
+) extends AutoCloseable
+    with LogSupport {
+
+  private val threadManager = new ScheduledThreadManager(name = "task-manager")
 
   // idempotent key -> TaskRef
   private val registeredTasks = new ConcurrentHashMap[ULID, TaskId]().asScala
   private val taskRefs        = new ConcurrentHashMap[TaskId, TaskRef].asScala
   private val taskRequests    = new ConcurrentHashMap[TaskId, TaskRequest].asScala
+  private val expiredTasks    = new LinkedBlockingQueue[TaskRef]().asScala
 
   @PostConstruct
   def start: Unit = {
+    // Start a background thread that
     threadManager.scheduledAtFixedRate(0, 1, TimeUnit.SECONDS) { () =>
       checkPendingTasks
     }
   }
 
+  override def close(): Unit = {
+    threadManager.close()
+  }
+
   private def checkPendingTasks: Unit = {
+    // Wake up queued tasks
     for {
       queuedTask        <- taskRefs.values if queuedTask.status == TaskStatus.QUEUED;
       queuedTaskRequest <- taskRequests.get(queuedTask.id)
     } {
       dispatchTaskInternal(queuedTask, queuedTaskRequest)
     }
+
+    // Remove expired tasks
+    for (task <- taskRefs.values if task.status.isDone) {}
 
     //
 //      val queuedTime = ElapsedTime.nanosSince(TimeUnit.SECONDS.toNanos(queuedTask.createdAt.getEpochSecond))
@@ -110,20 +121,18 @@ class TaskManager(
   def getOrCreateTask(request: TaskRequest): TaskRef = {
     val taskId = registeredTasks.getOrElseUpdate(
       request.idempotentKey, {
-        // Add "T" prefix for the readability of taskId
-        s"T_${ULID.newULIDString}"
+        ULID.newULID
       }
     )
     val taskRef = taskRefs.getOrElseUpdate(
       taskId, {
-        val now = Instant.now
+        val now = taskId.toInstant
         TaskRef(
           id = taskId,
           taskPlugin = request.taskPlugin,
           methodName = request.methodName,
           status = TaskStatus.QUEUED,
           tags = request.tags,
-          createdAt = now,
           updatedAt = now,
           completedAt = None
         )
@@ -156,7 +165,7 @@ class TaskManager(
 object TaskManager {
   type TaskManagerThreadManager = ScheduledThreadManager
 
-  def design: Design =
-    Design.newDesign
-      .bind[TaskManagerThreadManager].toInstance(new ScheduledThreadManager(name = "task-manager"))
+  def design: Design = Design.newDesign
+    .bind[TaskManager].toSingleton
+
 }
