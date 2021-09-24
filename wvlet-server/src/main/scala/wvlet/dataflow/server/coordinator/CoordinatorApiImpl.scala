@@ -15,12 +15,11 @@ package wvlet.dataflow.server.coordinator
 
 import wvlet.dataflow.api.internal.Cluster.{Node, NodeInfo}
 import wvlet.dataflow.api.internal.coordinator.CoordinatorApi
-import wvlet.dataflow.api.v1.TaskApi.TaskId
-import wvlet.dataflow.api.v1.TaskStatus
+import wvlet.log.LogSupport
 
 /**
   */
-class CoordinatorApiImpl(nodeManager: NodeManager, taskManager: TaskManager) extends CoordinatorApi {
+class CoordinatorApiImpl(nodeManager: NodeManager, taskManager: TaskManager) extends CoordinatorApi with LogSupport {
   override def listNodes: Seq[NodeInfo] = {
     nodeManager.listNodes
   }

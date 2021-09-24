@@ -57,8 +57,9 @@ object ErrorCode extends LogSupport {
   case object UNKNOWN_METHOD extends NonRetryableError(0x0003)
 
   // Internal service errors, which is usually retryable
-  case object INTERNAL_ERROR    extends RetryableError(0x1_0000)
-  case object TOO_MANY_REQUESTS extends RetryableError(0x1_0001)
+  case object INTERNAL_ERROR             extends RetryableError(0x1_0000)
+  case object TOO_MANY_REQUESTS          extends RetryableError(0x1_0001)
+  case object EXCEEDED_MAX_QUEUEING_TIME extends NonRetryableError(0x1_0002)
 
   // Deterministic internal errors, which are not retryable
   case object DETERMINISTIC_INTERNAL_ERROR extends NonRetryableError(0x2_0000)

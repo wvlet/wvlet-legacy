@@ -13,30 +13,30 @@
  */
 package wvlet.dataflow.plugin.sqlite
 
+import wvlet.airframe.codec.MessageCodec
 import wvlet.airframe.rx.Cancelable
 import wvlet.dataflow.api.v1.{DataflowException, ErrorCode}
 import wvlet.dataflow.spi.{TaskInput, TaskPlugin}
+import wvlet.log.LogSupport
 
 object SQLitePlugin extends TaskPlugin {
   override def pluginName: String = "sqlite"
 
+  case class RunQuery(service: String, query: String, schema: Option[String] = None) extends LogSupport {
+    def run: Unit = {
+      info(s"run sqlite query\n${query}")
+    }
+  }
+
   override def run(input: TaskInput): Cancelable = {
     input.methodName match {
       case "runQuery" =>
-        val service = input.taskBody.getOrElse("service", new AssertionError("missing service parameter")).toString
-        val query   = input.taskBody.getOrElse("query", new AssertionError("missing query")).toString
-        val schema  = input.taskBody.get("schema").map(_.toString)
-        runQuery(service, query, schema)
+        val command = MessageCodec.of[RunQuery].fromMap(input.taskBody)
+        command.run
       case other =>
         throw DataflowException(ErrorCode.UNKNOWN_METHOD, s"unknown method: ${other}")
     }
     // TODO Support cancellation
     Cancelable.empty
   }
-
-  def runQuery(service: String, query: String, schema: Option[String] = None): Unit = {
-    info(s"run sqlite query\n${query}")
-
-  }
-
 }

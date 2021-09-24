@@ -16,9 +16,8 @@ package wvlet.dataflow.server.coordinator
 import wvlet.airframe.Design
 import wvlet.airframe.metrics.ElapsedTime
 import wvlet.airframe.ulid.ULID
-import wvlet.dataflow.api.v1.TaskApi.{TaskId}
-import wvlet.dataflow.api.v1.{TaskRef, TaskRequest}
-import wvlet.dataflow.api.v1.TaskStatus
+import wvlet.dataflow.api.v1.TaskApi.TaskId
+import wvlet.dataflow.api.v1.{ErrorCode, TaskError, TaskRef, TaskRequest, TaskStatus}
 import wvlet.dataflow.server.coordinator.TaskManager._
 import wvlet.dataflow.server.util.{RPCClientProvider, ScheduledThreadManager}
 import wvlet.log.LogSupport
@@ -61,10 +60,14 @@ class TaskManager(
       queuedTask        <- taskRefs.values.filter(_.status == TaskStatus.QUEUED);
       queuedTaskRequest <- taskRequests.get(queuedTask.id)
     } {
-      val queuedTime = ElapsedTime.nanosSince(queuedTask.createdAt.getNano)
+      val queuedTime = ElapsedTime.nanosSince(TimeUnit.SECONDS.toNanos(queuedTask.createdAt.getEpochSecond))
       if (queuedTime.compareTo(config.maxQueueingTime) > 0) {
         // Fail the task when it exceeds the max queueing time
-        updateTask(queuedTask.id)(_.withStatus(TaskStatus.FAILED))
+        updateTask(queuedTask.id)(
+          _.withError(
+            TaskError(ErrorCode.EXCEEDED_MAX_QUEUEING_TIME, s"${queuedTime} exceeded ${config.maxQueueingTime}")
+          )
+        )
       } else {
         dispatchTask(queuedTaskRequest)
       }

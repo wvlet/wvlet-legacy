@@ -14,6 +14,8 @@
 package wvlet.dataflow.server
 
 import wvlet.airframe.Design
+import wvlet.dataflow.plugin.control.ControlPlugin
+import wvlet.dataflow.plugin.sqlite.SQLitePlugin
 import wvlet.dataflow.plugin.trino.TrinoPlugin
 import wvlet.dataflow.spi.TaskPlugin
 
@@ -37,6 +39,8 @@ object PluginManager {
     Design.newDesign
       .bind[PluginManager].toSingleton
       .onStart { x =>
+        x.addPlugin(ControlPlugin)
+        x.addPlugin(SQLitePlugin)
         x.addPlugin(TrinoPlugin)
       }
 }

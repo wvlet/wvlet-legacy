@@ -16,28 +16,29 @@ package wvlet.dataflow.plugin.control
 import wvlet.airframe.codec.MessageCodec
 import wvlet.airframe.rx.Cancelable
 import wvlet.dataflow.api.v1.{DataflowException, ErrorCode, TaskRequest}
-import wvlet.dataflow.spi.{TaskInput, TaskPlugin}
+import wvlet.dataflow.spi.{PluginContext, TaskInput, TaskPlugin}
+import wvlet.log.LogSupport
 
 object ControlPlugin extends TaskPlugin {
 
-  case class AndThenTask(firstTask: TaskRequest, nextTask: TaskRequest)
+  case class AndThenTask(firstTask: TaskRequest, nextTask: TaskRequest) extends LogSupport {
+    def run: Unit = {
+      warn(this)
+      val context = PluginContext.current
+
+    }
+  }
 
   override def pluginName: String = "control"
 
   override def run(input: TaskInput): Cancelable = {
     input.methodName match {
       case "andThen" =>
-        val arg = MessageCodec.of[AndThenTask].fromMap(input.taskBody)
-        controlAndThen(arg)
+        val t = MessageCodec.of[AndThenTask].fromMap(input.taskBody)
+        t.run
       case other =>
         throw DataflowException(ErrorCode.UNKNOWN_METHOD, s"unknown method: ${other}")
     }
     Cancelable.empty
   }
-
-  def controlAndThen(andThenTask: AndThenTask): Unit = {
-    info(andThenTask)
-
-  }
-
 }

@@ -14,18 +14,56 @@
 package wvlet.dataflow.server
 
 import wvlet.airframe.Design
+import wvlet.airframe.codec.MessageCodec
 import wvlet.airspec.AirSpec
 import wvlet.dataflow.api.v1.TaskRequest
+import wvlet.dataflow.plugin.control.ControlPlugin.AndThenTask
+import wvlet.dataflow.plugin.sqlite.SQLitePlugin
+import wvlet.dataflow.plugin.sqlite.SQLitePlugin.RunQuery
 import wvlet.dataflow.server.ServerModule.ApiClient
+import wvlet.dataflow.server.util.TaskUtil
 
 class ControlPluginTest extends AirSpec {
   override def design: Design = ServerModule.testServerAndClient
 
   test("run control task") { (client: ApiClient) =>
-//    val taskRef = client.TaskApi.newTask(
-//      TaskRequest(
-//      )
-//    )
+    val a = AndThenTask(
+      firstTask = TaskRequest(
+        taskPlugin = "sqlite",
+        methodName = "runQuery",
+        taskBody = MessageCodec
+          .of[Map[String, Any]].fromMsgPack(
+            MessageCodec
+              .of[SQLitePlugin.RunQuery].toMsgPack(
+                RunQuery("db1", "select 1")
+              )
+          )
+      ),
+      nextTask = TaskRequest(
+        taskPlugin = "sqlite",
+        methodName = "runQuery",
+        taskBody = MessageCodec
+          .of[Map[String, Any]].fromMsgPack(
+            MessageCodec
+              .of[SQLitePlugin.RunQuery].toMsgPack(
+                RunQuery("db1", "select 2")
+              )
+          )
+      )
+    )
 
+    val t = MessageCodec
+      .of[Map[String, Any]].fromMsgPack(
+        MessageCodec.of[AndThenTask].toMsgPack(a)
+      )
+    val taskRef = client.TaskApi.newTask(
+      TaskRequest(
+        taskPlugin = "control",
+        methodName = "andThen",
+        taskBody = t
+      )
+    )
+    val lastState = TaskUtil.waitCompletion(client, taskRef.id)
+    info(lastState)
   }
 }

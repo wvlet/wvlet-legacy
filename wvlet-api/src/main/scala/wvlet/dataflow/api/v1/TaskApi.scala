@@ -77,10 +77,22 @@ case class TaskRef(
     completedAt: Option[Instant] = None,
     taskError: Option[TaskError] = None
 ) {
-  override def toString: TaskId = s"[${id}] ${status}: ${taskPlugin}.${methodName}"
+  override def toString: TaskId = {
+    taskError match {
+      case Some(err) =>
+        s"[${id}] ${status}:${err.errorCode} ${taskPlugin}.${methodName}: ${err.message}"
+      case None =>
+        s"[${id}] ${status}: ${taskPlugin}.${methodName}"
+    }
+  }
+  def isFailed: Boolean = status == TaskStatus.FAILED
 
   def withStatus(newStatus: TaskStatus): TaskRef = this.copy(status = newStatus)
   def withError(error: TaskError): TaskRef       = this.copy(taskError = Some(error), status = TaskStatus.FAILED)
+  def withError(errorCode: ErrorCode, message: String): TaskRef =
+    this.copy(taskError = Some(TaskError(errorCode, message)), status = TaskStatus.FAILED)
+  def withError(errorCode: ErrorCode, message: String, cause: Throwable): TaskRef =
+    this.copy(taskError = Some(TaskError(errorCode, message, Option(cause))), status = TaskStatus.FAILED)
 }
 case class TaskListRequest(
     limit: Option[Int] = None
@@ -91,4 +103,8 @@ case class TaskList(
     timestamp: Instant = Instant.now()
 )
 
-case class TaskError(message: String, errorCode: ErrorCode, cause: Option[Throwable] = None)
+case class TaskError(errorCode: ErrorCode, message: String, cause: Option[Throwable] = None) {
+  override def toString: String = {
+    s"[${errorCode}] ${message}"
+  }
+}

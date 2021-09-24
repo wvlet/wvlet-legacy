@@ -38,20 +38,21 @@ class WorkerApiImpl(node: WorkerSelf, coordinatorClient: CoordinatorClient, plug
     pluginManager.getPlugin(task.taskPlugin) match {
       case Some(plugin) =>
         coordinatorClient.CoordinatorApi.updateTaskStatus(UpdateTaskRequest(taskId, TaskStatus.RUNNING))
-        runTask(plugin, TaskInput(taskId, task))
+        runTaskInternal(plugin, TaskInput(taskId, task))
       case None =>
+        val err = TaskError(ErrorCode.UNKNOWN_PLUGIN, s"Unknown plugin: ${task.taskPlugin}")
         coordinatorClient.CoordinatorApi.updateTaskStatus(
           UpdateTaskRequest(
             taskId,
             TaskStatus.FAILED,
-            Some(TaskError(s"Unknown plugin: ${task.taskPlugin}", ErrorCode.UNKNOWN_PLUGIN))
+            Some(err)
           )
         )
     }
     TaskExecutionInfo(taskId, nodeId = node.name, startedAt = Instant.now())
   }
 
-  private def runTask(plugin: TaskPlugin, taskInput: TaskInput): Cancelable = {
+  private def runTaskInternal(plugin: TaskPlugin, taskInput: TaskInput): Cancelable = {
     try {
       plugin.run(taskInput)
       coordinatorClient.CoordinatorApi.updateTaskStatus(
@@ -61,14 +62,15 @@ class WorkerApiImpl(node: WorkerSelf, coordinatorClient: CoordinatorClient, plug
       Cancelable.empty
     } catch {
       case e: Throwable =>
+        error(s"Task failed", e)
         coordinatorClient.CoordinatorApi.updateTaskStatus(
           UpdateTaskRequest(
             taskInput.taskId,
             TaskStatus.FAILED,
-            Some(TaskError(e.getMessage, ErrorCode.INTERNAL_ERROR, cause = Some(e)))
+            Some(TaskError(ErrorCode.INTERNAL_ERROR, e.getMessage, cause = Some(e)))
           )
         )
-        // TODO Supprot cancellation
+        // TODO Support cancellation
         Cancelable.empty
     }
   }

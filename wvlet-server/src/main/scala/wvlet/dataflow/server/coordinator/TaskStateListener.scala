@@ -13,7 +13,7 @@
  */
 package wvlet.dataflow.server.coordinator
 
-import wvlet.dataflow.api.v1.TaskRef
+import wvlet.dataflow.api.v1.{TaskError, TaskRef}
 import wvlet.log.LogSupport
 
 /**
@@ -25,7 +25,19 @@ trait TaskStateListener {
 object TaskStateListener {
   def defaultListener: TaskStateListener = new TaskStateListener with LogSupport {
     override def onStateChange(taskRef: TaskRef): Unit = {
-      info(s"[${taskRef.id}] ${taskRef.status}")
+      taskRef.taskError match {
+        case None =>
+          if (!taskRef.isFailed) {
+            info(taskRef)
+          } else {
+            warn(taskRef)
+          }
+        case Some(TaskError(_, _, None)) =>
+          warn(taskRef)
+        case Some(TaskError(_, _, Some(cause))) =>
+          warn(taskRef, cause)
+      }
+
     }
   }
 }
