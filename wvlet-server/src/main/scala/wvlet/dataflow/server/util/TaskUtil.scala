@@ -16,10 +16,11 @@ package wvlet.dataflow.server.util
 import wvlet.dataflow.api.v1.TaskApi.TaskId
 import wvlet.dataflow.api.v1.{TaskRef, TaskStatus}
 import wvlet.dataflow.server.ServerModule.ApiClient
+import wvlet.log.LogSupport
 
 import scala.annotation.tailrec
 
-object TaskUtil {
+object TaskUtil extends LogSupport {
 
   def waitCompletion(client: ApiClient, taskId: TaskId, maxRetry: Int = 30): TaskRef = {
     @tailrec
@@ -34,6 +35,7 @@ object TaskUtil {
             // ok
             ref
           case Some(ref) =>
+            debug(ref)
             Thread.sleep(100 * (retryCount + 1))
             loop(retryCount + 1)
         }

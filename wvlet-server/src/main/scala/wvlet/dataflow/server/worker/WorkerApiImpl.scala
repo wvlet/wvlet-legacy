@@ -38,6 +38,7 @@ class WorkerApiImpl(node: WorkerSelf, coordinatorClient: CoordinatorClient, plug
     pluginManager.getPlugin(task.taskPlugin) match {
       case Some(plugin) =>
         coordinatorClient.CoordinatorApi.updateTaskStatus(UpdateTaskRequest(taskId, TaskStatus.RUNNING))
+        info(s"Running ${task.taskPlugin}:${task.methodName}")
         runTaskInternal(plugin, TaskInput(taskId, task))
       case None =>
         val err = TaskError(ErrorCode.UNKNOWN_PLUGIN, s"Unknown plugin: ${task.taskPlugin}")

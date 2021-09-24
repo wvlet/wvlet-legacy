@@ -18,18 +18,3 @@ import wvlet.dataflow.api.v1.{DataflowException, ErrorCode, TaskRef, TaskRequest
 trait PluginContext {
   def newTask(taskRequest: TaskRequest): TaskRef
 }
-
-object PluginContext {
-  // TODO use TLS
-  private var _current: Option[PluginContext] = None
-
-  def current: PluginContext = {
-    _current.getOrElse(
-      throw DataflowException(ErrorCode.MISSING_PLUGIN_CONTEXT, "missing plugin context")
-    )
-  }
-
-  private[dataflow] def setPluginContext(context: PluginContext) = {
-    _current = Some(context)
-  }
-}

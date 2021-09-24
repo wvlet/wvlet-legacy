@@ -20,10 +20,10 @@ import wvlet.dataflow.api.v1.TaskApi.TaskId
 import wvlet.dataflow.api.v1.{ErrorCode, TaskError, TaskRef, TaskRequest, TaskStatus}
 import wvlet.dataflow.server.coordinator.TaskManager._
 import wvlet.dataflow.server.util.{RPCClientProvider, ScheduledThreadManager}
-import wvlet.log.LogSupport
+import wvlet.log.{Guard, LogSupport}
 
 import java.time.Instant
-import java.util.concurrent.{ConcurrentHashMap, TimeUnit}
+import java.util.concurrent.{ConcurrentHashMap, ConcurrentLinkedDeque, TimeUnit}
 import javax.annotation.PostConstruct
 import scala.jdk.CollectionConverters._
 import scala.util.Random
@@ -50,44 +50,52 @@ class TaskManager(
 
   @PostConstruct
   def start: Unit = {
-    threadManager.scheduledAtFixedRate(0, 1, TimeUnit.SECONDS) {
+    threadManager.scheduledAtFixedRate(0, 1, TimeUnit.SECONDS) { () =>
       checkPendingTasks
     }
   }
 
   private def checkPendingTasks: Unit = {
-    for {
-      queuedTask        <- taskRefs.values.filter(_.status == TaskStatus.QUEUED);
-      queuedTaskRequest <- taskRequests.get(queuedTask.id)
-    } {
-      val queuedTime = ElapsedTime.nanosSince(TimeUnit.SECONDS.toNanos(queuedTask.createdAt.getEpochSecond))
-      if (queuedTime.compareTo(config.maxQueueingTime) > 0) {
-        // Fail the task when it exceeds the max queueing time
-        updateTask(queuedTask.id)(
-          _.withError(
-            TaskError(ErrorCode.EXCEEDED_MAX_QUEUEING_TIME, s"${queuedTime} exceeded ${config.maxQueueingTime}")
-          )
-        )
-      } else {
-        dispatchTask(queuedTaskRequest)
-      }
+    for (queuedTask <- taskRefs.values if queuedTask.status == TaskStatus.QUEUED) {
+      val queuedTaskRequest = taskRequests(queuedTask.id)
+      dispatchTaskInternal(queuedTask, queuedTaskRequest)
+
+//
+//      val queuedTime = ElapsedTime.nanosSince(TimeUnit.SECONDS.toNanos(queuedTask.createdAt.getEpochSecond))
+//      if (queuedTime.compareTo(config.maxQueueingTime) > 0) {
+//        warn(s"${queuedTime} is exceeded")
+//        // Fail the task when it exceeds the max queueing time
+//        updateTask(queuedTask.id)(
+//          _.withError(
+//            TaskError(ErrorCode.EXCEEDED_MAX_QUEUEING_TIME, s"${queuedTime} exceeded ${config.maxQueueingTime}")
+//          )
+//        )
+//      } else {
+//        val queuedTaskRequest = taskRequests(queuedTask.id)
+//        warn(s"Found queued: ${queuedTaskRequest}")
+//        dispatchTaskInternal(queuedTask, queuedTaskRequest)
+//      }
     }
   }
 
   def dispatchTask(request: TaskRequest): TaskRef = {
-    info(s"New task: ${request}")
+    debug(s"New task: ${request}")
     val taskRef = getOrCreateTask(request)
+    dispatchTaskInternal(taskRef, request)
+  }
 
+  private def dispatchTaskInternal(taskRef: TaskRef, taskRequest: TaskRequest): TaskRef = {
     val activeWorkerNodes = nodeManager.listWorkerNodes
     if (activeWorkerNodes.isEmpty) {
       warn(s"[${taskRef.id}] No worker node is available")
       taskRef
     } else {
+      info(s"[${taskRef.id}] Dispatch task")
       val nodeIndex         = Random.nextInt(activeWorkerNodes.size)
       val targetWorkerNode  = activeWorkerNodes(nodeIndex)
       val workerClient      = rpcClientProvider.getWorkerClient(targetWorkerNode.serverAddress)
       val updatedTask       = updateTask(taskRef.id)(_.withStatus(TaskStatus.STARTING))
-      val taskExecutionInfo = workerClient.WorkerApi.runTask(taskRef.id, request)
+      val taskExecutionInfo = workerClient.WorkerApi.runTask(taskRef.id, taskRequest)
       info(taskExecutionInfo)
       getTaskRef(taskRef.id).getOrElse(updatedTask)
     }
@@ -101,10 +109,13 @@ class TaskManager(
     val taskId = registeredTasks.getOrElseUpdate(
       request.idempotentKey, {
         // Add "T" prefix for the readability of taskId
-        val taskId = s"T_${ULID.newULIDString}"
-        val now    = Instant.now
-
-        val ref = TaskRef(
+        s"T_${ULID.newULIDString}"
+      }
+    )
+    val taskRef = taskRefs.getOrElseUpdate(
+      taskId, {
+        val now = Instant.now
+        TaskRef(
           id = taskId,
           taskPlugin = request.taskPlugin,
           methodName = request.methodName,
@@ -114,12 +125,10 @@ class TaskManager(
           updatedAt = now,
           completedAt = None
         )
-        taskRefs += taskId -> ref
-        taskId
       }
     )
-    taskRequests += taskId -> request
-    taskRefs(taskId)
+    taskRequests.getOrElseUpdate(taskId, request)
+    taskRef
   }
 
   def updateTask(taskId: TaskId)(updater: TaskRef => TaskRef): TaskRef = {

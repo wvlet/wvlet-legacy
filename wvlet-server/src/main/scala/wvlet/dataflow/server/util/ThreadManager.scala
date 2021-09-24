@@ -74,10 +74,12 @@ class ScheduledThreadManager(name: String, numThreads: Int = 1) extends AutoClos
     )
   }
 
-  def scheduledAtFixedRate[U](initialDelay: Long, period: Long, unit: TimeUnit)(body: => U): Unit = {
+  def scheduledAtFixedRate[U](initialDelay: Long, period: Long, unit: TimeUnit)(body: () => U): Unit = {
     scheduledExecutorService.scheduleAtFixedRate(
       new Runnable {
-        override def run(): Unit = body
+        override def run(): Unit = {
+          body()
+        }
       },
       initialDelay,
       period,

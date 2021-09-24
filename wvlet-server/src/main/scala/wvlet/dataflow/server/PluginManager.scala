@@ -13,20 +13,33 @@
  */
 package wvlet.dataflow.server
 
-import wvlet.airframe.Design
+import wvlet.airframe.surface.Surface
+import wvlet.airframe.{Design, Session}
+import wvlet.dataflow.api.v1.{TaskRef, TaskRequest}
 import wvlet.dataflow.plugin.control.ControlPlugin
 import wvlet.dataflow.plugin.sqlite.SQLitePlugin
 import wvlet.dataflow.plugin.trino.TrinoPlugin
-import wvlet.dataflow.spi.TaskPlugin
+import wvlet.dataflow.server.ServerModule.{ApiClient, CoordinatorClient}
+import wvlet.dataflow.spi.{PluginContext, TaskPlugin}
+import wvlet.log.LogSupport
 
 import java.util.concurrent.ConcurrentHashMap
 import scala.jdk.CollectionConverters._
 
-class PluginManager {
+class PluginManager(session: Session) extends LogSupport {
   private val plugins = new ConcurrentHashMap[String, TaskPlugin]().asScala
 
   def addPlugin(plugin: TaskPlugin): Unit = {
     plugins.getOrElseUpdate(plugin.pluginName, plugin)
+  }
+
+  def addPluginOfSurface(pluginSurface: Surface): Unit = {
+    session.get[TaskPlugin](pluginSurface) match {
+      case plugin: TaskPlugin =>
+        addPlugin(plugin)
+      case _ =>
+        warn(s"Failed to instantiate plugin: ${pluginSurface.name}")
+    }
   }
 
   def getPlugin(name: String): Option[TaskPlugin] = {
@@ -39,8 +52,15 @@ object PluginManager {
     Design.newDesign
       .bind[PluginManager].toSingleton
       .onStart { x =>
-        x.addPlugin(ControlPlugin)
+        x.addPluginOfSurface(Surface.of[ControlPlugin])
         x.addPlugin(SQLitePlugin)
         x.addPlugin(TrinoPlugin)
       }
+      .bind[PluginContext].to[PluginContextImpl]
+}
+
+class PluginContextImpl(client: ApiClient) extends PluginContext {
+  override def newTask(taskRequest: TaskRequest): TaskRef = {
+    client.TaskApi.newTask(taskRequest)
+  }
 }

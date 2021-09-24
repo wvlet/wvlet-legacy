@@ -17,17 +17,13 @@ import wvlet.airframe.codec.MessageCodec
 import wvlet.airframe.rx.Cancelable
 import wvlet.dataflow.api.v1.{DataflowException, ErrorCode, TaskRequest}
 import wvlet.dataflow.spi.{PluginContext, TaskInput, TaskPlugin}
-import wvlet.log.LogSupport
 
-object ControlPlugin extends TaskPlugin {
+object ControlPlugin {
+  case class AndThenTask(firstTask: TaskRequest, nextTask: TaskRequest)
+}
 
-  case class AndThenTask(firstTask: TaskRequest, nextTask: TaskRequest) extends LogSupport {
-    def run: Unit = {
-      warn(this)
-      val context = PluginContext.current
-
-    }
-  }
+import ControlPlugin._
+class ControlPlugin(pluginContext: PluginContext) extends TaskPlugin {
 
   override def pluginName: String = "control"
 
@@ -35,10 +31,18 @@ object ControlPlugin extends TaskPlugin {
     input.methodName match {
       case "andThen" =>
         val t = MessageCodec.of[AndThenTask].fromMap(input.taskBody)
-        t.run
+        runAndThenTask(t)
       case other =>
         throw DataflowException(ErrorCode.UNKNOWN_METHOD, s"unknown method: ${other}")
     }
     Cancelable.empty
   }
+
+  def runAndThenTask(t: AndThenTask): Unit = {
+    warn(t)
+    val firstTaskRef = pluginContext.newTask(t.firstTask)
+    // TODO Await
+    val nextTaskRef = pluginContext.newTask(t.nextTask)
+  }
+
 }
