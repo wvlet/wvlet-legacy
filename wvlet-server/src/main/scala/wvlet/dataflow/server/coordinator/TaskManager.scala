@@ -56,11 +56,14 @@ class TaskManager(
   }
 
   private def checkPendingTasks: Unit = {
-    for (queuedTask <- taskRefs.values if queuedTask.status == TaskStatus.QUEUED) {
-      val queuedTaskRequest = taskRequests(queuedTask.id)
+    for {
+      queuedTask        <- taskRefs.values if queuedTask.status == TaskStatus.QUEUED;
+      queuedTaskRequest <- taskRequests.get(queuedTask.id)
+    } {
       dispatchTaskInternal(queuedTask, queuedTaskRequest)
+    }
 
-//
+    //
 //      val queuedTime = ElapsedTime.nanosSince(TimeUnit.SECONDS.toNanos(queuedTask.createdAt.getEpochSecond))
 //      if (queuedTime.compareTo(config.maxQueueingTime) > 0) {
 //        warn(s"${queuedTime} is exceeded")
@@ -75,7 +78,6 @@ class TaskManager(
 //        warn(s"Found queued: ${queuedTaskRequest}")
 //        dispatchTaskInternal(queuedTask, queuedTaskRequest)
 //      }
-    }
   }
 
   def dispatchTask(request: TaskRequest): TaskRef = {
