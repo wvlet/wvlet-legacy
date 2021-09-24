@@ -11,22 +11,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package wvlet.dataflow.plugin.trino
+package wvlet.dataflow.plugin.sqlite
 
 import wvlet.airframe.rx.Cancelable
-import wvlet.airframe.surface.secret
 import wvlet.dataflow.api.v1.{DataflowException, ErrorCode}
 import wvlet.dataflow.spi.{TaskInput, TaskPlugin}
 
-object TrinoPlugin extends TaskPlugin {
-  override def pluginName: String = "trino"
+object SQLitePlugin extends TaskPlugin {
+  override def pluginName: String = "sqlite"
 
   override def run(input: TaskInput): Cancelable = {
-    require(input.taskPlugin == "trino", s"Invalid plugin name: ${input.taskPlugin}. Expected trino")
-
     input.methodName match {
       case "runQuery" =>
-        // TODO Call method with MethodSurface
         val service = input.taskBody.getOrElse("service", new AssertionError("missing service parameter")).toString
         val query   = input.taskBody.getOrElse("query", new AssertionError("missing query")).toString
         val schema  = input.taskBody.get("schema").map(_.toString)
@@ -34,14 +30,13 @@ object TrinoPlugin extends TaskPlugin {
       case other =>
         throw DataflowException(ErrorCode.UNKNOWN_METHOD, s"unknown method: ${other}")
     }
-
-    // TODO: Support cancel
+    // TODO Support cancellation
     Cancelable.empty
   }
 
   def runQuery(service: String, query: String, schema: Option[String] = None): Unit = {
-    info(s"run query [${service}] schema:${schema}\n${query}")
-  }
-}
+    info(s"run sqlite query\n${query}")
 
-case class TrinoService(address: String, connector: String, @secret user: String)
+  }
+
+}

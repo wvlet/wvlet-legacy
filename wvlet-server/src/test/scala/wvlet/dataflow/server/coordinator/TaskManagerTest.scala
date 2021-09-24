@@ -32,7 +32,6 @@ class TaskManagerTest extends AirSpec {
   test("add a new task") { (client: ApiClient) =>
     val ret = client.TaskApi.newTask(
       TaskRequest(
-        parentId = None,
         taskPlugin = "trino",
         methodName = "runQuery",
         taskBody = Map("query" -> "select 1", "service" -> "TD (US)"),

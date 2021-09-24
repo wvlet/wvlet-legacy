@@ -54,6 +54,7 @@ object ErrorCode extends LogSupport {
   case object USER_ERROR     extends NonRetryableError(0x0000)
   case object SYNTAX_ERROR   extends NonRetryableError(0x0001)
   case object UNKNOWN_PLUGIN extends NonRetryableError(0x0002)
+  case object UNKNOWN_METHOD extends NonRetryableError(0x0003)
 
   // Internal service errors, which is usually retryable
   case object INTERNAL_ERROR    extends RetryableError(0x1_0000)
@@ -61,6 +62,7 @@ object ErrorCode extends LogSupport {
 
   // Deterministic internal errors, which are not retryable
   case object DETERMINISTIC_INTERNAL_ERROR extends NonRetryableError(0x2_0000)
+  case object MISSING_PLUGIN_CONTEXT       extends NonRetryableError(0x2_0001)
 
   // External service errors (e.g., errors in third-party APIs)
   case object EXTERNAL_ERROR extends RetryableError(0x3_0000)

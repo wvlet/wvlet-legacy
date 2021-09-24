@@ -42,17 +42,15 @@ object TaskApi {
   }
 }
 
-sealed trait TaskTrigger
-object TaskTrigger {
-  case object ON_PARENT_SUCCESS extends TaskTrigger
-  case object ON_PARENT_FAILURE extends TaskTrigger
-
-  def unapply(s: String): Option[TaskTrigger] = Seq(ON_PARENT_SUCCESS, ON_PARENT_FAILURE).find(_.toString == s)
-}
+//sealed trait TaskTrigger
+//object TaskTrigger {
+//  case object ON_PARENT_SUCCESS extends TaskTrigger
+//  case object ON_PARENT_FAILURE extends TaskTrigger
+//
+//  def unapply(s: String): Option[TaskTrigger] = Seq(ON_PARENT_SUCCESS, ON_PARENT_FAILURE).find(_.toString == s)
+//}
 
 case class TaskRequest(
-    // TaskId of the parent if exists
-    parentId: Option[TaskId],
     // Task plugin name
     taskPlugin: String,
     // A method name to execute in the plugin
@@ -61,8 +59,6 @@ case class TaskRequest(
     taskBody: TaskBody,
     // Tags attached to the task
     tags: Tags = Tags.empty,
-    // A condition when this task will be triggered
-    trigger: TaskTrigger = TaskTrigger.ON_PARENT_SUCCESS,
     // Idempotent key for preventing duplicated task creation
     idempotentKey: ULID = ULID.newULID
 )
@@ -71,7 +67,6 @@ case class TaskRequest(
   * A reference of the task
   */
 case class TaskRef(
-    parentId: Option[TaskId],
     id: TaskId,
     taskPlugin: String,
     methodName: String,

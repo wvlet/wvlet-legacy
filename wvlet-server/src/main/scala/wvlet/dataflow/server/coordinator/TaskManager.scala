@@ -102,7 +102,6 @@ class TaskManager(
         val now    = Instant.now
 
         val ref = TaskRef(
-          parentId = request.parentId,
           id = taskId,
           taskPlugin = request.taskPlugin,
           methodName = request.methodName,
