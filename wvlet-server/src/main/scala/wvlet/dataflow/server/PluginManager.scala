@@ -20,7 +20,7 @@ import wvlet.dataflow.api.v1.{DataflowException, ErrorCode, TaskRef, TaskRequest
 import wvlet.dataflow.plugin.control.ControlPlugin
 import wvlet.dataflow.plugin.sqlite.SQLitePlugin
 import wvlet.dataflow.plugin.trino.TrinoPlugin
-import wvlet.dataflow.server.ServerModule.ApiClient
+import wvlet.dataflow.server.ServerModule.{ApiClient, CoordinatorClient}
 import wvlet.dataflow.spi.{PluginContext, TaskPlugin}
 import wvlet.log.LogSupport
 

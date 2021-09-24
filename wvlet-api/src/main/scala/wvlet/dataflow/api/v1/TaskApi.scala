@@ -76,6 +76,10 @@ case class TaskRef(
     completedAt: Option[Instant] = None,
     taskError: Option[TaskError] = None
 ) {
+  private var lastHeartBeat: Instant = updatedAt
+  def recordHeartbeat: Unit = {
+    lastHeartBeat = Instant.now()
+  }
   override def toString: String = {
     taskError match {
       case Some(err) =>

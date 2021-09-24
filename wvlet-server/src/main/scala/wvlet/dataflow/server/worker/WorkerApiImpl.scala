@@ -33,8 +33,6 @@ class WorkerApiImpl(node: WorkerSelf, coordinatorClient: CoordinatorClient, plug
     extends WorkerApi
     with LogSupport {
   override def runTask(taskId: TaskId, task: TaskRequest): WorkerApi.TaskExecutionInfo = {
-    info(s"Run task: ${taskId}, ${task}")
-
     pluginManager.getPlugin(task.taskPlugin) match {
       case Some(plugin) =>
         coordinatorClient.CoordinatorApi.updateTaskStatus(UpdateTaskRequest(taskId, TaskStatus.RUNNING))

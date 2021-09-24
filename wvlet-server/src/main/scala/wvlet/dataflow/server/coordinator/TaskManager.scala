@@ -53,7 +53,7 @@ class TaskManager(
   @PostConstruct
   def start: Unit = {
     // Start a background thread that
-    threadManager.scheduledAtFixedRate(0, 1, TimeUnit.SECONDS) { () =>
+    threadManager.scheduleWithFixedDelay(0, 1, TimeUnit.SECONDS) { () =>
       checkPendingTasks
     }
   }
@@ -103,13 +103,13 @@ class TaskManager(
       warn(s"[${taskRef.id}] No worker node is available")
       taskRef
     } else {
-      info(s"[${taskRef.id}] Dispatch task")
+      debug(s"[${taskRef.id}] Dispatch task")
       val nodeIndex         = Random.nextInt(activeWorkerNodes.size)
       val targetWorkerNode  = activeWorkerNodes(nodeIndex)
       val workerClient      = rpcClientProvider.getWorkerClient(targetWorkerNode.serverAddress)
       val updatedTask       = updateTask(taskRef.id)(_.withStatus(TaskStatus.STARTING))
       val taskExecutionInfo = workerClient.WorkerApi.runTask(taskRef.id, taskRequest)
-      info(taskExecutionInfo)
+      debug(taskExecutionInfo)
       getTaskRef(taskRef.id).getOrElse(updatedTask)
     }
   }

@@ -51,7 +51,7 @@ class ThreadManager(name: String, numThreads: Int = Runtime.getRuntime.available
   }
 
   override def close(): Unit = {
-    info(s"[${name}] Terminating thread manager")
+    info(s"[${name}] Terminating the thread manager")
     executorService.shutdownNow()
   }
 }
@@ -74,8 +74,8 @@ class ScheduledThreadManager(name: String, numThreads: Int = 1) extends AutoClos
     )
   }
 
-  def scheduledAtFixedRate[U](initialDelay: Long, period: Long, unit: TimeUnit)(body: () => U): Unit = {
-    scheduledExecutorService.scheduleAtFixedRate(
+  def scheduleWithFixedDelay[U](initialDelay: Long, period: Long, unit: TimeUnit)(body: () => U): Unit = {
+    scheduledExecutorService.scheduleWithFixedDelay(
       new Runnable {
         override def run(): Unit = {
           body()
@@ -88,7 +88,7 @@ class ScheduledThreadManager(name: String, numThreads: Int = 1) extends AutoClos
   }
 
   override def close(): Unit = {
-    info(s"[${name}] Terminating thread manager")
+    info(s"[${name}] Terminating the thread manager")
     scheduledExecutorService.shutdownNow()
   }
 }
