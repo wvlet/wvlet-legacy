@@ -4,7 +4,7 @@ addSbtPlugin("org.scoverage"      % "sbt-scoverage"            % "1.9.0")
 addSbtPlugin("org.scalameta"      % "sbt-scalafmt"             % "2.4.3")
 addSbtPlugin("org.portable-scala" % "sbt-scalajs-crossproject" % "1.1.0")
 addSbtPlugin("com.eed3si9n"       % "sbt-buildinfo"            % "0.10.0")
-addSbtPlugin("org.wvlet.airframe" % "sbt-airframe"  % "21.9.0")
+addSbtPlugin("org.wvlet.airframe" % "sbt-airframe"             % "21.9.0")
 
 addSbtPlugin("io.spray" % "sbt-revolver" % "0.9.1")
 
@@ -15,8 +15,8 @@ val SCALAJS_VERSION = sys.env.getOrElse("SCALAJS_VERSION", "1.7.0")
 addSbtPlugin("org.scala-js"  % "sbt-scalajs"         % SCALAJS_VERSION)
 addSbtPlugin("ch.epfl.scala" % "sbt-scalajs-bundler" % "0.20.0")
 libraryDependencies ++= (
-        Seq("org.scala-js" %% "scalajs-env-jsdom-nodejs" % "1.1.0")
-        )
+  Seq("org.scala-js" %% "scalajs-env-jsdom-nodejs" % "1.1.0")
+)
 
 // For setting explicit versions for each commit
 addSbtPlugin("com.dwijnand" % "sbt-dynver" % "4.1.1")
@@ -24,6 +24,6 @@ addSbtPlugin("com.dwijnand" % "sbt-dynver" % "4.1.1")
 // Documentation
 addSbtPlugin("org.scalameta" % "sbt-mdoc" % "2.2.23")
 
-addSbtPlugin("org.xerial.sbt"     % "sbt-pack" % "0.14")
+addSbtPlugin("org.xerial.sbt" % "sbt-pack" % "0.14")
 
 scalacOptions ++= Seq("-deprecation", "-feature")
