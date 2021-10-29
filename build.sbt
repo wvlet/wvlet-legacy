@@ -2,6 +2,7 @@ val SCALA_2_13 = "2.13.6"
 
 val AIRFRAME_VERSION    = "21.9.0"
 val SCALAJS_DOM_VERSION = "1.2.0"
+val TRINO_VERSION       = "363"
 
 ThisBuild / scalaVersion := SCALA_2_13
 
@@ -80,12 +81,12 @@ lazy val server =
       description := "wvlet server",
       libraryDependencies ++= Seq(
         "org.wvlet.airframe" %% "airframe-http-grpc" % AIRFRAME_VERSION,
-        "org.wvlet.airframe" %% "airframe-launcher"  % AIRFRAME_VERSION
+        "org.wvlet.airframe" %% "airframe-launcher"  % AIRFRAME_VERSION,
+        // Add this as a reference implementation
+        "io.trino" % "trino-main" % TRINO_VERSION % Test
       )
     )
     .dependsOn(core, plugin, api, apiClient, plugin)
-
-val TRINO_VERSION = "362"
 
 lazy val plugin =
   project

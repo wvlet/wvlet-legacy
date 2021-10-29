@@ -25,31 +25,6 @@ abstract class RetryableError(code: Int)    extends ErrorCode(code, retryable = 
 abstract class NonRetryableError(code: Int) extends ErrorCode(code, retryable = false)
 
 object ErrorCode extends LogSupport {
-
-  lazy val all: Seq[ErrorCode] = {
-    // Retrieve all ErrorCode classes using reflection
-    for {
-      cl  <- Resource.findClasses("wvlet.dataflow.api.v1", classOf[ErrorCode]);
-      obj <- ReflectTypeUtil.companionObject(cl)
-    } yield {
-      obj.asInstanceOf[ErrorCode]
-    }
-  }
-
-  private lazy val errorCodeTable   = all.map(x => x.name -> x).toMap
-  private var unknownErrorCodeNames = Set.empty[String]
-
-  def unapply(s: String): Option[ErrorCode] = {
-    errorCodeTable.get(s).orElse {
-      // Remember the unknown code name to suppress warning messages
-      if (!unknownErrorCodeNames.contains(s)) {
-        warn(s"Unknown error code: ${s}. Use ${UNKNOWN_ERROR} instead")
-        unknownErrorCodeNames += s
-      }
-      Some(UNKNOWN_ERROR)
-    }
-  }
-
   // Errors in user inputs
   case object USER_ERROR     extends NonRetryableError(0x0000)
   case object SYNTAX_ERROR   extends NonRetryableError(0x0001)
@@ -74,4 +49,27 @@ object ErrorCode extends LogSupport {
 
   case object UNKNOWN_ERROR extends RetryableError(0xf_ffff)
 
+  lazy val all: Seq[ErrorCode] = {
+    // Retrieve all ErrorCode classes using reflection
+    for {
+      cl  <- Resource.findClasses("wvlet.dataflow.api.v1", classOf[ErrorCode]);
+      obj <- ReflectTypeUtil.companionObject(cl)
+    } yield {
+      obj.asInstanceOf[ErrorCode]
+    }
+  }
+
+  private lazy val errorCodeTable   = all.map(x => x.name -> x).toMap
+  private var unknownErrorCodeNames = Set.empty[String]
+
+  def unapply(s: String): Option[ErrorCode] = {
+    errorCodeTable.get(s).orElse {
+      // Remember the unknown code name to suppress warning messages
+      if (!unknownErrorCodeNames.contains(s)) {
+        warn(s"Unknown error code: ${s}. Use ${UNKNOWN_ERROR} instead")
+        unknownErrorCodeNames += s
+      }
+      Some(UNKNOWN_ERROR)
+    }
+  }
 }

@@ -17,7 +17,7 @@ import wvlet.airframe.Design
 import wvlet.airframe.metrics.ElapsedTime
 import wvlet.airframe.ulid.ULID
 import wvlet.dataflow.api.v1.TaskApi.TaskId
-import wvlet.dataflow.api.v1.{TaskRef, TaskRequest, TaskStatus}
+import wvlet.dataflow.api.v1.{DataflowException, ErrorCode, TaskRef, TaskRequest, TaskStatus}
 import wvlet.dataflow.server.util.{RPCClientProvider, ScheduledThreadManager}
 import wvlet.log.LogSupport
 
@@ -152,12 +152,22 @@ class TaskManager(
         }
         newTask
       case None =>
-        throw new IllegalArgumentException(s"Unknown ${taskId}")
+        throw DataflowException(ErrorCode.UNKNOWN_TASK, s"Unknown ${taskId}")
     }
   }
 
   def getAllTasks: Seq[TaskRef] = {
     taskRefs.values.toSeq
+  }
+
+  def cancelTask(taskId: TaskId): TaskRef = {
+    getTaskRef(taskId) match {
+      case Some(taskRef) =>
+        // TODO: Cancel the task
+        taskRef
+      case None =>
+        throw DataflowException(ErrorCode.UNKNOWN_TASK, s"Unknown ${taskId}")
+    }
   }
 
 }
