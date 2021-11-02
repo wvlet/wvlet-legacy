@@ -2,7 +2,7 @@ val SCALA_2_13 = "2.13.6"
 
 val AIRFRAME_VERSION    = "21.9.0"
 val SCALAJS_DOM_VERSION = "1.2.0"
-val TRINO_VERSION       = "363"
+val TRINO_VERSION       = "364"
 
 ThisBuild / scalaVersion := SCALA_2_13
 
