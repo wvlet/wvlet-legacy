@@ -26,12 +26,12 @@ package object workflow {
 
   def task[U](body: => U): Task = macro mNewTask
 
-  //def task[U](body: TaskContext => U): Task = macro mNewTaskWithContext
+  // def task[U](body: TaskContext => U): Task = macro mNewTaskWithContext
   def shell(command: => String): Task = macro mNewShellTask
 
   implicit class ShellCommandString(val sc: StringContext) {
     def c(args: Any*): Task = macro mNewShellTaskStr
-    //def td(args: Any*): Task = macro mNewShellTaskStr
+    // def td(args: Any*): Task = macro mNewShellTaskStr
     def commandTemplate: String = sc.parts.mkString("{}")
 
     def commandStr(args: Any*): String = {
