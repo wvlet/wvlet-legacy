@@ -1,6 +1,6 @@
 val SCALA_2_13 = "2.13.7"
 
-val AIRFRAME_VERSION    = "21.11.0"
+val AIRFRAME_VERSION    = "21.12.1"
 val SCALAJS_DOM_VERSION = "1.2.0"
 val TRINO_VERSION       = "365"
 
