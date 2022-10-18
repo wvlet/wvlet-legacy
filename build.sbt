@@ -1,4 +1,4 @@
-val SCALA_2_13 = "2.13.8"
+val SCALA_2_13 = "2.13.10"
 
 val AIRFRAME_VERSION    = "21.12.1"
 val SCALAJS_DOM_VERSION = "1.2.0"
