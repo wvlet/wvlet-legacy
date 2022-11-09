@@ -8,7 +8,7 @@ addSbtPlugin("org.scoverage"      % "sbt-scoverage"            % "2.0.6")
 addSbtPlugin("org.scalameta"      % "sbt-scalafmt"             % "2.4.6")
 addSbtPlugin("org.portable-scala" % "sbt-scalajs-crossproject" % "1.1.0")
 addSbtPlugin("com.eed3si9n"       % "sbt-buildinfo"            % "0.10.0")
-addSbtPlugin("org.wvlet.airframe" % "sbt-airframe"             % "22.2.0")
+addSbtPlugin("org.wvlet.airframe" % "sbt-airframe"             % "22.11.0")
 
 addSbtPlugin("io.spray" % "sbt-revolver" % "0.9.1")
 
