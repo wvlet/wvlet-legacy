@@ -26,7 +26,7 @@ libraryDependencies ++= (
 addSbtPlugin("com.dwijnand" % "sbt-dynver" % "4.1.1")
 
 // Documentation
-addSbtPlugin("org.scalameta" % "sbt-mdoc" % "2.3.6")
+addSbtPlugin("org.scalameta" % "sbt-mdoc" % "2.3.7")
 
 addSbtPlugin("org.xerial.sbt" % "sbt-pack" % "0.17")
 
