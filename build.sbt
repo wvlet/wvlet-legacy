@@ -1,6 +1,6 @@
 val SCALA_2_13 = "2.13.8"
 
-val AIRFRAME_VERSION    = "21.12.1"
+val AIRFRAME_VERSION    = "22.11.0"
 val SCALAJS_DOM_VERSION = "1.2.0"
 val TRINO_VERSION       = "368"
 
@@ -101,7 +101,7 @@ lazy val plugin =
         "io.trino"            % "trino-jdbc"    % TRINO_VERSION,
         "io.trino"            % "trino-spi"     % TRINO_VERSION,
         "org.wvlet.airframe" %% "airframe-jdbc" % AIRFRAME_VERSION,
-        "org.xerial.snappy"   % "snappy-java"   % "1.1.8.4"
+        "org.xerial.snappy"   % "snappy-java"   % "1.1.9.1"
       )
     )
     .dependsOn(api, core)
