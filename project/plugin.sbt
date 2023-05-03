@@ -10,7 +10,7 @@ addSbtPlugin("org.portable-scala" % "sbt-scalajs-crossproject" % "1.3.1")
 addSbtPlugin("com.eed3si9n"       % "sbt-buildinfo"            % "0.11.0")
 addSbtPlugin("org.wvlet.airframe" % "sbt-airframe"             % "22.12.6")
 
-addSbtPlugin("io.spray" % "sbt-revolver" % "0.9.1")
+addSbtPlugin("io.spray" % "sbt-revolver" % "0.10.0")
 
 addDependencyTreePlugin
 
