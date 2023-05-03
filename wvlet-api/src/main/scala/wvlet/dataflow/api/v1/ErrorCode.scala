@@ -41,12 +41,13 @@ object ErrorCode extends LogSupport {
   case object DETERMINISTIC_INTERNAL_ERROR extends NonRetryableError(0x2_0000)
   case object MISSING_PLUGIN_CONTEXT       extends NonRetryableError(0x2_0001)
 
-  // External service errors (e.g., errors in third-party APIs)
+  // External service errors, which are retryable (e.g., errors in third-party APIs)
   case object EXTERNAL_ERROR extends RetryableError(0x3_0000)
 
   // Deterministic external errors, which are not retryable
   case object DETERMINISTIC_EXTERNAL_ERROR extends NonRetryableError(0x4_0000)
 
+  // For the other types of errors
   case object UNKNOWN_ERROR extends RetryableError(0xf_ffff)
 
   lazy val all: Seq[ErrorCode] = {
