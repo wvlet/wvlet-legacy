@@ -35,8 +35,6 @@ class WorkerService(
     rpcClientProvider: RPCClientProvider,
     executor: WorkerBackgroundExecutor
 ) extends LogSupport {
-  info(s"Starting WorkerService ${self.address}, coordinator: ${workerConfig.coordinatorAddress}")
-
   private lazy val coordinatorClient = rpcClientProvider.getCoordinatorClient(
     s"${workerConfig.name}-${self.name}",
     workerConfig.coordinatorAddress
@@ -45,7 +43,7 @@ class WorkerService(
   // Polling coordinator every 5 seconds for heartbeat
   executor.scheduleAtFixedRate(
     () => {
-      warn(s"register: ${self}")
+      trace(s"register: ${self}")
       try {
         coordinatorClient.CoordinatorApi.register(self)
       } catch {

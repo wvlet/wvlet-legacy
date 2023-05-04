@@ -39,7 +39,6 @@ class TaskManagerTest extends AirSpec {
       )
     )
     debug(ret)
-    1
 
     val taskList = client.TaskApi.listTasks(TaskListRequest())
     debug(taskList)
@@ -62,6 +61,5 @@ class TaskManagerTest extends AirSpec {
     }
 
     loop(ret.id, 30)
-
   }
 }

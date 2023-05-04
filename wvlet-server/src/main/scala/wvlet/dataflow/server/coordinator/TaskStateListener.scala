@@ -22,8 +22,8 @@ trait TaskStateListener {
   def onStateChange(taskRef: TaskRef): Unit
 }
 
-object TaskStateListener {
-  def defaultListener: TaskStateListener = new TaskStateListener with LogSupport {
+object TaskStateListener extends LogSupport {
+  def defaultListener: TaskStateListener = new TaskStateListener {
     override def onStateChange(taskRef: TaskRef): Unit = {
       taskRef.taskError match {
         case None =>
