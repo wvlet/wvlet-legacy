@@ -28,9 +28,9 @@ import wvlet.dataflow.api.v1.{TaskError, TaskStatus}
 trait CoordinatorApi extends ServiceInfoApi {
   import CoordinatorApi._
   def listNodes: Seq[NodeInfo]
-  def register(node: Node): Unit
+  def register(node: Node): Int
 
-  def updateTaskStatus(request: UpdateTaskRequest): Unit
+  def updateTaskStatus(request: UpdateTaskRequest): Int
 }
 
 object CoordinatorApi extends RxRouterProvider {

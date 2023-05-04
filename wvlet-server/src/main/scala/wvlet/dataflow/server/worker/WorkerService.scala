@@ -16,9 +16,10 @@ package wvlet.dataflow.server.worker
 import wvlet.airframe.{Design, newDesign}
 import wvlet.dataflow.api.internal.Cluster.Node
 import wvlet.dataflow.server.ServerModule.WorkerServer
-import wvlet.dataflow.server.worker.WorkerService._
+import wvlet.dataflow.server.worker.WorkerService.*
 import wvlet.dataflow.server.WorkerConfig
 import wvlet.dataflow.server.util.RPCClientProvider
+import wvlet.log.LogSupport
 
 import java.net.InetAddress
 import java.time.Instant
@@ -33,13 +34,25 @@ class WorkerService(
     workerServer: WorkerServer,
     rpcClientProvider: RPCClientProvider,
     executor: WorkerBackgroundExecutor
-) {
+) extends LogSupport {
+  info(s"Starting WorkerService ${self.address}, coordinator: ${workerConfig.coordinatorAddress}")
 
-  private lazy val coordinatorClient = rpcClientProvider.getCoordinatorClient(workerConfig.coordinatorAddress)
+  private lazy val coordinatorClient = rpcClientProvider.getCoordinatorClient(
+    s"${workerConfig.name}-${self.name}",
+    workerConfig.coordinatorAddress
+  )
 
   // Polling coordinator every 5 seconds for heartbeat
   executor.scheduleAtFixedRate(
-    () => { coordinatorClient.CoordinatorApi.register(self) },
+    () => {
+      warn(s"register: ${self}")
+      try {
+        coordinatorClient.CoordinatorApi.register(self)
+      } catch {
+        case e: Throwable => warn(e)
+      }
+
+    },
     0,
     5,
     TimeUnit.SECONDS

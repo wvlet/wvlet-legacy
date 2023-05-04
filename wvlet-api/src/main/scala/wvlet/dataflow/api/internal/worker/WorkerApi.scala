@@ -27,6 +27,8 @@ import java.time.Instant
 @RPC
 trait WorkerApi extends ServiceInfoApi {
   import WorkerApi._
+  def hello: String = "hello"
+
   def runTask(taskId: TaskId, task: TaskRequest): TaskExecutionInfo
   def getTask(taskId: TaskId): Option[TaskRef]
   def cancelTask(taskId: TaskId): Option[TaskRef]

@@ -23,18 +23,26 @@ class CoordinatorApiImpl(nodeManager: NodeManager, taskManager: TaskManager) ext
   override def listNodes: Seq[NodeInfo] = {
     nodeManager.listNodes
   }
-  override def register(node: Node): Unit = {
+  override def register(node: Node): Int = {
     nodeManager.heartBeat(node)
+    0
   }
 
-  override def updateTaskStatus(request: CoordinatorApi.UpdateTaskRequest): Unit = {
-    taskManager.updateTask(request.taskId) { task =>
-      request.error match {
-        case None =>
-          task.withStatus(request.status)
-        case Some(err) =>
-          task.withError(err)
+  override def updateTaskStatus(request: CoordinatorApi.UpdateTaskRequest): Int = {
+    warn(s"updateTaskStatus: ${request}")
+    try {
+      taskManager.updateTask(request.taskId) { task =>
+        request.error match {
+          case None =>
+            task.withStatus(request.status)
+          case Some(err) =>
+            task.withError(err)
+        }
       }
+    } catch {
+      case e: Throwable =>
+        warn(e)
     }
+    0
   }
 }

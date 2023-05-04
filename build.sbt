@@ -1,11 +1,13 @@
 val SCALA_2_13 = "2.13.8"
 val SCALA_3    = "3.2.2"
 
-val AIRFRAME_VERSION    = "23.5.0"
+val AIRFRAME_VERSION    = sys.env.getOrElse("AIRFRAME_VERSION", "23.5.0")
+val AIRSPEC_VERSION     = "23.5.0"
 val SCALAJS_DOM_VERSION = "2.4.0"
 val TRINO_VERSION       = "368"
 
 ThisBuild / scalaVersion := SCALA_3
+ThisBuild / resolvers ++= Resolver.sonatypeOssRepos("snapshots")
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
 
@@ -30,7 +32,7 @@ val buildSettings = Seq[Setting[_]](
   sonatypeProfileName := "org.wvlet",
   publishTo           := sonatypePublishToBundle.value,
   libraryDependencies ++= Seq(
-    "org.wvlet.airframe" %% "airspec" % AIRFRAME_VERSION % Test
+    "org.wvlet.airframe" %% "airspec" % AIRSPEC_VERSION % Test
   ),
   testFrameworks += new TestFramework("wvlet.airspec.Framework")
 )
@@ -135,7 +137,5 @@ lazy val apiClient =
         "wvlet.dataflow.api.internal.worker:rpc:WorkerRPC",
         "wvlet.dataflow.api.v1:rpc:WvletRPC"
       ),
-      libraryDependencies ++= Seq(
-        "org.wvlet.airframe" %% "airframe-http-netty" % AIRFRAME_VERSION
-      )
+      airframeHttpVersion := AIRFRAME_VERSION
     ).dependsOn(api)

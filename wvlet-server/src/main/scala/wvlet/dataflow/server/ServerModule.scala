@@ -150,10 +150,10 @@ object ServerModule extends LogSupport {
         )
       )
       .bind[CoordinatorClient].toProvider { (server: CoordinatorServer) =>
-        CoordinatorClient(Http.client.newSyncClient(server.localAddress))
+        CoordinatorClient(Http.client.withName("coordinator-client").newSyncClient(server.localAddress))
       }
       .bind[ApiClient].toProvider { (server: CoordinatorServer) =>
-        ApiClient(Http.client.newSyncClient(server.localAddress))
+        ApiClient(Http.client.withName("api-client").newSyncClient(server.localAddress))
       }
       // Add this design to start up worker service early
       .bind[WorkerService].toEagerSingleton
