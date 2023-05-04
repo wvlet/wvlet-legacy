@@ -1,8 +1,8 @@
 val SCALA_2_13 = "2.13.8"
 val SCALA_3    = "3.2.2"
 
-val AIRFRAME_VERSION    = sys.env.getOrElse("AIRFRAME_VERSION", "23.5.0")
-val AIRSPEC_VERSION     = "23.5.0"
+val AIRFRAME_VERSION    = sys.env.getOrElse("AIRFRAME_VERSION", "23.5.2")
+val AIRSPEC_VERSION     = "23.5.2"
 val SCALAJS_DOM_VERSION = "2.4.0"
 val TRINO_VERSION       = "368"
 
@@ -86,7 +86,8 @@ lazy val server =
         "org.wvlet.airframe" %% "airframe-launcher"   % AIRFRAME_VERSION,
         // Add this as a reference implementation
         "io.trino" % "trino-main" % TRINO_VERSION % Test
-      )
+      ),
+      Test / classLoaderLayeringStrategy := ClassLoaderLayeringStrategy.Flat
     )
     .dependsOn(core, plugin, api, apiClient, plugin)
 
