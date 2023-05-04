@@ -15,4 +15,8 @@ package wvlet.dataflow.api.v1
 
 import wvlet.airspec.AirSpec
 
-class ErrorCodeTest extends AirSpec {}
+class ErrorCodeTest extends AirSpec {
+  test("...") {
+    // TODO
+  }
+}
