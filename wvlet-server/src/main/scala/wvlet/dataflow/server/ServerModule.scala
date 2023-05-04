@@ -13,6 +13,7 @@
  */
 package wvlet.dataflow.server
 
+import wvlet.airframe.http.client.SyncClient
 import wvlet.airframe.http.netty.{Netty, NettyServer, NettyServerConfig}
 import wvlet.airframe.http.{Http, Router, RxRouter, ServerAddress}
 import wvlet.airframe.{Design, Session, newDesign}
@@ -22,8 +23,10 @@ import wvlet.dataflow.api.internal.worker.WorkerRPC
 import wvlet.dataflow.api.v1.WvletRPC
 import wvlet.dataflow.server.coordinator.{CoordinatorApiImpl, CoordinatorConfig, TaskApiImpl, TaskManager}
 import wvlet.dataflow.server.worker.{WorkerApiImpl, WorkerService}
+import wvlet.log.LogSupport
 
 import java.net.ServerSocket
+import javax.annotation.PostConstruct
 
 case class WorkerConfig(
     name: String = "worker-1",
@@ -35,12 +38,45 @@ case class WorkerConfig(
 
 /**
   */
-object ServerModule {
-  type CoordinatorClient = CoordinatorRPC.RPCSyncClient
-  type CoordinatorServer = NettyServer
-  type WorkerServer      = NettyServer
-  type WorkerClient      = WorkerRPC.RPCSyncClient
-  type ApiClient         = WvletRPC.RPCSyncClient
+object ServerModule extends LogSupport {
+  class CoordinatorClient(client: SyncClient) extends CoordinatorRPC.RPCSyncClient(client)
+  class WorkerClient(client: SyncClient)      extends WorkerRPC.RPCSyncClient(client)
+  class ApiClient(client: SyncClient)         extends WvletRPC.RPCSyncClient(client)
+
+  class CoordinatorServer(config: CoordinatorConfig, session: Session) extends AutoCloseable {
+    private var server: Option[NettyServer] = None
+    def localAddress: String                = config.serverAddress.hostAndPort
+    @PostConstruct
+    def start: Unit = {
+      server = Some(coordinatorServer(config).newServer(session))
+    }
+
+    def awaitTermination(): Unit = {
+      awaitTermination()
+    }
+
+    override def close(): Unit = {
+      server.foreach(_.close())
+    }
+  }
+
+  class WorkerServer(config: WorkerConfig, session: Session) extends AutoCloseable {
+    private var server: Option[NettyServer] = None
+    def localAddress: String                = config.serverAddress.hostAndPort
+
+    @PostConstruct
+    def start: Unit = {
+      server = Some(workerServer(config).newServer(session))
+    }
+
+    def awaitTermination(): Unit = {
+      awaitTermination()
+    }
+
+    override def close(): Unit = {
+      server.foreach(_.close())
+    }
+  }
 
   def coordinatorRouter = RxRouter.of(
     RxRouter.of[ServiceInfoApi],
@@ -68,14 +104,14 @@ object ServerModule {
   def coordinatorDesign(config: CoordinatorConfig): Design = {
     newDesign
       .bind[CoordinatorConfig].toInstance(config)
-      .bind[CoordinatorServer].toProvider { (session: Session) => coordinatorServer(config).newServer(session) }
+      .bind[CoordinatorServer].toSingleton
       .add(TaskManager.design)
   }
 
   def workerDesign(config: WorkerConfig): Design = {
     WorkerService.design
       .bind[WorkerConfig].toInstance(config)
-      .bind[WorkerServer].toProvider { (session: Session) => workerServer(config).newServer(session) }
+      .bind[WorkerServer].toSingleton
       .add(PluginManager.design)
   }
 
@@ -104,7 +140,6 @@ object ServerModule {
     */
   def testServerAndClient: Design = {
     val Seq(coordinatorPort, workerPort) = randomPort(2)
-
     coordinatorDesign(CoordinatorConfig(serverAddress = ServerAddress(s"localhost:${coordinatorPort}")))
       .add(
         workerDesign(
@@ -115,10 +150,10 @@ object ServerModule {
         )
       )
       .bind[CoordinatorClient].toProvider { (server: CoordinatorServer) =>
-        CoordinatorRPC.newRPCSyncClient(Http.client.newSyncClient(server.localAddress))
+        CoordinatorClient(Http.client.newSyncClient(server.localAddress))
       }
       .bind[ApiClient].toProvider { (server: CoordinatorServer) =>
-        WvletRPC.newRPCSyncClient(Http.client.newSyncClient(server.localAddress))
+        ApiClient(Http.client.newSyncClient(server.localAddress))
       }
       // Add this design to start up worker service early
       .bind[WorkerService].toEagerSingleton
