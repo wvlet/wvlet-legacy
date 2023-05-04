@@ -45,38 +45,16 @@ case class TrinoQueryRequest(
   }
 
   def toClientSession: ClientSession = {
-    new ClientSession(
-      // server
-      new URI(coordinatorAddress),
-      "",
-      Optional.of(user),
-      "querybase",
-      // traceToken
-      Optional.empty(),
-      // clientTags
-      Set.empty[String].asJava,
-      null,
-      catalog,
-      schema,
-      null,
-      ZoneOffset.UTC,
-      Locale.ENGLISH,
-      // resource estimates
-      Map.empty[String, String].asJava,
-      // properties
-      Map.empty[String, String].asJava,
-      // preparedStatements
-      Map.empty[String, String].asJava,
-      // roles
-      Map.empty[String, ClientSelectedRole].asJava,
-      // extra credentials
-      Map.empty[String, String].asJava,
-      // transaction id
-      null,
-      // client request timeout
-      io.airlift.units.Duration.valueOf("2m"),
-      false
-    )
+    val b = ClientSession.builder()
+    b.server(new URI(coordinatorAddress))
+      .user(Optional.of(user))
+      .source("querybase")
+      .catalog(catalog)
+      .schema(schema)
+      .timeZone(ZoneOffset.UTC)
+      .locale(Locale.ENGLISH)
+      .clientRequestTimeout(io.airlift.units.Duration.valueOf("2m"))
+      .build()
   }
 }
 
