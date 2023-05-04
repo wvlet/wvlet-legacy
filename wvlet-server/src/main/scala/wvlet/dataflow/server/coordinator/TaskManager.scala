@@ -13,17 +13,19 @@
  */
 package wvlet.dataflow.server.coordinator
 
+import io.netty.util.ThreadDeathWatcher
 import wvlet.airframe.Design
 import wvlet.airframe.metrics.ElapsedTime
 import wvlet.airframe.ulid.ULID
-import wvlet.dataflow.api.v1.TaskApi.TaskId
+import wvlet.dataflow.api.v1.TaskApi.{Tags, TaskId}
 import wvlet.dataflow.api.v1.{DataflowException, ErrorCode, TaskRef, TaskRequest, TaskStatus}
 import wvlet.dataflow.server.util.{RPCClientProvider, ScheduledThreadManager}
 import wvlet.log.LogSupport
 
+import java.time.Instant
 import java.util.concurrent.{ConcurrentHashMap, LinkedBlockingQueue, TimeUnit}
 import javax.annotation.PostConstruct
-import scala.jdk.CollectionConverters._
+import scala.jdk.CollectionConverters.*
 import scala.util.Random
 
 case class TaskManagerConfig(
@@ -95,6 +97,7 @@ class TaskManager(
     debug(s"New task: ${request}")
     val taskRef = getOrCreateTask(request)
     dispatchTaskInternal(taskRef, request)
+    taskRef
   }
 
   private def dispatchTaskInternal(taskRef: TaskRef, taskRequest: TaskRequest): TaskRef = {
@@ -103,10 +106,10 @@ class TaskManager(
       warn(s"[${taskRef.id}] No worker node is available")
       taskRef
     } else {
-      debug(s"[${taskRef.id}] Dispatch task")
+      info(s"[${taskRef.id}] Dispatch task")
       val nodeIndex         = Random.nextInt(activeWorkerNodes.size)
       val targetWorkerNode  = activeWorkerNodes(nodeIndex)
-      val workerClient      = rpcClientProvider.getWorkerClient(targetWorkerNode.serverAddress)
+      val workerClient      = rpcClientProvider.getWorkerClient("task-manager", targetWorkerNode.serverAddress)
       val updatedTask       = updateTask(taskRef.id)(_.withStatus(TaskStatus.STARTING))
       val taskExecutionInfo = workerClient.WorkerApi.runTask(taskRef.id, taskRequest)
       debug(taskExecutionInfo)
@@ -173,8 +176,6 @@ class TaskManager(
 }
 
 object TaskManager {
-  type TaskManagerThreadManager = ScheduledThreadManager
-
   def design: Design = Design.newDesign
     .bind[TaskManager].toSingleton
 

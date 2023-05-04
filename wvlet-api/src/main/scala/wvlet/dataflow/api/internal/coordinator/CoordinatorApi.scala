@@ -13,7 +13,7 @@
  */
 package wvlet.dataflow.api.internal.coordinator
 
-import wvlet.airframe.http.RPC
+import wvlet.airframe.http._
 import wvlet.dataflow.api.internal.Cluster.{Node, NodeInfo}
 import wvlet.dataflow.api.internal.ServiceInfoApi
 import wvlet.dataflow.api.v1.TaskApi.TaskId
@@ -33,6 +33,7 @@ trait CoordinatorApi extends ServiceInfoApi {
   def updateTaskStatus(request: UpdateTaskRequest): Unit
 }
 
-object CoordinatorApi {
+object CoordinatorApi extends RxRouterProvider {
+  override def router: RxRouter = RxRouter.of[CoordinatorApi]
   case class UpdateTaskRequest(taskId: TaskId, status: TaskStatus, error: Option[TaskError] = None)
 }

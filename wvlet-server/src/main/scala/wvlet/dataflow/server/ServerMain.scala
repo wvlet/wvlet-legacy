@@ -45,7 +45,7 @@ class ServerMain(@option(prefix = "-h,--help", description = "Show help messages
       .standaloneDesign(coordinatorPort, workerPort)
       .withProductionMode
       .build[CoordinatorServer] { server =>
-        server.awaitTermination
+        server.awaitTermination()
       }
   }
 }

@@ -13,7 +13,7 @@
  */
 package wvlet.dataflow.api.v1
 
-import wvlet.airframe.http.RPC
+import wvlet.airframe.http._
 import wvlet.airframe.ulid.ULID
 import wvlet.dataflow.api.v1.TaskApi.{Tags, TaskBody, TaskId}
 
@@ -30,7 +30,9 @@ trait TaskApi {
   def cancelTask(taskId: TaskId): Option[TaskRef]
 }
 
-object TaskApi {
+object TaskApi extends RxRouterProvider {
+  override def router: RxRouter = RxRouter.of[TaskApi]
+
   type TaskId   = ULID
   type TaskBody = Map[String, Any]
   object TaskBody {

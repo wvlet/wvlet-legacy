@@ -39,7 +39,7 @@ class PluginManager(session: Session) extends LogSupport {
     session.get[TaskPlugin](pluginSurface) match {
       case plugin: TaskPlugin =>
         addPlugin(plugin)
-      case _ =>
+      case null =>
         warn(s"Failed to instantiate plugin: ${pluginSurface.name}")
     }
   }

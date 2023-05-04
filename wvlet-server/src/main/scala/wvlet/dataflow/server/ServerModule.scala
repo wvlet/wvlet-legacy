@@ -13,18 +13,20 @@
  */
 package wvlet.dataflow.server
 
-import io.grpc.{ManagedChannel, ManagedChannelBuilder}
-import wvlet.airframe.http.grpc.{GrpcServer, GrpcServerConfig, gRPC}
-import wvlet.airframe.http.{Router, ServerAddress}
+import wvlet.airframe.http.client.SyncClient
+import wvlet.airframe.http.netty.{Netty, NettyServer, NettyServerConfig}
+import wvlet.airframe.http.{Http, Router, RxRouter, ServerAddress}
 import wvlet.airframe.{Design, Session, newDesign}
 import wvlet.dataflow.api.internal.ServiceInfoApi
-import wvlet.dataflow.api.internal.coordinator.CoordinatorGrpc
-import wvlet.dataflow.api.internal.worker.WorkerGrpc
-import wvlet.dataflow.api.v1.WvletGrpc
+import wvlet.dataflow.api.internal.coordinator.CoordinatorRPC
+import wvlet.dataflow.api.internal.worker.WorkerRPC
+import wvlet.dataflow.api.v1.WvletRPC
 import wvlet.dataflow.server.coordinator.{CoordinatorApiImpl, CoordinatorConfig, TaskApiImpl, TaskManager}
 import wvlet.dataflow.server.worker.{WorkerApiImpl, WorkerService}
+import wvlet.log.LogSupport
 
 import java.net.ServerSocket
+import javax.annotation.PostConstruct
 
 case class WorkerConfig(
     name: String = "worker-1",
@@ -36,30 +38,65 @@ case class WorkerConfig(
 
 /**
   */
-object ServerModule {
-  type CoordinatorClient = CoordinatorGrpc.SyncClient
-  type CoordinatorServer = GrpcServer
-  type WorkerServer      = GrpcServer
-  type WorkerClient      = WorkerGrpc.SyncClient
-  type ApiClient         = WvletGrpc.SyncClient
+object ServerModule extends LogSupport {
+  class CoordinatorClient(client: SyncClient) extends CoordinatorRPC.RPCSyncClient(client)
+  class WorkerClient(client: SyncClient)      extends WorkerRPC.RPCSyncClient(client)
+  class ApiClient(client: SyncClient)         extends WvletRPC.RPCSyncClient(client)
 
-  def coordinatorRouter = Router
-    .add[ServiceInfoApi]
-    .add[CoordinatorApiImpl]
-    .add[TaskApiImpl]
+  class CoordinatorServer(config: CoordinatorConfig, session: Session) extends AutoCloseable {
+    private var server: Option[NettyServer] = None
+    def localAddress: String                = config.serverAddress.hostAndPort
+    @PostConstruct
+    def start: Unit = {
+      server = Some(coordinatorServer(config).newServer(session))
+    }
 
-  def workerRouter = Router
-    .add[ServiceInfoApi]
-    .add[WorkerApiImpl]
+    def awaitTermination(): Unit = {
+      awaitTermination()
+    }
 
-  private def coordinatorServer(config: CoordinatorConfig): GrpcServerConfig =
-    gRPC.server
+    override def close(): Unit = {
+      server.foreach(_.close())
+    }
+  }
+
+  class WorkerServer(config: WorkerConfig, session: Session) extends AutoCloseable {
+    private var server: Option[NettyServer] = None
+    def localAddress: String                = config.serverAddress.hostAndPort
+
+    @PostConstruct
+    def start: Unit = {
+      server = Some(workerServer(config).newServer(session))
+    }
+
+    def awaitTermination(): Unit = {
+      awaitTermination()
+    }
+
+    override def close(): Unit = {
+      server.foreach(_.close())
+    }
+  }
+
+  def coordinatorRouter = RxRouter.of(
+    RxRouter.of[ServiceInfoApi],
+    RxRouter.of[CoordinatorApiImpl],
+    RxRouter.of[TaskApiImpl]
+  )
+
+  def workerRouter = RxRouter.of(
+    RxRouter.of[ServiceInfoApi],
+    RxRouter.of[WorkerApiImpl]
+  )
+
+  private def coordinatorServer(config: CoordinatorConfig): NettyServerConfig =
+    Netty.server
       .withName(config.name)
       .withPort(config.port)
       .withRouter(coordinatorRouter)
 
-  private def workerServer(config: WorkerConfig): GrpcServerConfig =
-    gRPC.server
+  private def workerServer(config: WorkerConfig): NettyServerConfig =
+    Netty.server
       .withName(config.name)
       .withPort(config.port)
       .withRouter(workerRouter)
@@ -67,14 +104,14 @@ object ServerModule {
   def coordinatorDesign(config: CoordinatorConfig): Design = {
     newDesign
       .bind[CoordinatorConfig].toInstance(config)
-      .bind[CoordinatorServer].toProvider { session: Session => coordinatorServer(config).newServer(session) }
+      .bind[CoordinatorServer].toSingleton
       .add(TaskManager.design)
   }
 
   def workerDesign(config: WorkerConfig): Design = {
     WorkerService.design
       .bind[WorkerConfig].toInstance(config)
-      .bind[WorkerServer].toProvider { session: Session => workerServer(config).newServer(session) }
+      .bind[WorkerServer].toSingleton
       .add(PluginManager.design)
   }
 
@@ -86,7 +123,7 @@ object ServerModule {
   }
 
   def standaloneDesign(coordinatorPort: Int, workerPort: Int): Design = {
-    coordinatorDesign(coordinator.CoordinatorConfig(serverAddress = ServerAddress(s"localhost:${coordinatorPort}")))
+    coordinatorDesign(CoordinatorConfig(serverAddress = ServerAddress(s"localhost:${coordinatorPort}")))
       .add(
         workerDesign(
           WorkerConfig(
@@ -97,23 +134,13 @@ object ServerModule {
       )
   }
 
-  def newGrpcChannel(address: String): ManagedChannel = {
-    val channel = ManagedChannelBuilder
-      .forTarget(address)
-      .maxInboundMessageSize(32 * 1024 * 1024)
-      .usePlaintext()
-      .build()
-    channel
-  }
-
   /**
     * Design for launching a test server and client
     * @return
     */
   def testServerAndClient: Design = {
     val Seq(coordinatorPort, workerPort) = randomPort(2)
-
-    coordinatorDesign(coordinator.CoordinatorConfig(serverAddress = ServerAddress(s"localhost:${coordinatorPort}")))
+    coordinatorDesign(CoordinatorConfig(serverAddress = ServerAddress(s"localhost:${coordinatorPort}")))
       .add(
         workerDesign(
           WorkerConfig(
@@ -123,10 +150,10 @@ object ServerModule {
         )
       )
       .bind[CoordinatorClient].toProvider { (server: CoordinatorServer) =>
-        CoordinatorGrpc.newSyncClient(newGrpcChannel(server.localAddress))
+        CoordinatorClient(Http.client.withName("coordinator-client").newSyncClient(server.localAddress))
       }
       .bind[ApiClient].toProvider { (server: CoordinatorServer) =>
-        WvletGrpc.newSyncClient(newGrpcChannel(server.localAddress))
+        ApiClient(Http.client.withName("api-client").newSyncClient(server.localAddress))
       }
       // Add this design to start up worker service early
       .bind[WorkerService].toEagerSingleton

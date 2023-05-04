@@ -33,10 +33,11 @@ class WorkerApiImpl(node: WorkerSelf, coordinatorClient: CoordinatorClient, plug
     extends WorkerApi
     with LogSupport {
   override def runTask(taskId: TaskId, task: TaskRequest): WorkerApi.TaskExecutionInfo = {
+    debug(s"run task: ${task}")
     pluginManager.getPlugin(task.taskPlugin) match {
       case Some(plugin) =>
         coordinatorClient.CoordinatorApi.updateTaskStatus(UpdateTaskRequest(taskId, TaskStatus.RUNNING))
-        info(s"Running ${task.taskPlugin}:${task.methodName}")
+        debug(s"Running ${task.taskPlugin}:${task.methodName}")
         runTaskInternal(plugin, TaskInput(taskId, task))
       case None =>
         val err = TaskError(ErrorCode.UNKNOWN_PLUGIN, s"Unknown plugin: ${task.taskPlugin}")

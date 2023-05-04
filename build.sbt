@@ -1,15 +1,17 @@
 val SCALA_2_13 = "2.13.8"
+val SCALA_3    = "3.2.2"
 
-val AIRFRAME_VERSION    = "22.11.0"
-val SCALAJS_DOM_VERSION = "1.2.0"
+val AIRFRAME_VERSION    = sys.env.getOrElse("AIRFRAME_VERSION", "23.5.2")
+val AIRSPEC_VERSION     = "23.5.2"
+val SCALAJS_DOM_VERSION = "2.4.0"
 val TRINO_VERSION       = "368"
 
-ThisBuild / scalaVersion := SCALA_2_13
+ThisBuild / scalaVersion := SCALA_3
+ThisBuild / resolvers ++= Resolver.sonatypeOssRepos("snapshots")
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
 
 val buildSettings = Seq[Setting[_]](
-  crossScalaVersions  := Seq(SCALA_2_13),
   organization        := "org.wvlet.dataflow",
   description         := "A framework for building functional data flows",
   crossPaths          := true,
@@ -30,7 +32,7 @@ val buildSettings = Seq[Setting[_]](
   sonatypeProfileName := "org.wvlet",
   publishTo           := sonatypePublishToBundle.value,
   libraryDependencies ++= Seq(
-    "org.wvlet.airframe" %% "airspec" % AIRFRAME_VERSION % "test"
+    "org.wvlet.airframe" %% "airspec" % AIRSPEC_VERSION % Test
   ),
   testFrameworks += new TestFramework("wvlet.airspec.Framework")
 )
@@ -80,11 +82,12 @@ lazy val server =
       name        := "wvlet-server",
       description := "wvlet server",
       libraryDependencies ++= Seq(
-        "org.wvlet.airframe" %% "airframe-http-grpc" % AIRFRAME_VERSION,
-        "org.wvlet.airframe" %% "airframe-launcher"  % AIRFRAME_VERSION,
+        "org.wvlet.airframe" %% "airframe-http-netty" % AIRFRAME_VERSION,
+        "org.wvlet.airframe" %% "airframe-launcher"   % AIRFRAME_VERSION,
         // Add this as a reference implementation
         "io.trino" % "trino-main" % TRINO_VERSION % Test
-      )
+      ),
+      Test / classLoaderLayeringStrategy := ClassLoaderLayeringStrategy.Flat
     )
     .dependsOn(core, plugin, api, apiClient, plugin)
 
@@ -131,11 +134,9 @@ lazy val apiClient =
       name        := "wvlet-api-client",
       description := "wvlet API interface client",
       airframeHttpClients := Seq(
-        "wvlet.dataflow.api.internal.coordinator:grpc:CoordinatorGrpc",
-        "wvlet.dataflow.api.internal.worker:grpc:WorkerGrpc",
-        "wvlet.dataflow.api.v1:grpc:WvletGrpc"
+        "wvlet.dataflow.api.internal.coordinator:rpc:CoordinatorRPC",
+        "wvlet.dataflow.api.internal.worker:rpc:WorkerRPC",
+        "wvlet.dataflow.api.v1:rpc:WvletRPC"
       ),
-      libraryDependencies ++= Seq(
-        "org.wvlet.airframe" %% "airframe-http-grpc" % AIRFRAME_VERSION
-      )
+      airframeHttpVersion := AIRFRAME_VERSION
     ).dependsOn(api)

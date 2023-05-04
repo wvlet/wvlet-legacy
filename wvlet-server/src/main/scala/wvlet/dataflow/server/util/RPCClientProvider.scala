@@ -13,11 +13,10 @@
  */
 package wvlet.dataflow.server.util
 
-import io.grpc.{ConnectivityState, ManagedChannel, ManagedChannelBuilder}
 import wvlet.airframe.control.Control
-import wvlet.airframe.http.ServerAddress
-import wvlet.dataflow.api.internal.coordinator.CoordinatorGrpc
-import wvlet.dataflow.api.internal.worker.WorkerGrpc
+import wvlet.airframe.http.{Http, ServerAddress}
+import wvlet.dataflow.api.internal.coordinator.CoordinatorRPC
+import wvlet.dataflow.api.internal.worker.WorkerRPC
 import wvlet.dataflow.server.ServerModule.{CoordinatorClient, WorkerClient}
 import wvlet.log.LogSupport
 
@@ -27,47 +26,34 @@ import scala.annotation.tailrec
 /**
   * Provide gRPC clients and closes created clients when closing this provider
   */
-class RPCClientProvider() extends LogSupport with AutoCloseable {
+class RPCClientProvider extends LogSupport with AutoCloseable {
 
-  import scala.jdk.CollectionConverters._
+  import scala.jdk.CollectionConverters.*
 
   private val clientHolder = new ConcurrentHashMap[String, AutoCloseable]().asScala
 
-  def getCoordinatorClient(nodeAddress: ServerAddress): CoordinatorClient = {
-    getClientFor(nodeAddress)(CoordinatorGrpc.newSyncClient(_))
-  }
-
-  def getWorkerClient(nodeAddress: ServerAddress): WorkerClient = {
-    getClientFor(nodeAddress)(WorkerGrpc.newSyncClient(_))
-  }
-
-  private def getClientFor[ClientType <: AutoCloseable](
-      nodeAddress: ServerAddress
-  )(factory: ManagedChannel => ClientType): ClientType = {
+  def getCoordinatorClient(name: String, nodeAddress: ServerAddress): CoordinatorClient = {
     clientHolder
       .getOrElseUpdate(
-        nodeAddress.toString(), {
-          val channel: ManagedChannel = ManagedChannelBuilder.forTarget(nodeAddress.toString()).usePlaintext().build()
+        nodeAddress.toString,
+        new CoordinatorClient(
+          Http.client
+            .withName(name)
+            .newSyncClient(nodeAddress.hostAndPort)
+        )
+      ).asInstanceOf[CoordinatorClient]
+  }
 
-          @tailrec
-          def loop: Unit = {
-            channel.getState(true) match {
-              case ConnectivityState.READY =>
-                info(s"Channel for ${nodeAddress} is ready")
-              // OK
-              case ConnectivityState.SHUTDOWN =>
-                throw new IllegalStateException(s"Failed to open a channel for ${nodeAddress}")
-              case other =>
-                warn(s"Channel state for ${nodeAddress} is ${other}. Sleeping for 100ms")
-                Thread.sleep(100)
-                loop
-            }
-          }
-
-          loop
-          factory(channel)
-        }
-      ).asInstanceOf[ClientType]
+  def getWorkerClient(name: String, nodeAddress: ServerAddress): WorkerClient = {
+    clientHolder
+      .getOrElseUpdate(
+        nodeAddress.toString,
+        new WorkerClient(
+          Http.client
+            .withName(name)
+            .newSyncClient(nodeAddress.hostAndPort)
+        )
+      ).asInstanceOf[WorkerClient]
   }
 
   override def close(): Unit = {

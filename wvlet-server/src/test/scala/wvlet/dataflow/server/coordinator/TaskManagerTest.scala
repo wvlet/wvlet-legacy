@@ -41,6 +41,7 @@ class TaskManagerTest extends AirSpec {
     debug(ret)
 
     val taskList = client.TaskApi.listTasks(TaskListRequest())
+    debug(taskList)
 
     @tailrec
     def loop(t: TaskId, maxRetry: Int): Unit = {
@@ -60,7 +61,5 @@ class TaskManagerTest extends AirSpec {
     }
 
     loop(ret.id, 30)
-
-    debug(taskList)
   }
 }
