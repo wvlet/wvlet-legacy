@@ -13,7 +13,7 @@
  */
 package wvlet.dataflow.api.internal.worker
 
-import wvlet.airframe.http.RPC
+import wvlet.airframe.http._
 import wvlet.dataflow.api.internal.Cluster.NodeId
 import wvlet.dataflow.api.internal.ServiceInfoApi
 import wvlet.dataflow.api.v1.TaskApi.TaskId
@@ -33,6 +33,7 @@ trait WorkerApi extends ServiceInfoApi {
   def listTasks(request: TaskListRequest): TaskList
 }
 
-object WorkerApi {
+object WorkerApi extends RxRouterProvider {
+  override def router: RxRouter = RxRouter.of[WorkerApi]
   case class TaskExecutionInfo(taskId: TaskId, nodeId: NodeId, startedAt: Instant = Instant.now())
 }

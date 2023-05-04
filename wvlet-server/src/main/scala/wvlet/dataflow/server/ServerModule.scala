@@ -13,14 +13,13 @@
  */
 package wvlet.dataflow.server
 
-import io.grpc.{ManagedChannel, ManagedChannelBuilder}
-import wvlet.airframe.http.grpc.{GrpcServer, GrpcServerConfig, gRPC}
-import wvlet.airframe.http.{Router, ServerAddress}
+import wvlet.airframe.http.netty.{Netty, NettyServer, NettyServerConfig}
+import wvlet.airframe.http.{Http, Router, RxRouter, ServerAddress}
 import wvlet.airframe.{Design, Session, newDesign}
 import wvlet.dataflow.api.internal.ServiceInfoApi
-import wvlet.dataflow.api.internal.coordinator.CoordinatorGrpc
-import wvlet.dataflow.api.internal.worker.WorkerGrpc
-import wvlet.dataflow.api.v1.WvletGrpc
+import wvlet.dataflow.api.internal.coordinator.CoordinatorRPC
+import wvlet.dataflow.api.internal.worker.WorkerRPC
+import wvlet.dataflow.api.v1.WvletRPC
 import wvlet.dataflow.server.coordinator.{CoordinatorApiImpl, CoordinatorConfig, TaskApiImpl, TaskManager}
 import wvlet.dataflow.server.worker.{WorkerApiImpl, WorkerService}
 
@@ -37,29 +36,31 @@ case class WorkerConfig(
 /**
   */
 object ServerModule {
-  type CoordinatorClient = CoordinatorGrpc.SyncClient
-  type CoordinatorServer = GrpcServer
-  type WorkerServer      = GrpcServer
-  type WorkerClient      = WorkerGrpc.SyncClient
-  type ApiClient         = WvletGrpc.SyncClient
+  type CoordinatorClient = CoordinatorRPC.RPCSyncClient
+  type CoordinatorServer = NettyServer
+  type WorkerServer      = NettyServer
+  type WorkerClient      = WorkerRPC.RPCSyncClient
+  type ApiClient         = WvletRPC.RPCSyncClient
 
-  def coordinatorRouter = Router
-    .add[ServiceInfoApi]
-    .add[CoordinatorApiImpl]
-    .add[TaskApiImpl]
+  def coordinatorRouter = RxRouter.of(
+    RxRouter.of[ServiceInfoApi],
+    RxRouter.of[CoordinatorApiImpl],
+    RxRouter.of[TaskApiImpl]
+  )
 
-  def workerRouter = Router
-    .add[ServiceInfoApi]
-    .add[WorkerApiImpl]
+  def workerRouter = RxRouter.of(
+    RxRouter.of[ServiceInfoApi],
+    RxRouter.of[WorkerApiImpl]
+  )
 
-  private def coordinatorServer(config: CoordinatorConfig): GrpcServerConfig =
-    gRPC.server
+  private def coordinatorServer(config: CoordinatorConfig): NettyServerConfig =
+    Netty.server
       .withName(config.name)
       .withPort(config.port)
       .withRouter(coordinatorRouter)
 
-  private def workerServer(config: WorkerConfig): GrpcServerConfig =
-    gRPC.server
+  private def workerServer(config: WorkerConfig): NettyServerConfig =
+    Netty.server
       .withName(config.name)
       .withPort(config.port)
       .withRouter(workerRouter)
@@ -67,14 +68,14 @@ object ServerModule {
   def coordinatorDesign(config: CoordinatorConfig): Design = {
     newDesign
       .bind[CoordinatorConfig].toInstance(config)
-      .bind[CoordinatorServer].toProvider { session: Session => coordinatorServer(config).newServer(session) }
+      .bind[CoordinatorServer].toProvider { (session: Session) => coordinatorServer(config).newServer(session) }
       .add(TaskManager.design)
   }
 
   def workerDesign(config: WorkerConfig): Design = {
     WorkerService.design
       .bind[WorkerConfig].toInstance(config)
-      .bind[WorkerServer].toProvider { session: Session => workerServer(config).newServer(session) }
+      .bind[WorkerServer].toProvider { (session: Session) => workerServer(config).newServer(session) }
       .add(PluginManager.design)
   }
 
@@ -86,7 +87,7 @@ object ServerModule {
   }
 
   def standaloneDesign(coordinatorPort: Int, workerPort: Int): Design = {
-    coordinatorDesign(coordinator.CoordinatorConfig(serverAddress = ServerAddress(s"localhost:${coordinatorPort}")))
+    coordinatorDesign(CoordinatorConfig(serverAddress = ServerAddress(s"localhost:${coordinatorPort}")))
       .add(
         workerDesign(
           WorkerConfig(
@@ -95,15 +96,6 @@ object ServerModule {
           )
         )
       )
-  }
-
-  def newGrpcChannel(address: String): ManagedChannel = {
-    val channel = ManagedChannelBuilder
-      .forTarget(address)
-      .maxInboundMessageSize(32 * 1024 * 1024)
-      .usePlaintext()
-      .build()
-    channel
   }
 
   /**
@@ -113,7 +105,7 @@ object ServerModule {
   def testServerAndClient: Design = {
     val Seq(coordinatorPort, workerPort) = randomPort(2)
 
-    coordinatorDesign(coordinator.CoordinatorConfig(serverAddress = ServerAddress(s"localhost:${coordinatorPort}")))
+    coordinatorDesign(CoordinatorConfig(serverAddress = ServerAddress(s"localhost:${coordinatorPort}")))
       .add(
         workerDesign(
           WorkerConfig(
@@ -123,10 +115,10 @@ object ServerModule {
         )
       )
       .bind[CoordinatorClient].toProvider { (server: CoordinatorServer) =>
-        CoordinatorGrpc.newSyncClient(newGrpcChannel(server.localAddress))
+        CoordinatorRPC.newRPCSyncClient(Http.client.newSyncClient(server.localAddress))
       }
       .bind[ApiClient].toProvider { (server: CoordinatorServer) =>
-        WvletGrpc.newSyncClient(newGrpcChannel(server.localAddress))
+        WvletRPC.newRPCSyncClient(Http.client.newSyncClient(server.localAddress))
       }
       // Add this design to start up worker service early
       .bind[WorkerService].toEagerSingleton
