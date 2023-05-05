@@ -45,6 +45,11 @@ const replacementForPublic = isDev()
     : printSbtTask("ui/publicProd");
 
 export default defineConfig({
+    server: {
+      proxy: {
+          '^/wvlet.dataflow.api.*': 'http://localhost:9092'
+      }
+    },
     resolve: {
         alias: [
             {
