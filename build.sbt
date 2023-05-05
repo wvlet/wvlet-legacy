@@ -132,9 +132,8 @@ lazy val apiClient =
     .in(file("wvlet-api-client"))
     .settings(
       buildSettings,
-      name             := "wvlet-api-client",
-      description      := "wvlet API interface client",
-      airframeHttpOpts := "-l debug",
+      name        := "wvlet-api-client",
+      description := "wvlet API interface client",
       airframeHttpClients := Seq(
         "wvlet.dataflow.api.internal.coordinator:rpc:CoordinatorRPC",
         "wvlet.dataflow.api.internal.worker:rpc:WorkerRPC",
@@ -158,7 +157,6 @@ lazy val ui = project
     airframeHttpClients := Seq(
       "wvlet.dataflow.api.frontend:rpc:FrontendRPC"
     ),
-    airframeHttpOpts                := "-l debug",
     scalaJSUseMainModuleInitializer := true,
     scalaJSLinkerConfig ~= {
       _.withModuleKind(ModuleKind.ESModule)
