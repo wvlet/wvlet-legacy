@@ -34,7 +34,7 @@ class MainPanel extends RxElement {
       editor
         .IStandaloneEditorConstructionOptions()
         .setValue(s"SELECT 1")
-        .setLanguage("javascript")
+        .setLanguage("sql")
         .setTheme("vs-dark")
     )
 
