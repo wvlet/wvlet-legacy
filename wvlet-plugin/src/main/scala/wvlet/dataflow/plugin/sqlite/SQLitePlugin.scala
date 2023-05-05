@@ -14,8 +14,8 @@
 package wvlet.dataflow.plugin.sqlite
 
 import wvlet.airframe.codec.MessageCodec
+import wvlet.airframe.http.RPCStatus
 import wvlet.airframe.rx.Cancelable
-import wvlet.dataflow.api.v1.{DataflowException, ErrorCode}
 import wvlet.dataflow.spi.{TaskInput, TaskPlugin}
 import wvlet.log.LogSupport
 
@@ -34,7 +34,7 @@ object SQLitePlugin extends TaskPlugin {
         val command = MessageCodec.of[RunQuery].fromMap(input.taskBody)
         command.run
       case other =>
-        throw DataflowException(ErrorCode.UNKNOWN_METHOD, s"unknown method: ${other}")
+        throw RPCStatus.NOT_FOUND_U5.newException(s"unknown method: ${other}")
     }
     // TODO Support cancellation
     Cancelable.empty

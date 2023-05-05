@@ -98,9 +98,9 @@ case class TaskRef(
   def withStatus(newStatus: TaskStatus): TaskRef = this.copy(status = newStatus, updatedAt = Instant.now())
   def withError(error: TaskError): TaskRef =
     this.copy(taskError = Some(error), status = TaskStatus.FAILED, updatedAt = Instant.now())
-  def withError(errorCode: ErrorCode, message: String): TaskRef =
+  def withError(errorCode: RPCStatus, message: String): TaskRef =
     withError(TaskError(errorCode, message))
-  def withError(errorCode: ErrorCode, message: String, cause: Throwable): TaskRef = withError(
+  def withError(errorCode: RPCStatus, message: String, cause: Throwable): TaskRef = withError(
     TaskError(errorCode, message, Option(cause))
   )
 }
@@ -113,7 +113,7 @@ case class TaskList(
     timestamp: Instant = Instant.now()
 )
 
-case class TaskError(errorCode: ErrorCode, message: String, cause: Option[Throwable] = None) {
+case class TaskError(errorCode: RPCStatus, message: String, cause: Option[Throwable] = None) {
   override def toString: String = {
     s"[${errorCode}] ${message}"
   }

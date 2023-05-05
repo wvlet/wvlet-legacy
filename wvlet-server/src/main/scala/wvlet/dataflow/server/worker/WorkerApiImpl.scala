@@ -13,12 +13,13 @@
  */
 package wvlet.dataflow.server.worker
 
+import wvlet.airframe.http.RPCStatus
 import wvlet.airframe.rx.Cancelable
 import wvlet.dataflow.api.internal.coordinator.CoordinatorApi.UpdateTaskRequest
 import wvlet.dataflow.api.internal.worker.WorkerApi
 import wvlet.dataflow.api.internal.worker.WorkerApi.TaskExecutionInfo
-import wvlet.dataflow.api.v1.TaskApi._
-import wvlet.dataflow.api.v1.{ErrorCode, TaskError, TaskList, TaskListRequest, TaskRef, TaskRequest, TaskStatus}
+import wvlet.dataflow.api.v1.TaskApi.*
+import wvlet.dataflow.api.v1.{TaskError, TaskList, TaskListRequest, TaskRef, TaskRequest, TaskStatus}
 import wvlet.dataflow.server.PluginManager
 import wvlet.dataflow.server.ServerModule.CoordinatorClient
 import wvlet.dataflow.server.worker.WorkerService.WorkerSelf
@@ -40,7 +41,7 @@ class WorkerApiImpl(node: WorkerSelf, coordinatorClient: CoordinatorClient, plug
         debug(s"Running ${task.taskPlugin}:${task.methodName}")
         runTaskInternal(plugin, TaskInput(taskId, task))
       case None =>
-        val err = TaskError(ErrorCode.UNKNOWN_PLUGIN, s"Unknown plugin: ${task.taskPlugin}")
+        val err = TaskError(RPCStatus.NOT_SUPPORTED_U7, s"Unknown plugin: ${task.taskPlugin}")
         coordinatorClient.CoordinatorApi.updateTaskStatus(
           UpdateTaskRequest(
             taskId,
@@ -67,7 +68,7 @@ class WorkerApiImpl(node: WorkerSelf, coordinatorClient: CoordinatorClient, plug
           UpdateTaskRequest(
             taskInput.taskId,
             TaskStatus.FAILED,
-            Some(TaskError(ErrorCode.INTERNAL_ERROR, e.getMessage, cause = Some(e)))
+            Some(TaskError(RPCStatus.INTERNAL_ERROR_I0, e.getMessage, cause = Some(e)))
           )
         )
         // TODO Support cancellation

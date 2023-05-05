@@ -13,9 +13,9 @@
  */
 package wvlet.dataflow.plugin.trino
 
+import wvlet.airframe.http.RPCStatus
 import wvlet.airframe.rx.Cancelable
 import wvlet.airframe.surface.secret
-import wvlet.dataflow.api.v1.{DataflowException, ErrorCode}
 import wvlet.dataflow.spi.{TaskInput, TaskPlugin}
 
 object TrinoPlugin extends TaskPlugin {
@@ -32,7 +32,7 @@ object TrinoPlugin extends TaskPlugin {
         val schema  = input.taskBody.get("schema").map(_.toString)
         runQuery(service, query, schema)
       case other =>
-        throw DataflowException(ErrorCode.UNKNOWN_METHOD, s"unknown method: ${other}")
+        throw RPCStatus.NOT_FOUND_U5.newException(s"unknown method: ${other}")
     }
 
     // TODO: Support cancel

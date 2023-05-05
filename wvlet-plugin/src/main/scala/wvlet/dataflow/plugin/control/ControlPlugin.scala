@@ -14,15 +14,16 @@
 package wvlet.dataflow.plugin.control
 
 import wvlet.airframe.codec.MessageCodec
+import wvlet.airframe.http.RPCStatus
 import wvlet.airframe.rx.Cancelable
-import wvlet.dataflow.api.v1.{DataflowException, ErrorCode, TaskRequest}
+import wvlet.dataflow.api.v1.TaskRequest
 import wvlet.dataflow.spi.{PluginContext, TaskInput, TaskPlugin}
 
 object ControlPlugin {
   case class AndThenTask(firstTask: TaskRequest, nextTask: TaskRequest)
 }
 
-import ControlPlugin._
+import wvlet.dataflow.plugin.control.ControlPlugin.*
 class ControlPlugin(pluginContext: PluginContext) extends TaskPlugin {
 
   override def pluginName: String = "control"
@@ -33,7 +34,7 @@ class ControlPlugin(pluginContext: PluginContext) extends TaskPlugin {
         val t = MessageCodec.of[AndThenTask].fromMap(input.taskBody)
         runAndThenTask(t)
       case other =>
-        throw DataflowException(ErrorCode.UNKNOWN_METHOD, s"unknown method: ${other}")
+        throw RPCStatus.NOT_FOUND_U5.newException(s"unknown method: ${other}")
     }
     Cancelable.empty
   }

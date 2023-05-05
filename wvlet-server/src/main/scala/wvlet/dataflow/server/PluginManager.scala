@@ -13,10 +13,11 @@
  */
 package wvlet.dataflow.server
 
+import wvlet.airframe.http.RPCStatus
 import wvlet.airframe.surface.Surface
 import wvlet.airframe.{Design, Session}
 import wvlet.dataflow.api.v1.TaskApi.TaskId
-import wvlet.dataflow.api.v1.{DataflowException, ErrorCode, TaskRef, TaskRequest}
+import wvlet.dataflow.api.v1.{TaskRef, TaskRequest}
 import wvlet.dataflow.plugin.control.ControlPlugin
 import wvlet.dataflow.plugin.sqlite.SQLitePlugin
 import wvlet.dataflow.plugin.trino.TrinoPlugin
@@ -26,7 +27,7 @@ import wvlet.log.LogSupport
 
 import java.util.concurrent.ConcurrentHashMap
 import scala.annotation.tailrec
-import scala.jdk.CollectionConverters._
+import scala.jdk.CollectionConverters.*
 
 class PluginManager(session: Session) extends LogSupport {
   private val plugins = new ConcurrentHashMap[String, TaskPlugin]().asScala
@@ -72,7 +73,9 @@ class PluginContextImpl(client: ApiClient) extends PluginContext with LogSupport
     def loop(): TaskRef = {
       client.TaskApi.getTask(taskId) match {
         case None =>
-          throw DataflowException(ErrorCode.UNKNOWN_TASK, s"Unknown task: ${taskId}")
+          throw RPCStatus.NOT_FOUND_U5.newException(
+            s"Unknown task: ${taskId}"
+          )
         case Some(t) if t.isDone =>
           t
         case _ =>
