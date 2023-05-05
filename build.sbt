@@ -140,3 +140,42 @@ lazy val apiClient =
       ),
       airframeHttpVersion := AIRFRAME_VERSION
     ).dependsOn(api)
+
+import org.scalajs.linker.interface.ModuleSplitStyle
+
+val publicDev  = taskKey[String]("output directory for `npm run dev`")
+val publicProd = taskKey[String]("output directory for `npm run build`")
+
+lazy val ui = project
+  .in(file("wvlet-ui"))
+  .enablePlugins(ScalaJSPlugin)
+  .enablePlugins(ScalablyTypedConverterExternalNpmPlugin)
+  .settings(
+    buildSettings,
+    scalacOptions ++= Seq("-encoding", "utf-8", "-deprecation", "-feature"),
+    scalaJSUseMainModuleInitializer := true,
+    scalaJSLinkerConfig ~= {
+      _.withModuleKind(ModuleKind.ESModule)
+        .withModuleSplitStyle(ModuleSplitStyle.SmallModulesFor(List("wvlet-ui")))
+    },
+    externalNpm := {
+      // scala.sys.process.Process(List("npm", "install", "--silent", "--no-audit", "--no-fund"), baseDirectory.value).!
+      scala.sys.process.Process("yarn", baseDirectory.value).!
+      baseDirectory.value
+    },
+    libraryDependencies ++= Seq(
+      "org.wvlet.airframe" %%% "airframe"         % AIRFRAME_VERSION,
+      "org.wvlet.airframe" %%% "airframe-rx-http" % AIRFRAME_VERSION
+    ),
+    publicDev  := linkerOutputDirectory((Compile / fastLinkJS).value).getAbsolutePath(),
+    publicProd := linkerOutputDirectory((Compile / fullLinkJS).value).getAbsolutePath()
+  )
+
+def linkerOutputDirectory(v: Attributed[org.scalajs.linker.interface.Report]): File = {
+  v.get(scalaJSLinkerOutputDirectory.key).getOrElse {
+    throw new MessageOnlyException(
+      "Linking report was not attributed with output directory. " +
+        "Please report this as a Scala.js bug."
+    )
+  }
+}
