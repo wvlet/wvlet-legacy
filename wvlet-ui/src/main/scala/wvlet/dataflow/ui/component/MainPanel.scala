@@ -13,12 +13,26 @@
  */
 package wvlet.dataflow.ui.component
 
+import wvlet.airframe.http.Http
+import wvlet.airframe.rx.Rx
 import wvlet.airframe.rx.html.RxElement
-import wvlet.airframe.rx.html._
-import wvlet.airframe.rx.html.all._
+import wvlet.airframe.rx.html.*
+import wvlet.airframe.rx.html.all.*
+import wvlet.dataflow.api.frontend.FrontendRPC
+
+import java.net.http.HttpClient
 
 class MainPanel extends RxElement {
+
+  private val rpcClient = FrontendRPC.newRPCAsyncClient(Http.client.newJSClient)
+
   override def render: RxElement = div(
-    "Hello wvlet!"
+    cls -> "p-2",
+    "Hello wvlet!",
+    Rx.intervalMillis(500).flatMap { i =>
+      rpcClient.FrontendApi.serviceInfo().map { serviceInfo =>
+        p(s"Server up time:${serviceInfo.upTime}")
+      }
+    }
   )
 }

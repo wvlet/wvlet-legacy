@@ -41,6 +41,5 @@ object TaskInput {
 
 trait TaskPlugin extends LogSupport {
   def pluginName: String
-
   def run(input: TaskInput): Cancelable
 }

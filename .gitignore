@@ -16,3 +16,4 @@ metals.sbt
 .bsp
 log
 node_modules
+wvlet-ui/dist
