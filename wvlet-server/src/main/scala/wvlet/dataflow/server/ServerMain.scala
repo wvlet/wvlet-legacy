@@ -39,10 +39,12 @@ class ServerMain(@option(prefix = "-h,--help", description = "Show help messages
       @option(prefix = "-p", description = "coordinator port")
       coordinatorPort: Int = 9090,
       @option(prefix = "-w", description = "worker port")
-      workerPort: Int = 9091
+      workerPort: Int = 9091,
+      @option(prefix = "-f", description = "frontend server port")
+      frontendServerPort: Int = 9092
   ): Unit = {
     ServerModule
-      .standaloneDesign(coordinatorPort, workerPort)
+      .standaloneDesign(coordinatorPort, workerPort, frontendServerPort)
       .withProductionMode
       .build[CoordinatorServer] { server =>
         server.awaitTermination()

@@ -11,11 +11,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package wvlet.dataflow.api.internal
+package wvlet.dataflow.api
 
 import wvlet.airframe.metrics.ElapsedTime
 import wvlet.airframe.ulid.ULID
-import wvlet.dataflow.api.BuildInfo
 
 import java.time.Instant
 

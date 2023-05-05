@@ -14,8 +14,8 @@
 package wvlet.dataflow.api.internal.coordinator
 
 import wvlet.airframe.http.*
+import wvlet.dataflow.api.ServiceInfoApi
 import wvlet.dataflow.api.internal.Cluster.{Node, NodeInfo}
-import wvlet.dataflow.api.internal.ServiceInfoApi
 import wvlet.dataflow.api.v1.TaskApi.TaskId
 import wvlet.dataflow.api.v1.{TaskError, TaskStatus}
 

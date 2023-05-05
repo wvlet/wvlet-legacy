@@ -11,6 +11,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package wvlet
+package wvlet.dataflow.api.frontend
 
-package object dataflow {}
+import wvlet.airframe.http._
+import wvlet.dataflow.api.ServiceInfoApi
+
+@RPC
+trait FrontendApi extends ServiceInfoApi {}
+
+object FrontendApi extends RxRouterProvider {
+  override def router: RxRouter = RxRouter.of[FrontendApi]
+}

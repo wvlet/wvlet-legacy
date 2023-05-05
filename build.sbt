@@ -46,7 +46,7 @@ lazy val wvlet =
       publishArtifact := false,
       publish         := {},
       publishLocal    := {}
-    ).aggregate(core, api, apiClient, server, plugin, main)
+    ).aggregate(core, api.jvm, api.js, apiClient, server, plugin, main)
 
 lazy val core =
   project
@@ -59,7 +59,7 @@ lazy val core =
         "org.wvlet.airframe" %% "airframe" % AIRFRAME_VERSION
       )
     )
-    .dependsOn(api)
+    .dependsOn(api.jvm)
 
 lazy val main =
   project
@@ -89,7 +89,7 @@ lazy val server =
       ),
       Test / classLoaderLayeringStrategy := ClassLoaderLayeringStrategy.Flat
     )
-    .dependsOn(core, plugin, api, apiClient, plugin)
+    .dependsOn(core, plugin, api.jvm, apiClient, plugin)
 
 lazy val plugin =
   project
@@ -107,10 +107,11 @@ lazy val plugin =
         "org.xerial.snappy"   % "snappy-java"   % "1.1.9.1"
       )
     )
-    .dependsOn(api, core)
+    .dependsOn(api.jvm, core)
 
 lazy val api =
-  project
+  crossProject(JSPlatform, JVMPlatform)
+    .crossType(CrossType.Pure)
     .enablePlugins(BuildInfoPlugin)
     .in(file("wvlet-api"))
     .settings(
@@ -131,15 +132,16 @@ lazy val apiClient =
     .in(file("wvlet-api-client"))
     .settings(
       buildSettings,
-      name        := "wvlet-api-client",
-      description := "wvlet API interface client",
+      name             := "wvlet-api-client",
+      description      := "wvlet API interface client",
+      airframeHttpOpts := "-l debug",
       airframeHttpClients := Seq(
         "wvlet.dataflow.api.internal.coordinator:rpc:CoordinatorRPC",
         "wvlet.dataflow.api.internal.worker:rpc:WorkerRPC",
         "wvlet.dataflow.api.v1:rpc:WvletRPC"
       ),
       airframeHttpVersion := AIRFRAME_VERSION
-    ).dependsOn(api)
+    ).dependsOn(api.jvm)
 
 import org.scalajs.linker.interface.ModuleSplitStyle
 
@@ -150,9 +152,13 @@ lazy val ui = project
   .in(file("wvlet-ui"))
   .enablePlugins(ScalaJSPlugin)
   .enablePlugins(ScalablyTypedConverterExternalNpmPlugin)
+  .enablePlugins(AirframeHttpPlugin)
   .settings(
     buildSettings,
-    scalacOptions ++= Seq("-encoding", "utf-8", "-deprecation", "-feature"),
+    airframeHttpClients := Seq(
+      "wvlet.dataflow.api.frontend:rpc:FrontendRPC"
+    ),
+    airframeHttpOpts                := "-l debug",
     scalaJSUseMainModuleInitializer := true,
     scalaJSLinkerConfig ~= {
       _.withModuleKind(ModuleKind.ESModule)
@@ -165,11 +171,13 @@ lazy val ui = project
     },
     libraryDependencies ++= Seq(
       "org.wvlet.airframe" %%% "airframe"         % AIRFRAME_VERSION,
+      "org.wvlet.airframe" %%% "airframe-http"    % AIRFRAME_VERSION,
       "org.wvlet.airframe" %%% "airframe-rx-html" % AIRFRAME_VERSION
     ),
     publicDev  := linkerOutputDirectory((Compile / fastLinkJS).value).getAbsolutePath(),
     publicProd := linkerOutputDirectory((Compile / fullLinkJS).value).getAbsolutePath()
   )
+  .dependsOn(api.js)
 
 def linkerOutputDirectory(v: Attributed[org.scalajs.linker.interface.Report]): File = {
   v.get(scalaJSLinkerOutputDirectory.key).getOrElse {
