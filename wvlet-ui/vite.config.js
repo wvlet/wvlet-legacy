@@ -22,6 +22,7 @@ function isDev() {
 function printSbtTask(task) {
     const args = ["--error", `print ${task}`];
     const options = {
+        cwd: "..",
         stdio: [
             "pipe", // StdIn.
             "pipe", // StdOut.
@@ -40,8 +41,8 @@ function printSbtTask(task) {
 }
 
 const replacementForPublic = isDev()
-    ? printSbtTask("publicDev")
-    : printSbtTask("publicProd");
+    ? printSbtTask("ui/publicDev")
+    : printSbtTask("ui/publicProd");
 
 export default defineConfig({
     resolve: {

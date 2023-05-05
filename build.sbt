@@ -160,12 +160,12 @@ lazy val ui = project
     },
     externalNpm := {
       // scala.sys.process.Process(List("npm", "install", "--silent", "--no-audit", "--no-fund"), baseDirectory.value).!
-      scala.sys.process.Process("yarn", baseDirectory.value).!
+      scala.sys.process.Process(List("yarn", "--silent"), baseDirectory.value).!
       baseDirectory.value
     },
     libraryDependencies ++= Seq(
       "org.wvlet.airframe" %%% "airframe"         % AIRFRAME_VERSION,
-      "org.wvlet.airframe" %%% "airframe-rx-http" % AIRFRAME_VERSION
+      "org.wvlet.airframe" %%% "airframe-rx-html" % AIRFRAME_VERSION
     ),
     publicDev  := linkerOutputDirectory((Compile / fastLinkJS).value).getAbsolutePath(),
     publicProd := linkerOutputDirectory((Compile / fullLinkJS).value).getAbsolutePath()
