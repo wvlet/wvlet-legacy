@@ -47,7 +47,7 @@ const replacementForPublic = isDev()
 export default defineConfig({
     server: {
       proxy: {
-          '^/wvlet.dataflow.api.*': 'http://localhost:9092'
+          '^/wvlet.dataflow.api.*': 'http://127.0.0.1:9092'
       }
     },
     resolve: {
