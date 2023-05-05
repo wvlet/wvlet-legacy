@@ -26,7 +26,6 @@ class ServerMainTest extends AirSpec {
   test("launch server") { (client: CoordinatorClient) =>
     test("service info") {
       val serviceInfo = client.CoordinatorApi.serviceInfo()
-      debug(serviceInfo)
       serviceInfo.launchId.epochMillis <= System.currentTimeMillis() shouldBe true
     }
 

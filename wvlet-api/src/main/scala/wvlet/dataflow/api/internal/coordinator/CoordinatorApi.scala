@@ -13,11 +13,13 @@
  */
 package wvlet.dataflow.api.internal.coordinator
 
-import wvlet.airframe.http._
+import wvlet.airframe.http.*
 import wvlet.dataflow.api.internal.Cluster.{Node, NodeInfo}
 import wvlet.dataflow.api.internal.ServiceInfoApi
 import wvlet.dataflow.api.v1.TaskApi.TaskId
 import wvlet.dataflow.api.v1.{TaskError, TaskStatus}
+
+import java.time.Instant
 
 /**
   * Coordinator is a central manager of task execution control. It receives requests for running tasks.
@@ -27,9 +29,9 @@ import wvlet.dataflow.api.v1.{TaskError, TaskStatus}
 @RPC
 trait CoordinatorApi extends ServiceInfoApi {
   import CoordinatorApi._
+
   def listNodes: Seq[NodeInfo]
   def register(node: Node): Unit
-
   def updateTaskStatus(request: UpdateTaskRequest): Unit
 }
 
