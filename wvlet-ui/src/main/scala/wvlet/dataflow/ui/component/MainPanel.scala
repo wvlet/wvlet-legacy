@@ -27,10 +27,11 @@ class MainPanel extends RxElement {
   private val rpcClient = FrontendRPC.newRPCAsyncClient(Http.client.newJSClient)
 
   override def render: RxElement = div(
+    cls -> "p-2",
     "Hello wvlet!",
     Rx.intervalMillis(500).flatMap { i =>
       rpcClient.FrontendApi.serviceInfo().map { serviceInfo =>
-        p(s"Server up time: ${serviceInfo.upTime}")
+        p(s"Server up time:${serviceInfo.upTime}")
       }
     }
   )
