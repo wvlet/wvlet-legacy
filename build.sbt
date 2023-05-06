@@ -159,8 +159,19 @@ lazy val ui = project
     ),
     scalaJSUseMainModuleInitializer := true,
     scalaJSLinkerConfig ~= {
-      _.withModuleKind(ModuleKind.ESModule)
-        .withModuleSplitStyle(ModuleSplitStyle.SmallModulesFor(List("wvlet.dataflow.ui")))
+      linkerConfig(_)
+        .withSourceMap(true)
+    },
+    // Workaround for the error:
+    // Surfaces.scala(235:12:Return): java.io.Serializable expected but java.lang.Class found for tree of type org.scalajs.ir.Trees$Apply
+    Compile / fullLinkJS / scalaJSLinkerConfig ~= {
+      linkerConfig(_)
+        .withCheckIR(false)
+        .withSourceMap(true)
+    },
+    Test / fullLinkJS / scalaJSLinkerConfig ~= {
+      linkerConfig(_)
+        .withCheckIR(false)
     },
     externalNpm := {
       // scala.sys.process.Process(List("npm", "install", "--silent", "--no-audit", "--no-fund"), baseDirectory.value).!
@@ -174,12 +185,20 @@ lazy val ui = project
     ),
     publicDev := s"target/scala-${scalaVersion.value}/ui-fastopt",
     // TODO: fullLinkJS is not working
-    publicProd := s"target/scala-${scalaVersion.value}/ui-fastopt"
-    // publicProd := s"target/scala-${scalaVersion.value}/ui-opt"
+    // publicProd := s"target/scala-${scalaVersion.value}/ui-fastopt"
+    publicProd := s"target/scala-${scalaVersion.value}/ui-opt"
     // publicDev := linkerOutputDirectory((Compile / fastLinkJS).value).getAbsolutePath(),
-    // publicProd := linkerOutputDirectory((Compile / fullLinkJS).value).getAbsolutePath()
+    // publicProd := linkerOutputDirectory((Compile / fastLinkJS).value).relativeTo(baseDirectory.value).get.getPath()
   )
   .dependsOn(api.js)
+
+import org.scalajs.linker.interface.{StandardConfig, OutputPatterns}
+def linkerConfig(config: StandardConfig): StandardConfig = {
+  config
+    .withModuleKind(ModuleKind.ESModule)
+    .withModuleSplitStyle(ModuleSplitStyle.SmallModulesFor(List("wvlet.dataflow.ui")))
+  // .withOutputPatterns(OutputPatterns.fromJSFile("%s.mjs"))
+}
 
 def linkerOutputDirectory(v: Attributed[org.scalajs.linker.interface.Report]): File = {
   v.get(scalaJSLinkerOutputDirectory.key).getOrElse {

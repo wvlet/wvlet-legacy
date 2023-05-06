@@ -13,7 +13,7 @@
  */
 import { spawnSync } from "child_process";
 import { defineConfig } from "vite";
-import scalaJSPlugin from "@scala-js/vite-plugin-scalajs";
+//import scalaJSPlugin from "@scala-js/vite-plugin-scalajs";
 
 function isDev() {
     return process.env.NODE_ENV !== "production";
@@ -41,28 +41,28 @@ function printSbtTask(task) {
     return result.stdout.toString('utf8').trim();
 }
 
-// const replacementForPublic = isDev()
-//     ? printSbtTask("ui/publicDev")
-//     : printSbtTask("ui/publicProd");
+const replacementForPublic = isDev()
+     ? printSbtTask("ui/publicDev")
+     : printSbtTask("ui/publicProd");
 
 export default defineConfig({
-    plugins: [
-        scalaJSPlugin({
-            cwd: '..',
-            projectID: 'ui',
-        })
-    ],
+    // plugins: [
+    //     scalaJSPlugin({
+    //         cwd: '..',
+    //         projectID: 'ui',
+    //     })
+    // ],
     server: {
         proxy: {
           '^/wvlet.dataflow.api.*': 'http://127.0.0.1:9092'
       }
     },
-    // resolve: {
-    //     alias: [
-    //         {
-    //             find: "@public",
-    //             replacement: replacementForPublic
-    //         },
-    //     ],
-    // },
+    resolve: {
+        alias: [
+            {
+                find: "@public",
+                replacement: replacementForPublic
+            },
+        ],
+    },
 });
