@@ -20,11 +20,11 @@ function isDev() {
 }
 
 function printSbtTask(task) {
-    const args = ["--error", `print ${task}`];
+    const args = ["--error", "--batch", "-Dsbt.supershell=false", `print ${task}`];
     const options = {
         cwd: "..",
         stdio: [
-            "pipe", // StdIn.
+            "ignore", // StdIn.
             "pipe", // StdOut.
             "inherit", // StdErr.
         ],
@@ -53,6 +53,7 @@ export default defineConfig({
     //     })
     // ],
     server: {
+        open: true,
         proxy: {
           '^/wvlet.dataflow.api.*': 'http://127.0.0.1:9092'
       }
