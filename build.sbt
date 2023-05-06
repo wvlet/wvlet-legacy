@@ -1,7 +1,7 @@
 val SCALA_2_13 = "2.13.8"
 val SCALA_3    = "3.2.2"
 
-val AIRFRAME_VERSION    = sys.env.getOrElse("AIRFRAME_VERSION", "23.5.2-3-8e1ee059-SNAPSHOT")
+val AIRFRAME_VERSION    = sys.env.getOrElse("AIRFRAME_VERSION", "23.5.2")
 val AIRSPEC_VERSION     = "23.5.2"
 val SCALAJS_DOM_VERSION = "2.4.0"
 val TRINO_VERSION       = "416"
