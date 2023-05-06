@@ -160,7 +160,7 @@ lazy val ui = project
     scalaJSUseMainModuleInitializer := true,
     scalaJSLinkerConfig ~= {
       _.withModuleKind(ModuleKind.ESModule)
-        .withModuleSplitStyle(ModuleSplitStyle.SmallModulesFor(List("wvlet-ui")))
+        .withModuleSplitStyle(ModuleSplitStyle.SmallModulesFor(List("wvlet.dataflow.ui")))
     },
     externalNpm := {
       // scala.sys.process.Process(List("npm", "install", "--silent", "--no-audit", "--no-fund"), baseDirectory.value).!
@@ -172,8 +172,12 @@ lazy val ui = project
       "org.wvlet.airframe" %%% "airframe-http"    % AIRFRAME_VERSION,
       "org.wvlet.airframe" %%% "airframe-rx-html" % AIRFRAME_VERSION
     ),
-    publicDev  := linkerOutputDirectory((Compile / fastLinkJS).value).getAbsolutePath(),
-    publicProd := linkerOutputDirectory((Compile / fullLinkJS).value).getAbsolutePath()
+    publicDev := s"target/scala-${scalaVersion.value}/ui-fastopt",
+    // TODO: fullLinkJS is not working
+    publicProd := s"target/scala-${scalaVersion.value}/ui-fastopt"
+    // publicProd := s"target/scala-${scalaVersion.value}/ui-opt"
+    // publicDev := linkerOutputDirectory((Compile / fastLinkJS).value).getAbsolutePath(),
+    // publicProd := linkerOutputDirectory((Compile / fullLinkJS).value).getAbsolutePath()
   )
   .dependsOn(api.js)
 
