@@ -182,13 +182,13 @@ lazy val ui = project
       "org.wvlet.airframe" %%% "airframe"         % AIRFRAME_VERSION,
       "org.wvlet.airframe" %%% "airframe-http"    % AIRFRAME_VERSION,
       "org.wvlet.airframe" %%% "airframe-rx-html" % AIRFRAME_VERSION
-    )
-//    publicDev := s"target/scala-${scalaVersion.value}/ui-fastopt",
-//    // TODO: fullLinkJS is not working
-//    publicProd := s"target/scala-${scalaVersion.value}/ui-fastopt"
-    // publicProd := s"target/scala-${scalaVersion.value}/ui-opt"
+    ),
+    publicDev := s"target/scala-${scalaVersion.value}/ui-fastopt",
+    // TODO: fullLinkJS is not working
+    // publicProd := s"target/scala-${scalaVersion.value}/ui-fastopt"
+    publicProd := s"target/scala-${scalaVersion.value}/ui-opt"
     // publicDev := linkerOutputDirectory((Compile / fastLinkJS).value).getAbsolutePath(),
-    // publicProd := linkerOutputDirectory((Compile / fullLinkJS).value).getAbsolutePath()
+    // publicProd := linkerOutputDirectory((Compile / fastLinkJS).value).relativeTo(baseDirectory.value).get.getPath()
   )
   .dependsOn(api.js)
 
@@ -196,7 +196,7 @@ import org.scalajs.linker.interface.{StandardConfig, OutputPatterns}
 def linkerConfig(config: StandardConfig): StandardConfig = {
   config
     .withModuleKind(ModuleKind.ESModule)
-    .withModuleSplitStyle(ModuleSplitStyle.SmallModulesFor(List("wvlet.dataflow", "wvlet.airframe")))
+    .withModuleSplitStyle(ModuleSplitStyle.SmallModulesFor(List("wvlet.dataflow.ui")))
   // .withOutputPatterns(OutputPatterns.fromJSFile("%s.mjs"))
 }
 
