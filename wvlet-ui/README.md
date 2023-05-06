@@ -21,8 +21,11 @@ $ yarn dev --open
 Building a package
 
 ```
+$ ./sbt
+> ui/fullLinkJS
+
 $ yarn build
 
 # To test the production build
-$ yarn preview
+$ yarn preview --open
 ```
