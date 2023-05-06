@@ -9,16 +9,11 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@googleapis/identitytoolkit": "^2.5.0",
-    "@material/textfield": "^14.0.0",
-    "apexcharts": "^3.37.2",
-    "chart.js": "2.9.4",
     "monaco-editor": "^0.38.0",
-    "rollup": "^3.21.5"
+    "typescript": "^5.0.4"
   },
   "devDependencies": {
     "@scala-js/vite-plugin-scalajs": "1.0.0",
-    "@types/chart.js": "2.9.29",
-    "vite": "^4.3.2"
+    "vite": "^4.3.5"
   }
 }
