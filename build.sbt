@@ -163,8 +163,8 @@ lazy val ui = project
         .withModuleSplitStyle(ModuleSplitStyle.SmallModulesFor(List("wvlet.dataflow.ui")))
     },
     externalNpm := {
-      scala.sys.process.Process(List("npm", "install", "--silent", "--no-audit", "--no-fund"), baseDirectory.value).!
-      // scala.sys.process.Process(List("yarn", "--silent"), baseDirectory.value).!
+      // scala.sys.process.Process(List("npm", "install", "--silent", "--no-audit", "--no-fund"), baseDirectory.value).!
+      scala.sys.process.Process(List("yarn", "--silent"), baseDirectory.value).!
       baseDirectory.value
     },
     libraryDependencies ++= Seq(
