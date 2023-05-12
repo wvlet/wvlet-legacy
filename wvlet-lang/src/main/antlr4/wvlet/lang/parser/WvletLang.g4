@@ -1,10 +1,9 @@
 grammar WvletLang;
 
-options { caseInsensitive=true; }
-
-tokens {
-    DELIMITER
+options {
+  caseInsensitive=true;
 }
+
 
 singleStatement
     : statement EOF
@@ -14,29 +13,15 @@ statement
     : query
     ;
 
-qualifiedName
-    : identifier ('.' identifier)*
-    ;
-
-identifier
-    : IDENTIFIER             #unquotedIdentifier
-    | QUOTED_IDENTIFIER      #quotedIdentifier
-//    | nonReserved            #unquotedIdentifier
-    ;
-
-IDENTIFIER
-    : (LETTER | '_') (LETTER | DIGIT | '_' | '@' | ':')*
-    ;
-
-QUOTED_IDENTIFIER
-    : '"' ( ~'"' | '""' )* '"'
-    ;
-
 query
     : FOR identifier IN expression
       (WHERE expression)?
       (GROUP BY expression)?
       (RETURN expression)?
+    ;
+
+qualifiedName
+    : identifier ('.' identifier)*
     ;
 
 expression
@@ -57,6 +42,22 @@ namedExpression
     :  identifier COLON expression
     ;
 
+nonReserved
+    : FOR
+    | IN
+    ;
+
+
+
+SEMICOLON: ';';
+
+LEFT_PAREN: '(';
+RIGHT_PAREN: ')';
+COMMA: ',';
+DOT: '.';
+COLON: ':';
+LEFT_BRACKET: '[';
+RIGHT_BRACKET: ']';
 
 // logical operators
 IF: 'if';
@@ -107,8 +108,21 @@ MINUS: '-';
 ASTERISK: '*';
 
 
-COLON: ':';
-SEMICOLON: ';';
+
+identifier
+    : IDENTIFIER             #unquotedIdentifier
+    | QUOTED_IDENTIFIER      #quotedIdentifier
+    | nonReserved            #unquotedIdentifier
+    ;
+
+IDENTIFIER
+    : (LETTER | '_') (LETTER | DIGIT | '_' | '@' | ':')*
+    ;
+
+QUOTED_IDENTIFIER
+    : '"' ( ~'"' | '""' )* '"'
+    ;
+
 
 fragment DIGIT
     : [0-9]
@@ -137,3 +151,4 @@ WS
 UNRECOGNIZED
     : .
     ;
+

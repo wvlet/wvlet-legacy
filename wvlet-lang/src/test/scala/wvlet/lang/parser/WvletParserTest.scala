@@ -19,8 +19,10 @@ class WvletParserTest extends AirSpec {
   test("parse") {
 
     val p = new WvletParser()
-    p.parse("""for r in db.tbl
-        |return r
+    p.parse("""for x in db.tbl
+        |return x
         |""".stripMargin)
+
+    p.parse("for r in db")
   }
 }
