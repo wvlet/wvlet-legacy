@@ -52,7 +52,7 @@ class WvletInterpreter extends WvletLangVisitor[Any] with LogSupport {
   }
 
   override def visitForItem(ctx: WvletLangParser.ForItemContext): ForItem = {
-    ForItem(ctx.identifier().getText, expression(ctx.expression()))
+    ForItem(ctx.identifier().getText, expression(ctx.expression()))(getLocation(ctx))
   }
 
   override def visitQualifiedName(ctx: WvletLangParser.QualifiedNameContext): Any = ???
@@ -81,4 +81,10 @@ class WvletInterpreter extends WvletLangVisitor[Any] with LogSupport {
   override def visitTerminal(node: TerminalNode): Any = ???
 
   override def visitErrorNode(node: ErrorNode): Any = ???
+
+  override def visitReturnClause(ctx: WvletLangParser.ReturnClauseContext): Any = {}
+
+  override def visitSingleLineExpr(ctx: WvletLangParser.SingleLineExprContext): Any = ???
+
+  override def visitMultiLineExpr(ctx: WvletLangParser.MultiLineExprContext): Any = ???
 }

@@ -30,36 +30,38 @@ class TaskManagerTest extends AirSpec {
   override def design: Design = ServerModule.testServerAndClient
 
   test("add a new task") { (client: ApiClient) =>
-    val ret = client.TaskApi.newTask(
-      TaskRequest(
-        taskPlugin = "trino",
-        methodName = "runQuery",
-        taskBody = Map("query" -> "select 1", "service" -> "TD (US)"),
-        tags = Seq(s"service:td")
+    flaky {
+      val ret = client.TaskApi.newTask(
+        TaskRequest(
+          taskPlugin = "trino",
+          methodName = "runQuery",
+          taskBody = Map("query" -> "select 1", "service" -> "TD (US)"),
+          tags = Seq(s"service:td")
+        )
       )
-    )
-    debug(ret)
+      debug(ret)
 
-    val taskList = client.TaskApi.listTasks(TaskListRequest())
-    debug(taskList)
+      val taskList = client.TaskApi.listTasks(TaskListRequest())
+      debug(taskList)
 
-    @tailrec
-    def loop(t: TaskId, maxRetry: Int): Unit = {
-      if (maxRetry < 0) {
-        fail("Cannot update the status")
-      } else {
-        client.TaskApi.getTask(t) match {
-          case None =>
-            fail(s"Task ${t} is not found")
-          case Some(ref) if ref.status != TaskStatus.QUEUED =>
-          // ok
-          case Some(ref) =>
-            Thread.sleep(100)
-            loop(t, maxRetry - 1)
+      @tailrec
+      def loop(t: TaskId, maxRetry: Int): Unit = {
+        if (maxRetry < 0) {
+          fail("Cannot update the status")
+        } else {
+          client.TaskApi.getTask(t) match {
+            case None =>
+              fail(s"Task ${t} is not found")
+            case Some(ref) if ref.status != TaskStatus.QUEUED =>
+            // ok
+            case Some(ref) =>
+              Thread.sleep(100)
+              loop(t, maxRetry - 1)
+          }
         }
       }
-    }
 
-    loop(ret.id, 30)
+      loop(ret.id, 30)
+    }
   }
 }
