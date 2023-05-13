@@ -14,16 +14,20 @@
 package wvlet.lang.parser
 
 import org.antlr.v4.runtime.{CharStream, CharStreams, CommonTokenStream}
+import wvlet.lang.model.LogicalPlan
 import wvlet.log.LogSupport
 
 class WvletParser extends LogSupport {
-  def parse(s: String): String = {
+  def parse(s: String): LogicalPlan = {
     val lexer       = new WvletLangLexer(CharStreams.fromString(s))
     val tokenStream = new CommonTokenStream(lexer)
 
     val parser = new WvletLangParser(tokenStream)
     val ctx    = parser.statement()
     debug(ctx.toStringTree(parser))
-    null
+
+    val plan = new WvletInterpreter().visitStatement(ctx)
+    debug(plan)
+    plan
   }
 }

@@ -11,19 +11,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package wvlet.lang.parser
+package wvlet.lang.model
 
-import wvlet.airspec.AirSpec
-
-class WvletParserTest extends AirSpec {
-  test("parse") {
-
-    val p = new WvletParser()
-    val plan = p.parse("""for x in db.tbl
-        |return x
-        |""".stripMargin)
-    info(plan)
-
-    p.parse("for r in db")
-  }
+trait LogicalPlan {
+  def nodeLocation: Option[NodeLocation] = None
 }
+
+case class NodeLocation(line: Int, column: Int)
+
+trait Relation extends LogicalPlan
+
+case class FlowerQuery(
+    forClause: ForClause,
+    returnExpr: Option[Expression] = None
+)(override val nodeLocation: Option[NodeLocation] = None)
+    extends Relation {}
+
+case class ForClause(
+    binding: Seq[ForItem] = Seq.empty
+)
+
+case class ForItem(id: String, in: Expression)
+
+trait Expression
+
+case class Identifier(name: String) extends Expression

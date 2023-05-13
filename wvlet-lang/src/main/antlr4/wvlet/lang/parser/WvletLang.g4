@@ -14,10 +14,18 @@ statement
     ;
 
 query
-    : FOR identifier IN expression
+    : FOR forClause
       (WHERE expression)?
       (GROUP BY expression)?
       (RETURN expression)?
+    ;
+
+forClause
+    : forItem (','? forItem)*
+    ;
+
+forItem
+    : identifier IN expression
     ;
 
 qualifiedName
