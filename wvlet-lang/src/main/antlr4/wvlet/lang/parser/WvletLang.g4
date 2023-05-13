@@ -17,19 +17,28 @@ query
     : FOR forClause
       (WHERE expression)?
       (GROUP BY expression)?
-      (RETURN expression)?
+      returnClause?
     ;
 
 forClause
-    : forItem (','? forItem)*
+    : forItem (COMMA? forItem)*
     ;
 
 forItem
     : identifier IN expression
     ;
 
+returnClause
+    : RETURN expression
+    ;
+
+returnExpr
+    : expression (COMMA expression)*                  # singleLineExpr
+    | expression NEWLINE (INDENT expression NEWLINE)* # multiLineExpr
+    ;
+
 qualifiedName
-    : identifier ('.' identifier)*
+    : identifier (DOT identifier)*
     ;
 
 expression
@@ -38,7 +47,7 @@ expression
     ;
 
 functionCall
-    : qualifiedName '(' (functionArg (',' functionArg)*)? ')'
+    : qualifiedName LEFT_PAREN (functionArg (COMMA  functionArg)*)? RIGHT_PAREN
     ;
 
 functionArg
@@ -115,7 +124,7 @@ PLUS: '+';
 MINUS: '-';
 ASTERISK: '*';
 
-
+AT: '@';
 
 identifier
     : IDENTIFIER             #unquotedIdentifier
@@ -140,6 +149,9 @@ fragment LETTER
     : [A-Z]
     ;
 
+ANNOTATION_COMMENT
+    : '--' AT ~[\r\n]* '\r'? '\n'?
+    ;
 
 SIMPLE_COMMENT
     : '--' ~[\r\n]* '\r'? '\n'? -> channel(HIDDEN)
@@ -147,6 +159,14 @@ SIMPLE_COMMENT
 
 BRACKETED_COMMENT
     : '"""' .*? '"""' -> channel(HIDDEN)
+    ;
+
+INDENT
+    : '  '
+    ;
+
+NEWLINE
+    : [\r\n]
     ;
 
 WS

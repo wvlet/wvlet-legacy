@@ -23,7 +23,7 @@ trait Relation extends LogicalPlan
 
 case class FlowerQuery(
     forClause: ForClause,
-    returnExpr: Option[Expression] = None
+    returnClause: Option[ReturnClause] = None
 )(override val nodeLocation: Option[NodeLocation] = None)
     extends Relation {}
 
@@ -31,8 +31,12 @@ case class ForClause(
     binding: Seq[ForItem] = Seq.empty
 )
 
-case class ForItem(id: String, in: Expression)
+case class ForItem(id: String, in: Expression)(nodeLocation: Option[NodeLocation])
 
-trait Expression
+case class ReturnClause(exprs: Seq[Expression])(nodeLocation: Option[NodeLocation]) extends Expression
+
+trait Expression {
+  def nodeLocation: Option[NodeLocation] = None
+}
 
 case class Identifier(name: String) extends Expression
