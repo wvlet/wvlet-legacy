@@ -46,7 +46,25 @@ lazy val wvlet =
       publishArtifact := false,
       publish         := {},
       publishLocal    := {}
-    ).aggregate(core, api.jvm, api.js, apiClient, server, plugin, main)
+    ).aggregate(lang, core, api.jvm, api.js, apiClient, server, plugin, main)
+
+lazy val lang =
+  project
+    .in(file("wvlet-lang"))
+    .enablePlugins(Antlr4Plugin)
+    .settings(
+      buildSettings,
+      name        := "wvlet-lang",
+      description := "wvlet language",
+      libraryDependencies ++= Seq(
+        "org.wvlet.airframe" %% "airframe-log" % AIRFRAME_VERSION,
+        "org.wvlet.airframe" %% "airframe-sql" % AIRFRAME_VERSION
+      ),
+      Antlr4 / antlr4Version     := "4.12.0",
+      Antlr4 / antlr4PackageName := Some("wvlet.lang.parser"),
+      Antlr4 / antlr4GenListener := true,
+      Antlr4 / antlr4GenVisitor  := true
+    )
 
 lazy val core =
   project
