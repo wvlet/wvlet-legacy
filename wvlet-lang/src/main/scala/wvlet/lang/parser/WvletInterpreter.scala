@@ -20,7 +20,7 @@ import wvlet.log.LogSupport
 
 import scala.jdk.CollectionConverters.*
 
-class WvletInterpreter extends WvletLangVisitor[Any] with LogSupport {
+class WvletInterpreter extends WvletLangParserVisitor[Any] with LogSupport {
 
   private def syntaxError(msg: String, ctx: ParserRuleContext): Nothing = {
     val loc = getLocation(ctx)
@@ -51,22 +51,18 @@ class WvletInterpreter extends WvletLangVisitor[Any] with LogSupport {
   }
 
   override def visitQuery(ctx: WvletLangParser.QueryContext): Relation = {
-    val forClause = visitForClause(ctx.forClause())
+    val forClause = ctx.forClause().accept(this).asInstanceOf[ForClause]
     FlowerQuery(
       forClause = forClause
     )(getLocation(ctx))
   }
 
-  override def visitForClause(ctx: WvletLangParser.ForClauseContext): ForClause = {
-    val forItems = ctx match {
-      case m: MultiLineForContext =>
-        m.forItem().asScala.map(x => visitForItem(x)).toSeq
-      case s: SingleLineForContext =>
-        s.forItem().asScala.map(x => visitForItem(x)).toSeq
-      case _ =>
-        throw syntaxError(s"Unknown for clause: ${ctx.getClass}", ctx)
-    }
-    ForClause(forItems)
+  override def visitMultiLineFor(ctx: MultiLineForContext): ForClause = {
+    ForClause(ctx.forItem().asScala.map(x => visitForItem(x)).toSeq)
+  }
+
+  override def visitSingleLineFor(ctx: SingleLineForContext): ForClause = {
+    ForClause(ctx.forItem().asScala.map(x => visitForItem(x)).toSeq)
   }
 
   override def visitForItem(ctx: WvletLangParser.ForItemContext): ForItem = {
@@ -77,7 +73,6 @@ class WvletInterpreter extends WvletLangVisitor[Any] with LogSupport {
 
   override def visitExpression(ctx: WvletLangParser.ExpressionContext): Expression = {
     val qname = ctx.qualifiedName()
-    info(qname)
     Identifier(qname.getText)
   }
 
