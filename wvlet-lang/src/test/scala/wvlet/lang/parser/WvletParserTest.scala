@@ -27,6 +27,10 @@ class WvletParserTest extends AirSpec {
     p.parse("for r in db")
   }
 
+  test("parse single-line for") {
+    p.parse("""for x in tbl1, y in tbl2""")
+  }
+
   test("parse indent") {
     p.parse("""for
               |  x in tbl1

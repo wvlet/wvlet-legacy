@@ -97,11 +97,11 @@ BRACKETED_COMMENT
     ;
 
 INDENT
-    : '  '
+    : '[ \t]+'
     ;
 
 NEWLINE
-    : [\r\n]
+    : '[\r\n]'
     ;
 
 WS
