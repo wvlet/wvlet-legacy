@@ -16,14 +16,21 @@ package wvlet.lang.parser
 import wvlet.airspec.AirSpec
 
 class WvletParserTest extends AirSpec {
-  test("parse") {
+  private val p = new WvletParser()
 
-    val p = new WvletParser()
+  test("parse") {
     val plan = p.parse("""for x in db.tbl
         |return x
         |""".stripMargin)
     info(plan)
 
     p.parse("for r in db")
+  }
+
+  test("parse indent") {
+    p.parse("""for
+              |  x in tbl1
+              |  y in tbl2
+              |""".stripMargin)
   }
 }
