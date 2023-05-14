@@ -15,11 +15,17 @@ package wvlet.lang.parser
 import org.antlr.v4.runtime.tree.{ErrorNode, ParseTree, RuleNode, TerminalNode}
 import org.antlr.v4.runtime.{ParserRuleContext, Token}
 import wvlet.lang.model.*
+import wvlet.lang.parser.WvletLangParser.{MultiLineForContext, SingleLineForContext}
 import wvlet.log.LogSupport
 
 import scala.jdk.CollectionConverters.*
 
-class WvletInterpreter extends WvletLangVisitor[Any] with LogSupport {
+class WvletInterpreter extends WvletLangParserVisitor[Any] with LogSupport {
+
+  private def syntaxError(msg: String, ctx: ParserRuleContext): Nothing = {
+    val loc = getLocation(ctx)
+    throw new IllegalArgumentException(s"${loc.getOrElse("")}: ${msg}")
+  }
 
   private def getLocation(token: Token): Option[NodeLocation] = {
     Some(NodeLocation(token.getLine, token.getCharPositionInLine + 1))
@@ -30,7 +36,12 @@ class WvletInterpreter extends WvletLangVisitor[Any] with LogSupport {
   private def getLocation(node: TerminalNode): Option[NodeLocation] = getLocation(node.getSymbol)
 
   private def expression(ctx: ParserRuleContext): Expression = {
-    ctx.accept(this).asInstanceOf[Expression]
+    ctx.accept(this) match {
+      case e: Expression => e
+      case other =>
+        Identifier(ctx.getText)
+      // syntaxError(s"Expected an expression but found ${other}", ctx)
+    }
   }
 
   override def visitSingleStatement(ctx: WvletLangParser.SingleStatementContext): Any = ???
@@ -40,15 +51,18 @@ class WvletInterpreter extends WvletLangVisitor[Any] with LogSupport {
   }
 
   override def visitQuery(ctx: WvletLangParser.QueryContext): Relation = {
-    val forClause = visitForClause(ctx.forClause())
+    val forClause = ctx.forClause().accept(this).asInstanceOf[ForClause]
     FlowerQuery(
       forClause = forClause
     )(getLocation(ctx))
   }
 
-  override def visitForClause(ctx: WvletLangParser.ForClauseContext): ForClause = {
-    val items = ctx.forItem().asScala.map(x => visitForItem(x)).toSeq
-    ForClause(items)
+  override def visitMultiLineFor(ctx: MultiLineForContext): ForClause = {
+    ForClause(ctx.forItem().asScala.map(x => visitForItem(x)).toSeq)
+  }
+
+  override def visitSingleLineFor(ctx: SingleLineForContext): ForClause = {
+    ForClause(ctx.forItem().asScala.map(x => visitForItem(x)).toSeq)
   }
 
   override def visitForItem(ctx: WvletLangParser.ForItemContext): ForItem = {
@@ -76,7 +90,7 @@ class WvletInterpreter extends WvletLangVisitor[Any] with LogSupport {
 
   override def visit(tree: ParseTree): Any = ???
 
-  override def visitChildren(node: RuleNode): Any = ???
+  override def visitChildren(node: RuleNode): Any = {}
 
   override def visitTerminal(node: TerminalNode): Any = ???
 

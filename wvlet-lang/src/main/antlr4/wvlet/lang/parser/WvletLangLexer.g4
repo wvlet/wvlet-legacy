@@ -1,70 +1,10 @@
-grammar WvletLang;
+// ANTLR4 lexer definition .g4
+
+lexer grammar WvletLangLexer;
 
 options {
   caseInsensitive=true;
 }
-
-
-singleStatement
-    : statement EOF
-    ;
-
-statement
-    : query
-    ;
-
-query
-    : FOR forClause
-      (WHERE expression)?
-      (GROUP BY expression)?
-      returnClause?
-    ;
-
-forClause
-    : forItem (COMMA? forItem)*
-    ;
-
-forItem
-    : identifier IN expression
-    ;
-
-returnClause
-    : RETURN expression
-    ;
-
-returnExpr
-    : expression (COMMA expression)*                  # singleLineExpr
-    | expression NEWLINE (INDENT expression NEWLINE)* # multiLineExpr
-    ;
-
-qualifiedName
-    : identifier (DOT identifier)*
-    ;
-
-expression
-    : qualifiedName
-    | functionCall
-    ;
-
-functionCall
-    : qualifiedName LEFT_PAREN (functionArg (COMMA  functionArg)*)? RIGHT_PAREN
-    ;
-
-functionArg
-    : expression
-    | namedExpression
-    ;
-
-namedExpression
-    :  identifier COLON expression
-    ;
-
-nonReserved
-    : FOR
-    | IN
-    ;
-
-
 
 SEMICOLON: ';';
 
@@ -126,11 +66,6 @@ ASTERISK: '*';
 
 AT: '@';
 
-identifier
-    : IDENTIFIER             #unquotedIdentifier
-    | QUOTED_IDENTIFIER      #quotedIdentifier
-    | nonReserved            #unquotedIdentifier
-    ;
 
 IDENTIFIER
     : (LETTER | '_') (LETTER | DIGIT | '_' | '@' | ':')*
@@ -162,11 +97,11 @@ BRACKETED_COMMENT
     ;
 
 INDENT
-    : '  '
+    : '[ \t]+'
     ;
 
 NEWLINE
-    : [\r\n]
+    : '[\r\n]'
     ;
 
 WS
@@ -179,4 +114,3 @@ WS
 UNRECOGNIZED
     : .
     ;
-
