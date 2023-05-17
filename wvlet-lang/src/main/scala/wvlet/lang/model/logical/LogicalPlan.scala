@@ -11,7 +11,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package wvlet.lang.model
+package wvlet.lang.model.logical
+
+import wvlet.lang.model.*
 
 trait LogicalPlan {
   def nodeLocation: Option[NodeLocation] = None

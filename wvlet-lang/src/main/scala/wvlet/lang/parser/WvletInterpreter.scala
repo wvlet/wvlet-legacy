@@ -14,7 +14,17 @@
 package wvlet.lang.parser
 import org.antlr.v4.runtime.tree.{ErrorNode, ParseTree, RuleNode, TerminalNode}
 import org.antlr.v4.runtime.{ParserRuleContext, Token}
-import wvlet.lang.model.*
+import wvlet.lang.model.{logical, *}
+import wvlet.lang.model.logical.{
+  Expression,
+  FlowerQuery,
+  ForClause,
+  ForItem,
+  Identifier,
+  LogicalPlan,
+  NodeLocation,
+  Relation
+}
 import wvlet.lang.parser.WvletLangParser.{MultiLineForContext, SingleLineForContext}
 import wvlet.log.LogSupport
 
@@ -58,15 +68,15 @@ class WvletInterpreter extends WvletLangParserVisitor[Any] with LogSupport {
   }
 
   override def visitMultiLineFor(ctx: MultiLineForContext): ForClause = {
-    ForClause(ctx.forItem().asScala.map(x => visitForItem(x)).toSeq)
+    logical.ForClause(ctx.forItem().asScala.map(x => visitForItem(x)).toSeq)
   }
 
   override def visitSingleLineFor(ctx: SingleLineForContext): ForClause = {
-    ForClause(ctx.forItem().asScala.map(x => visitForItem(x)).toSeq)
+    logical.ForClause(ctx.forItem().asScala.map(x => visitForItem(x)).toSeq)
   }
 
   override def visitForItem(ctx: WvletLangParser.ForItemContext): ForItem = {
-    ForItem(ctx.identifier().getText, expression(ctx.expression()))(getLocation(ctx))
+    logical.ForItem(ctx.identifier().getText, expression(ctx.expression()))(getLocation(ctx))
   }
 
   override def visitQualifiedName(ctx: WvletLangParser.QualifiedNameContext): Any = ???
