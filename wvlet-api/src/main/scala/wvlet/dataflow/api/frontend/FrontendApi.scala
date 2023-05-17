@@ -13,12 +13,24 @@
  */
 package wvlet.dataflow.api.frontend
 
-import wvlet.airframe.http._
+import wvlet.airframe.http.*
 import wvlet.dataflow.api.ServiceInfoApi
+import FrontendApi.*
 
+import java.time.Instant
 @RPC
-trait FrontendApi extends ServiceInfoApi {}
+trait FrontendApi extends ServiceInfoApi {
+
+  def getTimeline(request: TimelineRequest): TimelineResponse
+}
 
 object FrontendApi extends RxRouterProvider {
   override def router: RxRouter = RxRouter.of[FrontendApi]
+
+  case class TimelineRequest(
+      timeWindow: String = "-1h/now"
+  )
+  case class TimelineResponse(
+  )
+
 }

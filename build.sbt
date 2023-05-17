@@ -12,7 +12,7 @@ ThisBuild / resolvers ++= Resolver.sonatypeOssRepos("snapshots")
 Global / onChangedBuildSource := ReloadOnSourceChanges
 
 val buildSettings = Seq[Setting[_]](
-  organization        := "org.wvlet.dataflow",
+  organization        := "org.wvlet.lang",
   description         := "A framework for building functional data flows",
   crossPaths          := true,
   publishMavenStyle   := true,
@@ -86,9 +86,10 @@ lazy val main =
     .settings(
       buildSettings,
       name        := "wvlet-main",
-      description := "wvlet main module",
-      packMain    := Map("wvlet-server" -> "wvlet.dataflow.server.ServerMain"),
+      description := "wv command line interface",
+      packMain    := Map("wv" -> "wvlet.lang.cli.WvletMain"),
       libraryDependencies ++= Seq(
+        "org.wvlet.airframe" %% "airframe-launcher" % AIRFRAME_VERSION
       )
     ).dependsOn(server)
 
@@ -140,7 +141,8 @@ lazy val api =
       name             := "wvlet-api",
       description      := "wvlet API interface and model classes",
       libraryDependencies ++= Seq(
-        "org.wvlet.airframe" %%% "airframe-http" % AIRFRAME_VERSION
+        "org.wvlet.airframe" %%% "airframe-http"    % AIRFRAME_VERSION,
+        "org.wvlet.airframe" %%% "airframe-metrics" % AIRFRAME_VERSION
       )
     )
 
