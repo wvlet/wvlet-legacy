@@ -103,8 +103,8 @@ lazy val server =
       libraryDependencies ++= Seq(
         "org.wvlet.airframe" %% "airframe-http-netty" % AIRFRAME_VERSION,
         "org.wvlet.airframe" %% "airframe-launcher"   % AIRFRAME_VERSION,
-        // Add this as a reference implementation
-        "io.trino" % "trino-main" % TRINO_VERSION % Test
+        // Add DuckDB test
+        "org.duckdb" % "duckdb_jdbc" % "0.8.0"
       ),
       Test / classLoaderLayeringStrategy := ClassLoaderLayeringStrategy.Flat
     )
@@ -192,8 +192,14 @@ lazy val ui = project
         .withCheckIR(false)
     },
     externalNpm := {
+      import java.nio.file.{Files, Paths}
+      val yarnProg = Files.exists(Paths.get("/opt/homebrew/bin/yarn")) match {
+        // Workaround for IntelliJ sbt project loader on Mac OS X
+        case true  => "/opt/homebrew/bin/yarn"
+        case false => "yarn"
+      }
       // Use Yarn instead of npm
-      scala.sys.process.Process(List("yarn", "--silent"), baseDirectory.value).!
+      scala.sys.process.Process(List(yarnProg, "--silent"), baseDirectory.value).!
       baseDirectory.value
     },
     libraryDependencies ++= Seq(

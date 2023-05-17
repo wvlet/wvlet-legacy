@@ -16,11 +16,12 @@ package wvlet.dataflow.api.frontend
 import wvlet.airframe.http.*
 import wvlet.dataflow.api.ServiceInfoApi
 import FrontendApi.*
+import wvlet.dataflow.api.v1.timeline.TimeInterval
 
 import java.time.Instant
+
 @RPC
 trait FrontendApi extends ServiceInfoApi {
-
   def getTimeline(request: TimelineRequest): TimelineResponse
 }
 
@@ -31,6 +32,9 @@ object FrontendApi extends RxRouterProvider {
       timeWindow: String = "-1h/now"
   )
   case class TimelineResponse(
+      startAt: Long,
+      endAt: Long,
+      entries: Seq[TimeInterval]
   )
 
 }
