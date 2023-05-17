@@ -13,8 +13,10 @@
  */
 package wvlet.dataflow.api.v1.timeline
 
+import scala.concurrent.duration.TimeUnit
+
 /**
-  * Represent [startAt, endAt) interval range
+  * Represent [startAt, endAt) interval range without specifying time unit
   */
 case class TimeInterval(
     name: String,
