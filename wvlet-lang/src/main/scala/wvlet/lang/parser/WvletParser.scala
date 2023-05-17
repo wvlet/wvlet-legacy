@@ -14,7 +14,7 @@
 package wvlet.lang.parser
 
 import org.antlr.v4.runtime.{CharStream, CharStreams, CommonTokenStream}
-import wvlet.lang.model.LogicalPlan
+import wvlet.lang.model.logical.LogicalPlan
 import wvlet.log.LogSupport
 
 class WvletParser extends LogSupport {
