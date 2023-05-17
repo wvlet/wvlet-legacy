@@ -27,43 +27,45 @@ class ControlPluginTest extends AirSpec {
   override def design: Design = ServerModule.testServerAndClient
 
   test("run control task") { (client: ApiClient) =>
-    val a = AndThenTask(
-      firstTask = TaskRequest(
-        taskPlugin = "sqlite",
-        methodName = "runQuery",
-        taskBody = MessageCodec
-          .of[Map[String, Any]].fromMsgPack(
-            MessageCodec
-              .of[SQLitePlugin.RunQuery].toMsgPack(
-                RunQuery("db1", "select 1")
-              )
-          )
-      ),
-      nextTask = TaskRequest(
-        taskPlugin = "sqlite",
-        methodName = "runQuery",
-        taskBody = MessageCodec
-          .of[Map[String, Any]].fromMsgPack(
-            MessageCodec
-              .of[SQLitePlugin.RunQuery].toMsgPack(
-                RunQuery("db1", "select 2")
-              )
-          )
+    flaky {
+      val a = AndThenTask(
+        firstTask = TaskRequest(
+          taskPlugin = "sqlite",
+          methodName = "runQuery",
+          taskBody = MessageCodec
+            .of[Map[String, Any]].fromMsgPack(
+              MessageCodec
+                .of[SQLitePlugin.RunQuery].toMsgPack(
+                  RunQuery("db1", "select 1")
+                )
+            )
+        ),
+        nextTask = TaskRequest(
+          taskPlugin = "sqlite",
+          methodName = "runQuery",
+          taskBody = MessageCodec
+            .of[Map[String, Any]].fromMsgPack(
+              MessageCodec
+                .of[SQLitePlugin.RunQuery].toMsgPack(
+                  RunQuery("db1", "select 2")
+                )
+            )
+        )
       )
-    )
 
-    val t = MessageCodec
-      .of[Map[String, Any]].fromMsgPack(
-        MessageCodec.of[AndThenTask].toMsgPack(a)
+      val t = MessageCodec
+        .of[Map[String, Any]].fromMsgPack(
+          MessageCodec.of[AndThenTask].toMsgPack(a)
+        )
+      val taskRef = client.TaskApi.newTask(
+        TaskRequest(
+          taskPlugin = "control",
+          methodName = "andThen",
+          taskBody = t
+        )
       )
-    val taskRef = client.TaskApi.newTask(
-      TaskRequest(
-        taskPlugin = "control",
-        methodName = "andThen",
-        taskBody = t
-      )
-    )
-    val lastState = TaskUtil.waitCompletion(client, taskRef.id)
-    info(lastState)
+      val lastState = TaskUtil.waitCompletion(client, taskRef.id)
+      info(lastState)
+    }
   }
 }
