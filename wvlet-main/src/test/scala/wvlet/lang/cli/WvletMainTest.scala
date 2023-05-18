@@ -11,12 +11,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package wvlet.dataflow.server.frontend
+package wvlet.lang.cli
 
-import wvlet.dataflow.api.frontend.FrontendApi
+import wvlet.airspec.AirSpec
 
-class FrontendApiImpl extends FrontendApi {
-  override def getTimeline(request: FrontendApi.TimelineRequest): FrontendApi.TimelineResponse = {
-    ???
+class WvletMainTest extends AirSpec {
+  test("run main") {
+    WvletMain.execute("")
+  }
+
+  test("show help") {
+    WvletMain.execute("--help")
   }
 }
