@@ -71,7 +71,7 @@ object TimeInterval {
     override def compare(x: TimeInterval, y: TimeInterval): Int = {
       val diff = y.endAt - x.endAt
       if (diff == 0) {
-        0
+        y.startAt.compareTo(x.startAt)
       } else if (diff < 0) {
         -1
       } else {

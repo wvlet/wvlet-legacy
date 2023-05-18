@@ -32,31 +32,23 @@ object TimelineAnalysis extends LogSupport {
       overlappedIntervals += sorted(0)
 
       def report: Unit = {
-        if (overlappedIntervals.length > 1) {
-          info(s"Peak time: ${sweepLine}: ${overlappedIntervals.size}")
-        }
+        info(s"Peak time: ${sweepLine}: ${overlappedIntervals.size}")
       }
 
       while (index < length) {
         val x = sorted(index)
-        if (overlappedIntervals.isEmpty || x.startAt < overlappedIntervals.head.endAt) {
-          overlappedIntervals.enqueue(x)
-        }
+        overlappedIntervals += x
+        sweepLine = x.startAt
+
         // Remove all intervals that end before x.startAt
-        while (overlappedIntervals.nonEmpty && overlappedIntervals.head.endAt <= x.startAt) {
-          val r = overlappedIntervals.dequeue()
-          if (sweepLine < r.endAt) {
-            sweepLine = r.endAt
-            report
-          }
+        while (overlappedIntervals.nonEmpty && overlappedIntervals.head.endAt <= sweepLine) {
+          overlappedIntervals.dequeue()
         }
-        if (sweepLine < x.startAt) {
-          sweepLine = x.startAt
+        if (overlappedIntervals.size > 1) {
           report
         }
         index += 1
       }
-
       while (overlappedIntervals.nonEmpty) {
         val r = overlappedIntervals.dequeue()
         sweepLine = r.endAt
