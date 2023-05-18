@@ -29,6 +29,8 @@ case class TimeInterval(
 
   override def toString: String = s"${name}:[$startAt, $endAt)"
 
+  def interval: (Long, Long) = (startAt, endAt)
+
   def length: Long = endAt - startAt
 
   def contains(other: TimeInterval): Boolean = {
@@ -60,6 +62,21 @@ case class TimeInterval(
       endAt.compareTo(other.endAt)
     } else {
       if (diff < 0) -1 else 1
+    }
+  }
+}
+
+object TimeInterval {
+  def biggerEndOrdering: Ordering[TimeInterval] = new Ordering[TimeInterval] {
+    override def compare(x: TimeInterval, y: TimeInterval): Int = {
+      val diff = y.endAt - x.endAt
+      if (diff == 0) {
+        0
+      } else if (diff < 0) {
+        -1
+      } else {
+        1
+      }
     }
   }
 }
