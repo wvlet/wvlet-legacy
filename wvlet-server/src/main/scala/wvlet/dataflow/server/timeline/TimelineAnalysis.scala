@@ -19,41 +19,68 @@ import wvlet.log.LogSupport
 import scala.collection.mutable
 
 object TimelineAnalysis extends LogSupport {
-  def findPeakTimes(list: Seq[TimeInterval]): Unit = {
+
+  case class PeakChange(pos: Long, count: Int)
+
+  def findPeakTimes[U](
+      list: Seq[TimeInterval],
+      reporter: PeakChange => U = { (x: PeakChange) =>
+        info(s"peak change at ${x.pos}: ${x.count}")
+      }
+  ): Unit = {
     if (list.isEmpty) {
       // do nothing
     } else {
-      val sorted    = list.sortBy(_.startAt).toIndexedSeq
-      val length    = sorted.length
+      val sorted = list.sortBy(_.startAt).toIndexedSeq
+      val length = sorted.length
+      // sorted intervals on endAt values
+      val overlappedIntervals = new mutable.PriorityQueue[TimeInterval]()(TimeInterval.intervalSweepOrdering)
+      overlappedIntervals += sorted(0)
       var sweepLine = sorted(0).startAt
       var index     = 1
-      // sorted intervals on endAt values
-      val overlappedIntervals = new mutable.PriorityQueue[TimeInterval]()(TimeInterval.biggerEndOrdering)
-      overlappedIntervals += sorted(0)
+
+      val peakCountReport = mutable.TreeMap.empty[Long, Int]
 
       def report: Unit = {
-        info(s"Peak time: ${sweepLine}: ${overlappedIntervals.size}")
+        val precedingIntervals = peakCountReport.range(Long.MinValue, sweepLine).toIndexedSeq
+        precedingIntervals.sortBy(_._1).foreach { (pos, count) =>
+          reporter(PeakChange(pos, count))
+          // Clean up reported peak count
+          peakCountReport.remove(pos)
+        }
+      }
+
+      def sweepUpto(to: Long): Unit = {
+        // Report before updating the sweepline
+        report
+        sweepLine = to
       }
 
       while (index < length) {
+        peakCountReport += sweepLine -> overlappedIntervals.size
+
+        // Add the next interval to the queue
         val x = sorted(index)
-        overlappedIntervals += x
-        sweepLine = x.startAt
+        sweepUpto(x.startAt)
 
         // Remove all intervals that end before x.startAt
         while (overlappedIntervals.nonEmpty && overlappedIntervals.head.endAt <= sweepLine) {
-          overlappedIntervals.dequeue()
+          val r = overlappedIntervals.dequeue()
+          peakCountReport += r.endAt -> overlappedIntervals.size
         }
-        if (overlappedIntervals.size > 1) {
-          report
-        }
+        overlappedIntervals += x
+        peakCountReport += sweepLine -> overlappedIntervals.size
         index += 1
       }
+      // Sweep remaining intervals
       while (overlappedIntervals.nonEmpty) {
         val r = overlappedIntervals.dequeue()
-        sweepLine = r.endAt
-        report
+        peakCountReport += r.endAt -> overlappedIntervals.size
+        sweepUpto(r.endAt)
       }
+      // final report
+      sweepLine = Long.MaxValue
+      report
     }
   }
 }

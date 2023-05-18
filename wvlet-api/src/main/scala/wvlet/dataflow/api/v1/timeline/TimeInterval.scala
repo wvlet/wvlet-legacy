@@ -67,7 +67,11 @@ case class TimeInterval(
 }
 
 object TimeInterval {
-  def biggerEndOrdering: Ordering[TimeInterval] = new Ordering[TimeInterval] {
+
+  /**
+    * Order intervals first by the endAt, then by the startAt
+    */
+  def intervalSweepOrdering: Ordering[TimeInterval] = new Ordering[TimeInterval] {
     override def compare(x: TimeInterval, y: TimeInterval): Int = {
       val diff = y.endAt - x.endAt
       if (diff == 0) {
