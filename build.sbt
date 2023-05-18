@@ -120,6 +120,7 @@ lazy val plugin =
       libraryDependencies ++= Seq(
         // For Trino plugin
         "io.trino"            % "trino-cli"     % TRINO_VERSION,
+        "io.trino"            % "trino-client"  % TRINO_VERSION,
         "io.trino"            % "trino-jdbc"    % TRINO_VERSION,
         "io.trino"            % "trino-spi"     % TRINO_VERSION,
         "org.wvlet.airframe" %% "airframe-jdbc" % AIRFRAME_VERSION,
