@@ -4,7 +4,7 @@ val SCALA_3    = "3.2.2"
 val AIRFRAME_VERSION    = sys.env.getOrElse("AIRFRAME_VERSION", "23.5.3")
 val AIRSPEC_VERSION     = "23.5.3"
 val SCALAJS_DOM_VERSION = "2.4.0"
-val TRINO_VERSION       = "417"
+val TRINO_VERSION       = "418"
 
 ThisBuild / scalaVersion := SCALA_3
 ThisBuild / resolvers ++= Resolver.sonatypeOssRepos("snapshots")
@@ -120,6 +120,7 @@ lazy val plugin =
       libraryDependencies ++= Seq(
         // For Trino plugin
         "io.trino"            % "trino-cli"     % TRINO_VERSION,
+        "io.trino"            % "trino-client"  % TRINO_VERSION,
         "io.trino"            % "trino-jdbc"    % TRINO_VERSION,
         "io.trino"            % "trino-spi"     % TRINO_VERSION,
         "org.wvlet.airframe" %% "airframe-jdbc" % AIRFRAME_VERSION,
