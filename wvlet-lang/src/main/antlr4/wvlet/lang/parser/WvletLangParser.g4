@@ -4,7 +4,6 @@ options {
   tokenVocab=WvletLangLexer;
 }
 
-
 singleStatement
     : statement EOF
     ;
@@ -22,7 +21,7 @@ query
 
 forClause
     : forItem (COMMA? forItem)*         #singleLineFor
-    | forItem NEWLINE (INDENT forItem NEWLINE)* #multiLineFor
+    | forItem NEWLINE (INDENT forItem COMMA? NEWLINE)* #multiLineFor
     ;
 
 forItem
@@ -35,7 +34,7 @@ returnClause
 
 returnExpr
     : expression (COMMA expression)*                  # singleLineExpr
-    | expression NEWLINE (INDENT expression NEWLINE)* # multiLineExpr
+    | expression NEWLINE (INDENT expression COMMA? NEWLINE)* # multiLineExpr
     ;
 
 qualifiedName
