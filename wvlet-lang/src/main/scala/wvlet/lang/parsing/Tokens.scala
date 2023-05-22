@@ -13,50 +13,48 @@
  */
 package wvlet.lang.parsing
 
-enum Token(str:String) {
-  case EMPTY extends Token("<empty>")
-  case ERROR extends Token("<erroneous token>")
-  case EOF extends Token("<eof>")
+enum Token(str: String) {
+  case EMPTY   extends Token("<empty>")
+  case ERROR   extends Token("<erroneous token>")
+  case EOF     extends Token("<eof>")
   case NEWLINE extends Token("<newline>")
 
-  case COLON extends Token(":")
-  case COMMA extends Token(",")
-  case L_PAREN extends Token("(")
-  case R_PAREN extends Token(")")
-  case L_BRACE extends Token("{")
-  case R_BRACE extends Token("}")
+  case COLON     extends Token(":")
+  case COMMA     extends Token(",")
+  case L_PAREN   extends Token("(")
+  case R_PAREN   extends Token(")")
+  case L_BRACE   extends Token("{")
+  case R_BRACE   extends Token("}")
   case L_BRACKET extends Token("[")
   case R_BRACKET extends Token("]")
 
   case EQ extends Token("=")
   case IN extends Token("in")
 
-
-  case DEF extends Token("def")
+  case DEF   extends Token("def")
   case MODEL extends Token("model")
-  case WITH extends Token("with")
-
+  case WITH  extends Token("with")
 
   case INTEGER_LITERAL extends Token("<integer literal>")
   case DECIMAL_LITERAL extends Token("<decimal literal>")
-  case EXP_LITERAL extends Token("<exp literal>")
-  case LONG_LITERAL extends Token("<long literal>")
-  case FLOAT_LITERAL extends Token("<float literal>")
-  case DOUBLE_LITERAL extends Token("<double literal>")
-  case STRING_LITERAL extends Token("<string literal>")
+  case EXP_LITERAL     extends Token("<exp literal>")
+  case LONG_LITERAL    extends Token("<long literal>")
+  case FLOAT_LITERAL   extends Token("<float literal>")
+  case DOUBLE_LITERAL  extends Token("<double literal>")
+  case STRING_LITERAL  extends Token("<string literal>")
 
-  case IDENTIFIER extends Token("<identifier>")
-  case QUOTED_IDENTIFIER  extends Token("<quoted identifier>")
+  case IDENTIFIER        extends Token("<identifier>")
+  case QUOTED_IDENTIFIER extends Token("<quoted identifier>")
 
-  case FOR extends Token("for")
-  case LET extends Token("let")
-  case WHERE extends Token("where")
+  case FOR      extends Token("for")
+  case LET      extends Token("let")
+  case WHERE    extends Token("where")
   case GROUP_BY extends Token("group by")
-  case HAVING extends Token("having")
-  case RETURN extends Token("return")
+  case HAVING   extends Token("having")
+  case RETURN   extends Token("return")
   case ORDER_BY extends Token("order by")
 
-  case RUN extends Token("run")
+  case RUN    extends Token("run")
   case EXPORT extends Token("export")
 
   case IF extends Token("if")
