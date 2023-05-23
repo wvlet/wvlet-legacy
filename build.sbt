@@ -1,5 +1,5 @@
 val SCALA_2_13 = "2.13.8"
-val SCALA_3    = "3.2.2"
+val SCALA_3    = "3.3.0"
 
 val AIRFRAME_VERSION    = sys.env.getOrElse("AIRFRAME_VERSION", "23.5.5")
 val AIRSPEC_VERSION     = "23.5.5"
