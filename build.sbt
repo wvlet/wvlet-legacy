@@ -60,7 +60,7 @@ lazy val lang =
         "org.wvlet.airframe" %% "airframe-log" % AIRFRAME_VERSION,
         "org.wvlet.airframe" %% "airframe-sql" % AIRFRAME_VERSION
       ),
-      Antlr4 / antlr4Version     := "4.12.0",
+      Antlr4 / antlr4Version     := "4.13.0",
       Antlr4 / antlr4PackageName := Some("wvlet.lang.parser"),
       Antlr4 / antlr4GenListener := true,
       Antlr4 / antlr4GenVisitor  := true
