@@ -19,8 +19,13 @@ enum Token(str: String) {
   case EOF     extends Token("<eof>")
   case NEWLINE extends Token("<newline>")
 
-  case COLON     extends Token(":")
-  case COMMA     extends Token(",")
+  case COLON extends Token(":")
+  case COMMA extends Token(",")
+
+  case DOT          extends Token(".")
+  case DOUBLE_QUOTE extends Token("\"")
+  case SINGLE_QUOTE extends Token("'")
+
   case L_PAREN   extends Token("(")
   case R_PAREN   extends Token(")")
   case L_BRACE   extends Token("{")
