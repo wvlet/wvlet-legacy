@@ -18,6 +18,7 @@ enum Token(str: String) {
   case ERROR   extends Token("<erroneous token>")
   case EOF     extends Token("<eof>")
   case NEWLINE extends Token("<newline>")
+  case INDENT extends Token("  ")
 
   case COLON extends Token(":")
   case COMMA extends Token(",")
@@ -37,7 +38,7 @@ enum Token(str: String) {
   case IN extends Token("in")
 
   case DEF   extends Token("def")
-  case MODEL extends Token("model")
+  case SCHEMA extends Token("schema")
   case WITH  extends Token("with")
 
   case INTEGER_LITERAL extends Token("<integer literal>")
