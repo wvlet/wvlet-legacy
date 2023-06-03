@@ -18,6 +18,7 @@ import wvlet.lang.parsing.{ScannerSource, StringSource, WvletScanner}
 import wvlet.lang.parsing.Token
 
 import scala.annotation.switch
+import scala.collection.mutable
 
 trait ScannerSource {
   def text: String
@@ -32,6 +33,8 @@ case class StringSource(override val text: String) extends ScannerSource {
   length: Int = text.length
 }
 
+
+
 object WvletScanner {
 
   def scan(text: String): Seq[Token] = {
@@ -45,6 +48,7 @@ object WvletScanner {
 class WvletScanner(source: ScannerSource) {
   private var cursor: Int = 0
   private var ch: Char = 0
+  protected val tokenBuffer = TokenBuffer()
 
   def skipToken(): Unit = {}
 
@@ -58,13 +62,13 @@ class WvletScanner(source: ScannerSource) {
     cursor += 1
 
   private def putChar(ch: Char): Unit =
-    // TODO
-    ()
+    tokenBuffer.append(ch)
 
   private def fetchToken(): Token =
     val ch = source.text.charAt(cursor)
     (ch: @switch) match
       case ' ' | '\t' | '\r' | '\n' | '\f' =>
+        // Skip white space characters
         nextChar()
         fetchToken()
       case 'A' | 'B' | 'C' | 'D' | 'E' |

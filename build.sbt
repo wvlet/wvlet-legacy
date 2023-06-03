@@ -58,7 +58,9 @@ lazy val lang =
       description := "wvlet language",
       libraryDependencies ++= Seq(
         "org.wvlet.airframe" %% "airframe-log" % AIRFRAME_VERSION,
-        "org.wvlet.airframe" %% "airframe-sql" % AIRFRAME_VERSION
+        "org.wvlet.airframe" %% "airframe-sql" % AIRFRAME_VERSION,
+        // Add a reference implementation of the compiler
+        "org.scala-lang" %% "scala3-compiler" % SCALA_3 % Test,
       ),
       Antlr4 / antlr4Version     := "4.13.0",
       Antlr4 / antlr4PackageName := Some("wvlet.lang.parser"),
