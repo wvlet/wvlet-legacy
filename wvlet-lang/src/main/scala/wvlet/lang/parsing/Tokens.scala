@@ -64,4 +64,8 @@ enum Token(str: String) {
   case EXPORT extends Token("export")
 
   case IF extends Token("if")
+
+
+  val keywords = Seq(DEF, SCHEMA, WITH, FOR, LET, WHERE, GROUP_BY, HAVING, RETURN, ORDER_BY, RUN, EXPORT, IF)
+
 }

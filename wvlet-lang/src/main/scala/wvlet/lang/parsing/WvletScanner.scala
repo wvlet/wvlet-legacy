@@ -17,7 +17,7 @@ import wvlet.airframe.control.IO
 import wvlet.lang.parsing.{ScannerSource, StringSource, WvletScanner}
 import wvlet.lang.parsing.Token
 
-import scala.annotation.switch
+import scala.annotation.{switch, tailrec}
 import scala.collection.mutable
 
 trait ScannerSource {
@@ -43,9 +43,15 @@ object WvletScanner {
     Seq.empty
   }
 
+  inline val LF = '\u000A'
+  inline val FF = '\u000C'
+  inline val CR = '\u000D'
+  inline val SU = '\u001A'
 }
 
 class WvletScanner(source: ScannerSource) {
+  import WvletScanner.*
+
   private var cursor: Int = 0
   private var ch: Char = 0
   protected val tokenBuffer = TokenBuffer()
@@ -64,10 +70,13 @@ class WvletScanner(source: ScannerSource) {
   private def putChar(ch: Char): Unit =
     tokenBuffer.append(ch)
 
+  private def lookAheadChar(): Char =
+    source.text.charAt(cursor + 1)
+
   private def fetchToken(): Token =
     val ch = source.text.charAt(cursor)
     (ch: @switch) match
-      case ' ' | '\t' | '\r' | '\n' | '\f' =>
+      case ' ' | '\t' | CR | LF | FF =>
         // Skip white space characters
         nextChar()
         fetchToken()
@@ -86,7 +95,36 @@ class WvletScanner(source: ScannerSource) {
         putChar(ch)
         nextChar()
         getIdentRest()
+      case '~' | '!' | '@' | '#' | '%' |
+           '^' | '*' | '+' | '-' | /*'<' | */
+           '>' | '?' | ':' | '=' | '&' |
+           '|' | '\\'  =>
+        putChar(ch)
+        nextChar()
+        getOperatorRest()
 
+
+  @tailrec private def getOperatorRest(): Unit = (ch: @switch) match {
+    case '~' | '!' | '@' | '#' | '%' |
+         '^' | '*' | '+' | '-' | '<' |
+         '>' | '?' | ':' | '=' | '&' |
+         '|' | '\\' =>
+      putChar(ch)
+      nextChar()
+      getOperatorRest()
+    case '/' =>
+      val nxch = lookAheadChar()
+      if nxch == '/' || nxch == '*' then finishNamed()
+      else {
+        putChar(ch); nextChar(); getOperatorRest()
+      }
+    case _ =>
+      if isSpecial(ch) then {
+        putChar(ch); nextChar(); getOperatorRest()
+      }
+      else if isSupplementary(ch, isSpecial) then getOperatorRest()
+      else finishNamed()
+  }
 
   private def getIdentRest(): Token = (ch: @switch) match {
     case 'A' | 'B' | 'C' | 'D' | 'E' |
