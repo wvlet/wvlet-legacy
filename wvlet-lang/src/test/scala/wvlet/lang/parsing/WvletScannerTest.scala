@@ -45,18 +45,21 @@ class WvletScannerTest extends AirSpec:
          |  id: int,
          |  name: string
          |""".stripMargin)
-    tokens shouldBe Seq(
+    debug(tokens.mkString("\n"))
+    tokens shouldMatch {
+      case List(
       // schema A:
-      Token.SCHEMA,
-      Token.IDENTIFIER,
-      Token.COLON,
+      TokenData(Token.SCHEMA, "schema", _, _),
+      TokenData(Token.IDENTIFIER, "A", _, _),
+      TokenData(Token.COLON, ":", _, _),
       // Token.NEWLINE,
       //   id: int,
-      Token.INDENT,
-      Token.IDENTIFIER,
-      Token.COLON,
+      TokenData(Token.INDENT, _, _, _),
+      TokenData(Token.IDENTIFIER, "id", _, _),
+      TokenData(Token.COLON, ":", _, _),
       //   name: string
-      Token.IDENTIFIER,
-      Token.COLON,
-      Token.IDENTIFIER
-    )
+      TokenData(Token.IDENTIFIER, "name", _, _),
+      TokenData(Token.COLON, ":", _, _),
+      TokenData(Token.IDENTIFIER, "string", _, _),
+      ) =>
+    }

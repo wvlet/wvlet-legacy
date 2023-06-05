@@ -34,16 +34,16 @@ case class StringSource(override val text: String) extends ScannerSource {
   length: Int = text.length
 }
 
-
+case class TokenData(token: Token, text: String, start: Int, end: Int)
 
 object WvletScanner extends LogSupport :
-  def scan(text: String): Seq[Token] = {
+  def scan(text: String): Seq[TokenData] = {
     val scanner = new WvletScanner(StringSource(text))
-    val tokens = Seq.newBuilder[Token]
-    var token = scanner.nextToken()
-    while token != Token.EOF do
-      tokens += token
-      token = scanner.nextToken()
+    val tokens = Seq.newBuilder[TokenData]
+    var tokenData = scanner.nextToken()
+    while tokenData.token != Token.EOF do
+      tokens += tokenData
+      tokenData = scanner.nextToken()
     tokens.result()
   }
 
@@ -62,14 +62,19 @@ class WvletScanner(source: ScannerSource) extends LogSupport:
 
   def skipToken(): Unit = {}
 
-  def nextToken(): Token =
-    if(cursor > source.length)
-      Token.EOF
+  def nextToken(): TokenData =
+    if(cursor >= source.length)
+      TokenData(Token.EOF, "", cursor, cursor)
     else
       fetchToken()
 
-  private def nextChar(): Unit =
+  private def nextChar(): Unit = {
+    if(cursor >= source.length)
+      ch = SU
+    else
+      ch = source.text.charAt(cursor)
     cursor += 1
+  }
 
   private def putChar(ch: Char): Unit =
     tokenBuffer.append(ch)
@@ -77,13 +82,12 @@ class WvletScanner(source: ScannerSource) extends LogSupport:
   private def lookAheadChar(): Char =
     source.text.charAt(cursor + 1)
 
-  private def fetchToken(): Token =
-    val ch = source.text.charAt(cursor)
-    info(s"ch: ${String.valueOf(ch)}")
+  private def fetchToken(): TokenData =
+    nextChar()
+    debug(s"ch: '${String.valueOf(ch)}'")
     (ch: @switch) match
       case ' ' | '\t' | CR | LF | FF =>
         // Skip white space characters
-        nextChar()
         fetchToken()
       case 'A' | 'B' | 'C' | 'D' | 'E' |
            'F' | 'G' | 'H' | 'I' | 'J' |
@@ -100,38 +104,45 @@ class WvletScanner(source: ScannerSource) extends LogSupport:
         putChar(ch)
         nextChar()
         getIdentRest()
-//      case '~' | '!' | '@' | '#' | '%' |
-//           '^' | '*' | '+' | '-' | /*'<' | */
-//           '>' | '?' | ':' | '=' | '&' |
-//           '|' | '\\'  =>
-//        putChar(ch)
-//        nextChar()
-//        getOperatorRest()
+      case '~' | '!' | '@' | '#' | '%' |
+           '^' | '*' | '+' | '-' | /*'<' | */
+           '>' | '?' | ':' | '=' | '&' |
+           '|' | '\\'  =>
+        putChar(ch)
+        nextChar()
+        getOperatorRest()
+      case SU =>
+        TokenData(Token.EOF, "", cursor, cursor)
 
-
-//  @tailrec private def getOperatorRest(): Unit = (ch: @switch) match {
-//    case '~' | '!' | '@' | '#' | '%' |
-//         '^' | '*' | '+' | '-' | '<' |
-//         '>' | '?' | ':' | '=' | '&' |
-//         '|' | '\\' =>
-//      putChar(ch)
-//      nextChar()
-//      getOperatorRest()
+  @tailrec private def getOperatorRest(): TokenData =
+    info(s"getOperatorRest: ch: '${String.valueOf(ch)}'")
+    (ch: @switch) match {
+    case '~' | '!' | '@' | '#' | '%' |
+         '^' | '*' | '+' | '-' | '<' |
+         '>' | '?' | ':' | '=' | '&' |
+         '|' | '\\' =>
+      putChar(ch)
+      nextChar()
+      getOperatorRest()
 //    case '/' =>
 //      val nxch = lookAheadChar()
 //      if nxch == '/' || nxch == '*' then finishNamed()
 //      else {
 //        putChar(ch); nextChar(); getOperatorRest()
 //      }
-//    case _ =>
+    case SU =>
+      toToken()
+    case _ =>
+      toToken()
 //      if isSpecial(ch) then {
 //        putChar(ch); nextChar(); getOperatorRest()
 //      }
 //      else if isSupplementary(ch, isSpecial) then getOperatorRest()
 //      else finishNamed()
-//  }
+  }
 
-  private def getIdentRest(): Token = (ch: @switch) match {
+  private def getIdentRest(): TokenData =
+    (ch: @switch) match {
     case 'A' | 'B' | 'C' | 'D' | 'E' |
          'F' | 'G' | 'H' | 'I' | 'J' |
          'K' | 'L' | 'M' | 'N' | 'O' |
@@ -169,9 +180,18 @@ class WvletScanner(source: ScannerSource) extends LogSupport:
   }
   // def insertToken(token: Token, offset: Int): Unit = { ... }
 
-  private def toToken(): Token = {
+  private def toToken(): TokenData =
     val currentTokenStr = tokenBuffer.toString
-    info(s"current token: ${currentTokenStr}")
-    Token.EMPTY
-  }
-
+    info(s"current token at ${cursor}: '${currentTokenStr}'")
+    tokenBuffer.clear()
+    ch match {
+      case SU =>
+        TokenData(Token.EOF, "", cursor, cursor)
+      case _ =>
+        Tokens.allKeywords.find(x => x.str == currentTokenStr) match {
+          case Some(keyword) =>
+            TokenData(keyword, currentTokenStr, cursor - currentTokenStr.length, cursor)
+          case None =>
+            TokenData(Token.IDENTIFIER, currentTokenStr, cursor - currentTokenStr.length, cursor)
+        }
+    }

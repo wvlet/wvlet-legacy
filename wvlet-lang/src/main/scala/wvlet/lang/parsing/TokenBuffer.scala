@@ -13,7 +13,9 @@
  */
 package wvlet.lang.parsing
 
-class TokenBuffer(initialSize: Int = 1024) {
+import wvlet.log.LogSupport
+
+class TokenBuffer(initialSize: Int = 1024) extends LogSupport:
   private var buf: Array[Char] = new Array[Char](initialSize)
   private var len: Int = 0
 
@@ -33,4 +35,4 @@ class TokenBuffer(initialSize: Int = 1024) {
   def clear(): Unit = len = 0
 
   override def toString: String = new String(buf, 0, len)
-}
+
