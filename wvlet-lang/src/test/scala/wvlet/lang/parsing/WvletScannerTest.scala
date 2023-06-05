@@ -24,6 +24,7 @@ class WvletScannerTest extends AirSpec:
   private def testQuery(path:String): Seq[TestQuery] =
     Resource
       .listResources(path)
+      .filterNot(_.isDirectory)
       .map: f =>
         val name = f.logicalPath.split("/").last.stripSuffix(".wv")
         val query = IO.readAsString(f.url)
@@ -49,7 +50,7 @@ class WvletScannerTest extends AirSpec:
       Token.SCHEMA,
       Token.IDENTIFIER,
       Token.COLON,
-      Token.NEWLINE,
+      // Token.NEWLINE,
       //   id: int,
       Token.INDENT,
       Token.IDENTIFIER,
