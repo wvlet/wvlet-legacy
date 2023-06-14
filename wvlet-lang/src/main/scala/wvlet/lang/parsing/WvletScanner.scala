@@ -57,7 +57,7 @@ class WvletScanner(source: ScannerSource) extends LogSupport:
   import WvletScanner.*
 
   private var cursor: Int = 0
-  private var ch: Char = 0
+  private var ch: Char = source.text.charAt(cursor)
   protected val tokenBuffer = TokenBuffer()
 
   def skipToken(): Unit = {}
@@ -69,11 +69,11 @@ class WvletScanner(source: ScannerSource) extends LogSupport:
       fetchToken()
 
   private def nextChar(): Unit = {
+    cursor += 1
     if(cursor >= source.length)
       ch = SU
     else
       ch = source.text.charAt(cursor)
-    cursor += 1
   }
 
   private def putChar(ch: Char): Unit =
@@ -83,11 +83,11 @@ class WvletScanner(source: ScannerSource) extends LogSupport:
     source.text.charAt(cursor + 1)
 
   private def fetchToken(): TokenData =
-    nextChar()
     debug(s"ch: '${String.valueOf(ch)}'")
     (ch: @switch) match
       case ' ' | '\t' | CR | LF | FF =>
         // Skip white space characters
+        nextChar()
         fetchToken()
       case 'A' | 'B' | 'C' | 'D' | 'E' |
            'F' | 'G' | 'H' | 'I' | 'J' |
@@ -113,6 +113,8 @@ class WvletScanner(source: ScannerSource) extends LogSupport:
         getOperatorRest()
       case SU =>
         TokenData(Token.EOF, "", cursor, cursor)
+      case _ =>
+        toToken()
 
   @tailrec private def getOperatorRest(): TokenData =
     info(s"getOperatorRest: ch: '${String.valueOf(ch)}'")
@@ -142,6 +144,7 @@ class WvletScanner(source: ScannerSource) extends LogSupport:
   }
 
   private def getIdentRest(): TokenData =
+    info(s"getIdentRest: ch: '${String.valueOf(ch)}' at ${cursor}")
     (ch: @switch) match {
     case 'A' | 'B' | 'C' | 'D' | 'E' |
          'F' | 'G' | 'H' | 'I' | 'J' |
@@ -161,7 +164,10 @@ class WvletScanner(source: ScannerSource) extends LogSupport:
       nextChar()
       getIdentRest()
     case _ =>
-      toToken()
+      val token = toToken()
+      putChar(ch)
+      nextChar()
+      token
 //    case '_' =>
 //      putChar(ch)
 //      nextChar()
