@@ -124,7 +124,7 @@ lazy val plugin =
         "io.trino"            % "trino-jdbc"    % TRINO_VERSION,
         "io.trino"            % "trino-spi"     % TRINO_VERSION,
         "org.wvlet.airframe" %% "airframe-jdbc" % AIRFRAME_VERSION,
-        "org.xerial.snappy"   % "snappy-java"   % "1.1.10.0"
+        "org.xerial.snappy"   % "snappy-java"   % "1.1.10.1"
       )
     )
     .dependsOn(api.jvm, core)
