@@ -82,7 +82,7 @@ class WvletScanner(source: ScannerSource) extends LogSupport:
 
   private def fetchToken(): TokenData =
     val ch = peekChar()
-    debug(s"ch: '${String.valueOf(ch)}'")
+    trace(s"ch: '${String.valueOf(ch)}'")
     (ch: @switch) match
       case ' ' | '\t' | CR | LF | FF =>
         // Skip white space characters
@@ -106,7 +106,7 @@ class WvletScanner(source: ScannerSource) extends LogSupport:
 
   @tailrec private def getOperatorRest(): TokenData =
     val ch = peekChar()
-    info(s"getOperatorRest: ch: '${String.valueOf(ch)}'")
+    trace(s"getOperatorRest: ch: '${String.valueOf(ch)}'")
     (ch: @switch) match {
       case '~' | '!' | '@' | '#' | '%' | '^' | '*' | '+' | '-' | '<' | '>' | '?' | ':' | '=' | '&' | '|' | '\\' =>
         putChar(ch)
@@ -131,7 +131,7 @@ class WvletScanner(source: ScannerSource) extends LogSupport:
 
   private def getIdentRest(): TokenData =
     val ch = peekChar()
-    info(s"getIdentRest: ch: '${String.valueOf(ch)}' at ${cursor}")
+    trace(s"getIdentRest: ch: '${String.valueOf(ch)}' at ${cursor}")
     (ch: @switch) match {
       case 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H' | 'I' | 'J' | 'K' | 'L' | 'M' | 'N' | 'O' | 'P' | 'Q' | 'R' |
           'S' | 'T' | 'U' | 'V' | 'W' | 'X' | 'Y' | 'Z' | '$' | 'a' | 'b' | 'c' | 'd' | 'e' | 'f' | 'g' | 'h' | 'i' |
@@ -165,7 +165,7 @@ class WvletScanner(source: ScannerSource) extends LogSupport:
 
   private def toToken(): TokenData =
     val currentTokenStr = tokenBuffer.toString
-    info(s"current token at ${cursor}: '${currentTokenStr}'")
+    debug(s"current token at ${cursor}: '${currentTokenStr}'")
     tokenBuffer.clear()
     val ch = peekChar()
     ch match {

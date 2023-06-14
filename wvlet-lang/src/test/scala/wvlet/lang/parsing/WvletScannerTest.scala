@@ -21,45 +21,48 @@ class WvletScannerTest extends AirSpec:
 
   case class TestQuery(name: String, query: String)
 
-  private def testQuery(path:String): Seq[TestQuery] =
+  private def querySuite(path: String): Seq[TestQuery] = {
     Resource
       .listResources(path)
       .filterNot(_.isDirectory)
       .map: f =>
-        val name = f.logicalPath.split("/").last.stripSuffix(".wv")
+        val name  = f.logicalPath.split("/").last.stripSuffix(".wv")
         val query = IO.readAsString(f.url)
         TestQuery(name, query)
+  }
 
-  test("scan test query files"):
-    testQuery("query/basic").map: q =>
-      q
+  test("scan test query files") {
+    querySuite("query/basic").map { q => }
+  }
 
-  test("scan tokens"):
-    testQuery("query/basic").map: q =>
+  test("basic") {
+    querySuite("query/basic").map { q =>
+      warn(s"test: ${q.name}")
       WvletScanner.scan(q.query)
+    }
+  }
 
-
-  test("get tokens"):
-    val tokens = WvletScanner.scan(
-      s"""schema A:
+  test("s1: get tokens") {
+    val tokens = WvletScanner.scan(s"""schema A:
          |  id: int,
          |  name: string
          |""".stripMargin)
     debug(tokens.mkString("\n"))
     tokens shouldMatch {
       case List(
-      // schema A:
-      TokenData(Token.SCHEMA, "schema", _, _),
-      TokenData(Token.IDENTIFIER, "A", _, _),
-      TokenData(Token.COLON, ":", _, _),
-      // Token.NEWLINE,
-      //   id: int,
-      TokenData(Token.INDENT, _, _, _),
-      TokenData(Token.IDENTIFIER, "id", _, _),
-      TokenData(Token.COLON, ":", _, _),
-      //   name: string
-      TokenData(Token.IDENTIFIER, "name", _, _),
-      TokenData(Token.COLON, ":", _, _),
-      TokenData(Token.IDENTIFIER, "string", _, _),
-      ) =>
+            // schema A:
+            TokenData(Token.SCHEMA, "schema", _, _),
+            TokenData(Token.IDENTIFIER, "A", _, _),
+            TokenData(Token.COLON, ":", _, _),
+            // Token.NEWLINE,
+            //   id: int,
+            TokenData(Token.INDENT, _, _, _),
+            TokenData(Token.IDENTIFIER, "id", _, _),
+            TokenData(Token.COLON, ":", _, _),
+            //   name: string
+            TokenData(Token.IDENTIFIER, "name", _, _),
+            TokenData(Token.COLON, ":", _, _),
+            TokenData(Token.IDENTIFIER, "string", _, _)
+          ) =>
     }
+  }
