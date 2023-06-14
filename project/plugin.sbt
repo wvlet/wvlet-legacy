@@ -3,11 +3,11 @@
 ThisBuild / libraryDependencySchemes += "org.scala-lang.modules" %% "scala-xml" % "always"
 
 // ThisBuild / resolvers ++= Resolver.sonatypeOssRepos("snapshots")
-val AIRFRAME_VERSION = sys.env.getOrElse("AIRFRAME_VERSION", "23.5.6")
+val AIRFRAME_VERSION = sys.env.getOrElse("AIRFRAME_VERSION", "23.6.0")
 
 addSbtPlugin("org.xerial.sbt"     % "sbt-sonatype"             % "3.9.21")
 addSbtPlugin("com.github.sbt"     % "sbt-pgp"                  % "2.2.1")
-addSbtPlugin("org.scoverage"      % "sbt-scoverage"            % "2.0.7")
+addSbtPlugin("org.scoverage"      % "sbt-scoverage"            % "2.0.8")
 addSbtPlugin("org.scalameta"      % "sbt-scalafmt"             % "2.5.0")
 addSbtPlugin("org.portable-scala" % "sbt-scalajs-crossproject" % "1.3.1")
 addSbtPlugin("com.eed3si9n"       % "sbt-buildinfo"            % "0.11.0")
@@ -26,7 +26,7 @@ addSbtPlugin("org.scala-js" % "sbt-scalajs" % SCALAJS_VERSION)
 libraryDependencies ++= (
   Seq("org.scala-js" %% "scalajs-env-jsdom-nodejs" % "1.1.0")
 )
-addSbtPlugin("org.scalablytyped.converter" % "sbt-converter" % "1.0.0-beta41")
+addSbtPlugin("org.scalablytyped.converter" % "sbt-converter" % "1.0.0-beta42")
 
 // For setting explicit versions for each commit
 addSbtPlugin("com.dwijnand" % "sbt-dynver" % "4.1.1")

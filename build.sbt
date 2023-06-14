@@ -1,10 +1,10 @@
 val SCALA_2_13 = "2.13.8"
 val SCALA_3    = "3.3.0"
 
-val AIRFRAME_VERSION    = sys.env.getOrElse("AIRFRAME_VERSION", "23.5.6")
-val AIRSPEC_VERSION     = "23.5.6"
+val AIRFRAME_VERSION    = sys.env.getOrElse("AIRFRAME_VERSION", "23.6.0")
+val AIRSPEC_VERSION     = "23.6.0"
 val SCALAJS_DOM_VERSION = "2.4.0"
-val TRINO_VERSION       = "418"
+val TRINO_VERSION       = "419"
 
 ThisBuild / scalaVersion := SCALA_3
 ThisBuild / resolvers ++= Resolver.sonatypeOssRepos("snapshots")
@@ -106,7 +106,7 @@ lazy val server =
         "org.wvlet.airframe" %% "airframe-http-netty" % AIRFRAME_VERSION,
         "org.wvlet.airframe" %% "airframe-launcher"   % AIRFRAME_VERSION,
         // Add DuckDB test
-        "org.duckdb" % "duckdb_jdbc" % "0.8.0"
+        "org.duckdb" % "duckdb_jdbc" % "0.8.1"
       ),
       Test / classLoaderLayeringStrategy := ClassLoaderLayeringStrategy.Flat
     )
