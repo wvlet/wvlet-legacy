@@ -29,7 +29,7 @@ libraryDependencies ++= (
 addSbtPlugin("org.scalablytyped.converter" % "sbt-converter" % "1.0.0-beta42")
 
 // For setting explicit versions for each commit
-addSbtPlugin("com.dwijnand" % "sbt-dynver" % "4.1.1")
+addSbtPlugin("com.github.sbt" % "sbt-dynver" % "5.0.1")
 
 // Documentation
 addSbtPlugin("org.scalameta" % "sbt-mdoc" % "2.3.7")
