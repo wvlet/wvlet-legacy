@@ -13,32 +13,31 @@
  */
 package wvlet.lang.model.logical
 
-import wvlet.lang.model.*
+import wvlet.lang.model.NodeLocation
+import wvlet.lang.model.expression.*
 
 trait LogicalPlan {
   def nodeLocation: Option[NodeLocation] = None
 }
 
-case class NodeLocation(line: Int, column: Int)
+object LogicalPlan:
 
-trait Relation extends LogicalPlan
+  trait Relation extends LogicalPlan
+  trait UnaryRelation extends LogicalPlan:
+    def input: Relation
 
-case class FlowerQuery(
-    forClause: ForClause,
-    returnClause: Option[ReturnClause] = None
-)(override val nodeLocation: Option[NodeLocation] = None)
-    extends Relation {}
+  case class FLOWRQuery(
+      forClause: ForClause,
+      whereClause: Option[Filter] = None,
+      returnClause: Option[Return] = None
+  )(override val nodeLocation: Option[NodeLocation] = None)
+      extends Relation {}
 
-case class ForClause(
-    binding: Seq[ForItem] = Seq.empty
-)
+  case class ForClause(
+      forItems: Seq[ForItem] = Seq.empty
+  ) extends Expression
+  case class ForItem(id: String, in: Expression)(nodeLocation: Option[NodeLocation]) extends Expression
 
-case class ForItem(id: String, in: Expression)(nodeLocation: Option[NodeLocation])
+  case class Filter(input: Relation, filterExpr: Expression)(nodeLocation: Option[NodeLocation]) extends UnaryRelation
 
-case class ReturnClause(exprs: Seq[Expression])(nodeLocation: Option[NodeLocation]) extends Expression
-
-trait Expression {
-  def nodeLocation: Option[NodeLocation] = None
-}
-
-case class Identifier(name: String) extends Expression
+  case class Return(input: Relation, exprs: Seq[Expression])(nodeLocation: Option[NodeLocation]) extends UnaryRelation
