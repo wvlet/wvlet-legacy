@@ -31,19 +31,6 @@ class WvletScannerTest extends AirSpec:
         TestQuery(name, query)
   }
 
-  test("scan test query files") {
-    querySuite("query/basic").map { q =>
-      warn(s"== test: ${q.name}")
-    }
-  }
-
-  test("basic") {
-    querySuite("query/basic").map { q =>
-      warn(s"test: ${q.name}")
-      WvletScanner.scan(q.query)
-    }
-  }
-
   test("s1: get tokens") {
     val tokens = WvletScanner.scan(s"""schema A:
          |  id: int,
@@ -68,5 +55,13 @@ class WvletScannerTest extends AirSpec:
             TokenData(Token.COLON, ":", _, _),
             TokenData(Token.IDENTIFIER, "string", _, _)
           ) =>
+    }
+  }
+
+  test("basic") {
+    querySuite("query/basic").map { q =>
+      warn(s"test: ${q.name}")
+      val tokens = WvletScanner.scan(q.query)
+      debug(tokens.mkString("\n"))
     }
   }
