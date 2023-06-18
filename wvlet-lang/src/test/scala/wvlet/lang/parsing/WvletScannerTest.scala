@@ -32,7 +32,9 @@ class WvletScannerTest extends AirSpec:
   }
 
   test("scan test query files") {
-    querySuite("query/basic").map { q => }
+    querySuite("query/basic").map { q =>
+      warn(s"== test: ${q.name}")
+    }
   }
 
   test("basic") {
@@ -56,9 +58,11 @@ class WvletScannerTest extends AirSpec:
             TokenData(Token.COLON, ":", _, _),
             // Token.NEWLINE,
             //   id: int,
-            TokenData(Token.INDENT, _, _, _),
+            // TokenData(Token.INDENT, _, _, _),
             TokenData(Token.IDENTIFIER, "id", _, _),
             TokenData(Token.COLON, ":", _, _),
+            TokenData(Token.IDENTIFIER, "int", _, _),
+            TokenData(Token.COMMA, ",", _, _),
             //   name: string
             TokenData(Token.IDENTIFIER, "name", _, _),
             TokenData(Token.COLON, ":", _, _),

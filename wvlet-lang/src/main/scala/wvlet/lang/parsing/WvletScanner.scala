@@ -82,7 +82,7 @@ class WvletScanner(source: ScannerSource) extends LogSupport:
 
   private def fetchToken(): TokenData =
     val ch = peekChar()
-    trace(s"ch: '${String.valueOf(ch)}'")
+    debug(s"fetchToken ch[${cursor}]: '${String.valueOf(ch)}'")
     (ch: @switch) match
       case ' ' | '\t' | CR | LF | FF =>
         // Skip white space characters
@@ -99,14 +99,19 @@ class WvletScanner(source: ScannerSource) extends LogSupport:
         putChar(ch)
         nextChar()
         getOperatorRest()
+      case ',' =>
+        nextChar()
+        TokenData(Token.COMMA, ",", cursor - 1, cursor)
       case SU =>
         TokenData(Token.EOF, "", cursor, cursor)
       case _ =>
+        putChar(ch)
+        nextChar()
         toToken()
 
   @tailrec private def getOperatorRest(): TokenData =
     val ch = peekChar()
-    trace(s"getOperatorRest: ch: '${String.valueOf(ch)}'")
+    debug(s"getOperatorRest[${cursor}]: ch: '${String.valueOf(ch)}'")
     (ch: @switch) match {
       case '~' | '!' | '@' | '#' | '%' | '^' | '*' | '+' | '-' | '<' | '>' | '?' | ':' | '=' | '&' | '|' | '\\' =>
         putChar(ch)
@@ -131,7 +136,7 @@ class WvletScanner(source: ScannerSource) extends LogSupport:
 
   private def getIdentRest(): TokenData =
     val ch = peekChar()
-    trace(s"getIdentRest: ch: '${String.valueOf(ch)}' at ${cursor}")
+    debug(s"getIdentRest[${cursor}]: ch: '${String.valueOf(ch)}'")
     (ch: @switch) match {
       case 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H' | 'I' | 'J' | 'K' | 'L' | 'M' | 'N' | 'O' | 'P' | 'Q' | 'R' |
           'S' | 'T' | 'U' | 'V' | 'W' | 'X' | 'Y' | 'Z' | '$' | 'a' | 'b' | 'c' | 'd' | 'e' | 'f' | 'g' | 'h' | 'i' |
@@ -142,8 +147,6 @@ class WvletScanner(source: ScannerSource) extends LogSupport:
         getIdentRest()
       case _ =>
         val token = toToken()
-        putChar(ch)
-        nextChar()
         token
 //    case '_' =>
 //      putChar(ch)
@@ -165,17 +168,11 @@ class WvletScanner(source: ScannerSource) extends LogSupport:
 
   private def toToken(): TokenData =
     val currentTokenStr = tokenBuffer.toString
-    debug(s"current token at ${cursor}: '${currentTokenStr}'")
     tokenBuffer.clear()
-    val ch = peekChar()
-    ch match {
-      case SU =>
-        TokenData(Token.EOF, "", cursor, cursor)
-      case _ =>
-        Tokens.allKeywords.find(x => x.str == currentTokenStr) match {
-          case Some(keyword) =>
-            TokenData(keyword, currentTokenStr, cursor - currentTokenStr.length, cursor)
-          case None =>
-            TokenData(Token.IDENTIFIER, currentTokenStr, cursor - currentTokenStr.length, cursor)
-        }
+    debug(s"toToken at ${cursor}: '${currentTokenStr}'")
+    Tokens.allKeywords.find(x => x.str == currentTokenStr) match {
+      case Some(keyword) =>
+        TokenData(keyword, currentTokenStr, cursor - currentTokenStr.length, cursor)
+      case None =>
+        TokenData(Token.IDENTIFIER, currentTokenStr, cursor - currentTokenStr.length, cursor)
     }

@@ -1,8 +1,8 @@
 val SCALA_2_13 = "2.13.8"
 val SCALA_3    = "3.3.0"
 
-val AIRFRAME_VERSION    = sys.env.getOrElse("AIRFRAME_VERSION", "23.6.0")
-val AIRSPEC_VERSION     = "23.6.0"
+val AIRFRAME_VERSION    = sys.env.getOrElse("AIRFRAME_VERSION", "23.6.1")
+val AIRSPEC_VERSION     = "23.6.1"
 val SCALAJS_DOM_VERSION = "2.4.0"
 val TRINO_VERSION       = "419"
 
@@ -60,7 +60,7 @@ lazy val lang =
         "org.wvlet.airframe" %% "airframe-log" % AIRFRAME_VERSION,
         "org.wvlet.airframe" %% "airframe-sql" % AIRFRAME_VERSION,
         // Add a reference implementation of the compiler
-        "org.scala-lang" %% "scala3-compiler" % SCALA_3 % Test,
+        "org.scala-lang" %% "scala3-compiler" % SCALA_3 % Test
       ),
       Antlr4 / antlr4Version     := "4.13.0",
       Antlr4 / antlr4PackageName := Some("wvlet.lang.parser"),
