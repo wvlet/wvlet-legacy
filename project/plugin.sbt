@@ -14,7 +14,7 @@ addSbtPlugin("com.eed3si9n"       % "sbt-buildinfo"            % "0.11.0")
 addSbtPlugin("org.wvlet.airframe" % "sbt-airframe"             % AIRFRAME_VERSION)
 
 // For generating Lexer/Parser from ANTLR4 grammar (.g4)
-addSbtPlugin("com.simplytyped" % "sbt-antlr4" % "0.8.3")
+// addSbtPlugin("com.simplytyped" % "sbt-antlr4" % "0.8.3")
 
 addSbtPlugin("io.spray" % "sbt-revolver" % "0.10.0")
 

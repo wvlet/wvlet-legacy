@@ -51,19 +51,16 @@ lazy val wvlet =
 lazy val lang =
   project
     .in(file("wvlet-lang"))
-    .enablePlugins(Antlr4Plugin)
     .settings(
       buildSettings,
       name        := "wvlet-lang",
       description := "wvlet language",
       libraryDependencies ++= Seq(
         "org.wvlet.airframe" %% "airframe-log" % AIRFRAME_VERSION,
-        "org.wvlet.airframe" %% "airframe-sql" % AIRFRAME_VERSION
-      ),
-      Antlr4 / antlr4Version     := "4.13.0",
-      Antlr4 / antlr4PackageName := Some("wvlet.lang.parser"),
-      Antlr4 / antlr4GenListener := true,
-      Antlr4 / antlr4GenVisitor  := true
+        "org.wvlet.airframe" %% "airframe-sql" % AIRFRAME_VERSION,
+        // Add a reference implementation of the compiler
+        "org.scala-lang" %% "scala3-compiler" % SCALA_3 % Test
+      )
     )
 
 lazy val core =

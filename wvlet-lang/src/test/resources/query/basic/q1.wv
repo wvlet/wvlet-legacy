@@ -1,0 +1,6 @@
+schema A:
+  id: int,
+  name: string
+
+for x in A
+return x
