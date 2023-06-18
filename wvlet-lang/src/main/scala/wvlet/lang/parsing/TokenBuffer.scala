@@ -17,7 +17,7 @@ import wvlet.log.LogSupport
 
 class TokenBuffer(initialSize: Int = 1024) extends LogSupport:
   private var buf: Array[Char] = new Array[Char](initialSize)
-  private var len: Int = 0
+  private var len: Int         = 0
 
   def append(ch: Char): Unit =
     if len == buf.length then
@@ -28,11 +28,9 @@ class TokenBuffer(initialSize: Int = 1024) extends LogSupport:
     buf(len) = ch
     len += 1
 
-
-  def chars = buf
-  def length = len
+  def chars            = buf
+  def length           = len
   def isEmpty: Boolean = len == 0
-  def clear(): Unit = len = 0
+  def clear(): Unit    = len = 0
 
   override def toString: String = new String(buf, 0, len)
-

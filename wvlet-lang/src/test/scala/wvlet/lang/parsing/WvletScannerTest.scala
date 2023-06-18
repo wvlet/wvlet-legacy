@@ -36,7 +36,7 @@ class WvletScannerTest extends AirSpec:
          |  id: int,
          |  name: string
          |""".stripMargin)
-    debug(tokens.mkString("\n"))
+    trace(tokens.mkString("\n"))
     tokens shouldMatch {
       case List(
             // schema A:
@@ -60,8 +60,9 @@ class WvletScannerTest extends AirSpec:
 
   test("basic") {
     querySuite("query/basic").map { q =>
-      warn(s"test: ${q.name}")
-      val tokens = WvletScanner.scan(q.query)
-      debug(tokens.mkString("\n"))
+      test(q.name) {
+        val tokens = WvletScanner.scan(q.query)
+        debug(tokens.mkString("\n"))
+      }
     }
   }

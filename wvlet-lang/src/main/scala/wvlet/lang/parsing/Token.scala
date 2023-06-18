@@ -14,11 +14,11 @@
 package wvlet.lang.parsing
 
 enum Token(val str: String):
-  case EMPTY    extends Token("<empty>")
+  case EMPTY   extends Token("<empty>")
   case ERROR   extends Token("<erroneous token>")
   case EOF     extends Token("<eof>")
   case NEWLINE extends Token("<newline>")
-  case INDENT extends Token("  ")
+  case INDENT  extends Token("  ")
 
   case COLON extends Token(":")
   case COMMA extends Token(",")
@@ -37,9 +37,9 @@ enum Token(val str: String):
   case EQ extends Token("=")
   case IN extends Token("in")
 
-  case DEF   extends Token("def")
+  case DEF    extends Token("def")
   case SCHEMA extends Token("schema")
-  case WITH  extends Token("with")
+  case WITH   extends Token("with")
 
   case INTEGER_LITERAL extends Token("<integer literal>")
   case DECIMAL_LITERAL extends Token("<decimal literal>")
@@ -68,6 +68,6 @@ enum Token(val str: String):
 object Tokens:
   import Token.*
   val keywords = Seq(DEF, SCHEMA, WITH, FOR, LET, WHERE, GROUP_BY, HAVING, RETURN, ORDER_BY, RUN, EXPORT, IF)
-  val symbols = Seq(COLON, COMMA, DOT, DOUBLE_QUOTE, SINGLE_QUOTE, L_PAREN, R_PAREN, L_BRACE, R_BRACE, L_BRACKET, R_BRACKET, EQ, IN)
+  val symbols =
+    Seq(COLON, COMMA, DOT, DOUBLE_QUOTE, SINGLE_QUOTE, L_PAREN, R_PAREN, L_BRACE, R_BRACE, L_BRACKET, R_BRACKET, EQ, IN)
   val allKeywords = keywords ++ symbols
-

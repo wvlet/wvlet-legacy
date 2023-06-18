@@ -33,7 +33,9 @@ case class StringSource(override val text: String) extends ScannerSource {
   override val length: Int = text.length
 }
 
-case class TokenData(token: Token, text: String, start: Int, end: Int)
+case class TokenData(token: Token, text: String, start: Int, end: Int) {
+  override def toString: String = s"[${start},${end}] '${text}' <${token}>"
+}
 
 object WvletScanner extends LogSupport:
   def scan(text: String): Seq[TokenData] = {
