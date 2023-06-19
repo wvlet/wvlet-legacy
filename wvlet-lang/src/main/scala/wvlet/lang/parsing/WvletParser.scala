@@ -22,7 +22,6 @@ object WvletParser:
     val parser                 = new WvletParser
     parser.parse(tokens)
 
-
 class TokenScanner(tokens: IndexedSeq[TokenData]):
   private var cursor = 0
   def peek: TokenData =
