@@ -13,24 +13,97 @@
  */
 package wvlet.lang.parsing
 
+import wvlet.lang.model.expression.Expression
 import wvlet.lang.model.logical.LogicalPlan
+import wvlet.lang.model.logical.LogicalPlan.{FLOWRQuery, ForItem}
+import wvlet.lang.parsing.WvletParser.EOFToken
 import wvlet.log.LogSupport
 
 object WvletParser:
   def parse(text: String): LogicalPlan =
     val tokens: Seq[TokenData] = WvletScanner.scan(text)
-    val parser                 = new WvletParser
-    parser.parse(tokens)
+    val tokenScanner           = new TokenScanner(tokens.toIndexedSeq)
+    val parser                 = new WvletParser(tokenScanner)
+    parser.parseStatement
+
+  val EOFToken = TokenData(Token.EOF, "", 0, 0)
 
 class TokenScanner(tokens: IndexedSeq[TokenData]):
   private var cursor = 0
-  def peek: TokenData =
-    tokens(cursor)
+
+  def peekNext: TokenData =
+    if (cursor < tokens.size)
+      tokens(cursor)
+    else
+      WvletParser.EOFToken
 
   def next: Unit =
     cursor += 1
 
-class WvletParser() extends LogSupport:
-  def parse(tokens: Seq[TokenData]): LogicalPlan =
-    val scanner = new TokenScanner(tokens.toIndexedSeq)
+class WvletParser(tokenScanner: TokenScanner) extends LogSupport:
+
+  private def parseError(token: TokenData, expected: Token): Nothing =
+    // TODO define parse error exception type
+    throw new IllegalArgumentException(s"parse error: expected ${expected}, but found ${token}")
+
+  private def peekNextToken: TokenData =
+    tokenScanner.peekNext
+
+  private def nextToken: Unit =
+    tokenScanner.next
+
+  def parseStatement: LogicalPlan =
+    val currentToken = peekNextToken
+    currentToken.token match {
+      case Token.FOR =>
+        parseFLOWRQuery
+
+      case Token.EOF =>
+        null
+      case _ =>
+        null
+    }
+
+  def parseFLOWRQuery: FLOWRQuery =
+    val currentToken = peekNextToken
+    currentToken.token match {
+      case Token.FOR =>
+        nextToken
+        val forItems: Seq[ForItem] = parseForItems
+        // TODO parse where, return
+        FLOWRQuery(forItems = forItems, None, None)(currentToken.getNodeLocation)
+      case _ =>
+        null
+    }
+
+  private def parseForItems: Seq[ForItem] =
+    // identifier IN expr
+    val items        = Seq.newBuilder[ForItem]
+    var currentToken = peekNextToken
+    while (currentToken.token == Token.IDENTIFIER) {
+      val id = currentToken.text
+      nextToken
+
+      if (peekNextToken.token == Token.IN) {
+        nextToken
+      }
+
+      val expr = parseExpression
+      items += ForItem(id, expr)(currentToken.getNodeLocation)
+      currentToken = peekNextToken
+    }
+    items.result
+
+  private def parseIn: Unit = {
+    val currentToken = peekNextToken
+    if (currentToken.token == Token.IN) {
+      nextToken
+    } else {
+      parseError(currentToken, Token.IN)
+    }
+  }
+
+  private def parseExpression: Expression =
+    val currentToken = peekNextToken
+    // TODO
     null

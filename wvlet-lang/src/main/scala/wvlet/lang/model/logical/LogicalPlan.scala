@@ -27,15 +27,12 @@ object LogicalPlan:
     def input: Relation
 
   case class FLOWRQuery(
-      forClause: ForClause,
+      forItems: Seq[ForItem],
       whereClause: Option[Filter] = None,
       returnClause: Option[Return] = None
   )(override val nodeLocation: Option[NodeLocation] = None)
       extends Relation {}
 
-  case class ForClause(
-      forItems: Seq[ForItem] = Seq.empty
-  ) extends Expression
   case class ForItem(id: String, in: Expression)(nodeLocation: Option[NodeLocation]) extends Expression
 
   case class Filter(input: Relation, filterExpr: Expression)(nodeLocation: Option[NodeLocation]) extends UnaryRelation

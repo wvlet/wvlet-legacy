@@ -14,6 +14,7 @@
 package wvlet.lang.parsing
 
 import wvlet.airframe.control.IO
+import wvlet.lang.model.NodeLocation
 import wvlet.lang.parsing.{ScannerSource, StringSource, WvletScanner}
 import wvlet.lang.parsing.Token
 import wvlet.log.LogSupport
@@ -33,8 +34,11 @@ case class StringSource(override val text: String) extends ScannerSource {
   override val length: Int = text.length
 }
 
+// TODO Add line, offset
 case class TokenData(token: Token, text: String, start: Int, end: Int) {
   override def toString: String = s"[${start},${end}] '${text}' <${token}>"
+  // TODO
+  def getNodeLocation: Option[NodeLocation] = None
 }
 
 object WvletScanner extends LogSupport:
