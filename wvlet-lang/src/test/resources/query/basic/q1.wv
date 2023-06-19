@@ -1,2 +1,2 @@
-for x in A
-return x
+for a in A
+return a
