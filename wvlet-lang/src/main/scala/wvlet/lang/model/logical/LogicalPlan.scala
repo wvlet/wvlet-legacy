@@ -15,9 +15,12 @@ package wvlet.lang.model.logical
 
 import wvlet.lang.model.NodeLocation
 import wvlet.lang.model.expression.*
+import wvlet.lang.model.formatter.{FormatOption, PrintContext}
 
 trait LogicalPlan {
   def nodeLocation: Option[NodeLocation] = None
+
+  def toExpr(context: PrintContext = PrintContext.default): String
 }
 
 object LogicalPlan:
@@ -31,10 +34,42 @@ object LogicalPlan:
       whereClause: Option[Where] = None,
       returnClause: Option[Return] = None
   )(override val nodeLocation: Option[NodeLocation] = None)
-      extends Relation {}
+      extends Relation {
 
-  case class ForItem(id: String, in: Expression)(nodeLocation: Option[NodeLocation]) extends Expression
+    override def toExpr(context: PrintContext): String = {
+      val s = new StringBuilder()
+      s ++= "for"
+      forItems.size match {
+        case 1 =>
+          s ++= " "
+          s ++= forItems.head.toExpr(context)
+        case _ =>
+          for (x <- forItems) {
+            s ++= "\n"
+            s ++= context.indent(1)
+            s ++= x.toExpr(context)
+          }
+      }
+      whereClause.foreach { w =>
+        s ++= context.newline
+        s ++= w.toExpr(context)
+      }
+      returnClause.foreach { r =>
+        s ++= context.newline
+        s ++= r.toExpr(context)
+      }
+      context.indentBlock(s.result())
+    }
+  }
 
-  case class Where(filterExpr: Expression)(nodeLocation: Option[NodeLocation])
+  case class ForItem(id: String, in: Expression)(nodeLocation: Option[NodeLocation]) extends Expression {
+    override def toExpr(context: PrintContext): String = s"${id} in ${in.toExpr(context)}"
+  }
 
-  case class Return(exprs: Seq[Expression])(nodeLocation: Option[NodeLocation])
+  case class Where(filterExpr: Expression)(nodeLocation: Option[NodeLocation]) extends Expression {
+    override def toExpr(context: PrintContext): String = s"where ${filterExpr.toExpr(context)}"
+  }
+
+  case class Return(exprs: Seq[Expression])(nodeLocation: Option[NodeLocation]) extends Expression {
+    override def toExpr(context: PrintContext): String = s"return ${exprs.map(_.toExpr(context)).mkString(", ")}"
+  }

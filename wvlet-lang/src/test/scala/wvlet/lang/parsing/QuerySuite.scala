@@ -37,5 +37,5 @@ trait QuerySuite:
       .filterNot(_.isDirectory)
       .map: f =>
         val name  = f.logicalPath.split("/").last.stripSuffix(".wv")
-        val query = IO.readAsString(f.url)
+        val query = IO.readAsString(f.url).trim
         TestQuery(name, query)

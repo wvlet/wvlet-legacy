@@ -14,11 +14,13 @@
 package wvlet.lang.parsing
 
 import wvlet.lang.model.expression.Expression
-import wvlet.lang.model.expression.Expression.Identifier
+import wvlet.lang.model.expression.Expression.{Identifier, QName}
 import wvlet.lang.model.logical.LogicalPlan
 import wvlet.lang.model.logical.LogicalPlan.{FLOWRQuery, ForItem, Return, Where}
 import wvlet.lang.parsing.WvletParser.EOFToken
 import wvlet.log.LogSupport
+
+import scala.annotation.tailrec
 
 object WvletParser:
   def parse(text: String): LogicalPlan =
@@ -145,8 +147,51 @@ class WvletParser(tokenScanner: TokenScanner) extends LogSupport:
     val currentToken = peekNextToken
     currentToken.token match {
       case Token.IDENTIFIER =>
-        nextToken
-        Identifier(currentToken.text)(currentToken.getNodeLocation)
+        parseQualifiedName
       case _ =>
         parseError(currentToken, Token.IDENTIFIER)
+    }
+
+  private def parseQualifiedName: Expression = {
+    val qNameBuffer = Seq.newBuilder[String]
+    val firstToken  = peekNextToken
+
+    @tailrec
+    def loop(t: TokenData): Expression = {
+      t.token match {
+        case Token.IDENTIFIER =>
+          qNameBuffer += t.text
+          nextToken
+          loop(peekNextToken)
+        case Token.DOT =>
+          nextToken
+          loop(peekNextToken)
+        case _ =>
+          val qName = qNameBuffer.result()
+          if (qName.isEmpty) {
+            parseError(t, Token.IDENTIFIER)
+          } else {
+            QName(qName)(firstToken.getNodeLocation)
+          }
+      }
+    }
+
+    loop(firstToken)
+  }
+
+  private def parseIdentifierRest(lastToken: TokenData): Expression =
+    val currentToken = peekNextToken
+    currentToken.token match {
+      case Token.DOT =>
+        nextToken
+        val next = peekNextToken
+        next.token match {
+          case Token.IDENTIFIER =>
+            nextToken
+            parseIdentifierRest(next)
+          case _ =>
+            parseError(next, Token.IDENTIFIER)
+        }
+      case _ =>
+        Identifier(lastToken.text)(lastToken.getNodeLocation)
     }

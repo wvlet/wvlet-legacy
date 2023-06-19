@@ -11,13 +11,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package wvlet.lang.parsing
+package wvlet.lang.model.formatter
 
-import wvlet.airspec.AirSpec
+case class FormatOption(
+    maxWidth: Int = 120,
+    indentLength: Int = 2
+) {
+  def indent(level: Int = 0): String = " " * (indentLength * level)
+}
 
-class WvletParserTest extends AirSpec with QuerySuite:
-
-  runSuite { q =>
-    val plan = WvletParser.parse(q.query)
-    debug(s"[wv]\n${q.query}\n\n[plan]\n${plan}\n\n[result]\n${plan.toExpr()}")
-  }
+object FormatOption:
+  val default = FormatOption()

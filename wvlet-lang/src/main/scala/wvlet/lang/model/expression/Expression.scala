@@ -14,10 +14,17 @@
 package wvlet.lang.model.expression
 
 import wvlet.lang.model.NodeLocation
+import wvlet.lang.model.formatter.PrintContext
 
 trait Expression {
+  def toExpr(context: PrintContext): String
   def nodeLocation: Option[NodeLocation] = None
 }
 
 object Expression:
-  case class Identifier(name: String)(nodeLocation: Option[NodeLocation]) extends Expression
+  case class Identifier(name: String)(nodeLocation: Option[NodeLocation]) extends Expression {
+    override def toExpr(context: PrintContext): String = name
+  }
+  case class QName(names: Seq[String])(nodeLocation: Option[NodeLocation]) extends Expression {
+    override def toExpr(context: PrintContext) = names.mkString(".")
+  }
