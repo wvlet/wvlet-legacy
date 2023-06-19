@@ -20,4 +20,4 @@ trait Expression {
 }
 
 object Expression:
-  case class Identifier(name: String) extends Expression
+  case class Identifier(name: String)(nodeLocation: Option[NodeLocation]) extends Expression

@@ -28,13 +28,13 @@ object LogicalPlan:
 
   case class FLOWRQuery(
       forItems: Seq[ForItem],
-      whereClause: Option[Filter] = None,
+      whereClause: Option[Where] = None,
       returnClause: Option[Return] = None
   )(override val nodeLocation: Option[NodeLocation] = None)
       extends Relation {}
 
   case class ForItem(id: String, in: Expression)(nodeLocation: Option[NodeLocation]) extends Expression
 
-  case class Filter(input: Relation, filterExpr: Expression)(nodeLocation: Option[NodeLocation]) extends UnaryRelation
+  case class Where(filterExpr: Expression)(nodeLocation: Option[NodeLocation])
 
-  case class Return(input: Relation, exprs: Seq[Expression])(nodeLocation: Option[NodeLocation]) extends UnaryRelation
+  case class Return(exprs: Seq[Expression])(nodeLocation: Option[NodeLocation])

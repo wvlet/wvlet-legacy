@@ -14,8 +14,9 @@
 package wvlet.lang.parsing
 
 import wvlet.lang.model.expression.Expression
+import wvlet.lang.model.expression.Expression.Identifier
 import wvlet.lang.model.logical.LogicalPlan
-import wvlet.lang.model.logical.LogicalPlan.{FLOWRQuery, ForItem}
+import wvlet.lang.model.logical.LogicalPlan.{FLOWRQuery, ForItem, Return, Where}
 import wvlet.lang.parsing.WvletParser.EOFToken
 import wvlet.log.LogSupport
 
@@ -70,8 +71,19 @@ class WvletParser(tokenScanner: TokenScanner) extends LogSupport:
       case Token.FOR =>
         nextToken
         val forItems: Seq[ForItem] = parseForItems
-        // TODO parse where, return
-        FLOWRQuery(forItems = forItems, None, None)(currentToken.getNodeLocation)
+
+        val next = peekNextToken
+
+        // TODO parse group by, join, etc.
+        var whereClause: Option[Where]   = None
+        var returnClause: Option[Return] = None
+        next.token match {
+          case Token.WHERE =>
+            whereClause = Some(parseWhere)
+          case Token.RETURN =>
+            returnClause = Some(parseReturn)
+        }
+        FLOWRQuery(forItems = forItems, whereClause, returnClause)(currentToken.getNodeLocation)
       case _ =>
         null
     }
@@ -83,11 +95,7 @@ class WvletParser(tokenScanner: TokenScanner) extends LogSupport:
     while (currentToken.token == Token.IDENTIFIER) {
       val id = currentToken.text
       nextToken
-
-      if (peekNextToken.token == Token.IN) {
-        nextToken
-      }
-
+      parseIn
       val expr = parseExpression
       items += ForItem(id, expr)(currentToken.getNodeLocation)
       currentToken = peekNextToken
@@ -103,7 +111,42 @@ class WvletParser(tokenScanner: TokenScanner) extends LogSupport:
     }
   }
 
+  private def parseWhere: Where =
+    val currentToken = peekNextToken
+    if (currentToken.token == Token.WHERE) {
+      nextToken
+      val expr = parseExpression
+      Where(expr)(currentToken.getNodeLocation)
+    } else {
+      parseError(currentToken, Token.WHERE)
+    }
+
+  private def parseReturn: Return =
+    val currentToken = peekNextToken
+    if (currentToken.token == Token.RETURN) {
+      nextToken
+      val exprs = parseExpressions
+      Return(exprs)(currentToken.getNodeLocation)
+    } else {
+      parseError(currentToken, Token.RETURN)
+    }
+
+  private def parseExpressions: Seq[Expression] =
+    val expr = parseExpression
+    peekNextToken.token match {
+      case Token.COMMA =>
+        nextToken
+        expr +: parseExpressions
+      case _ =>
+        Seq(expr)
+    }
+
   private def parseExpression: Expression =
     val currentToken = peekNextToken
-    // TODO
-    null
+    currentToken.token match {
+      case Token.IDENTIFIER =>
+        nextToken
+        Identifier(currentToken.text)(currentToken.getNodeLocation)
+      case _ =>
+        parseError(currentToken, Token.IDENTIFIER)
+    }
