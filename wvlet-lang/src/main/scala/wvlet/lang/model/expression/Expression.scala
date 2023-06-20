@@ -29,22 +29,22 @@ object Expression:
     override def toExpr(context: PrintContext) = names.mkString(".")
   }
 
-  sealed trait ComparisonOperator extends Expression
-  case object Equal extends ComparisonOperator {
-    override def toExpr(context: PrintContext) = "="
+  sealed trait ConditionalExpression extends Expression
+  case class Equal(left: Expression, right: Expression) extends ConditionalExpression {
+    override def toExpr(context: PrintContext) = s"${left.toExpr(context)} = ${right.toExpr(context)}"
   }
-  case object NotEqual extends ComparisonOperator {
-    override def toExpr(context: PrintContext) = "!="
+  case class NotEqual(left: Expression, right: Expression) extends ConditionalExpression {
+    override def toExpr(context: PrintContext) = s"${left.toExpr(context)} != ${right.toExpr(context)}"
   }
-  case object LessThan extends ComparisonOperator {
-    override def toExpr(context: PrintContext) = "<"
+  case class LessThan(left: Expression, right: Expression) extends ConditionalExpression {
+    override def toExpr(context: PrintContext) = s"${left.toExpr(context)} < ${right.toExpr(context)}"
   }
-  case object LessThanOrEqual extends ComparisonOperator {
-    override def toExpr(context: PrintContext) = "<="
+  case class LessThanOrEqual(left: Expression, right: Expression) extends ConditionalExpression {
+    override def toExpr(context: PrintContext) = s"${left.toExpr(context)} <= ${right.toExpr(context)}"
   }
-  case object GreaterThan extends ComparisonOperator {
-    override def toExpr(context: PrintContext) = ">"
+  case class GreaterThan(left: Expression, right: Expression) extends ConditionalExpression {
+    override def toExpr(context: PrintContext) = s"${left.toExpr(context)} > ${right.toExpr(context)}"
   }
-  case object GreaterThanOrEqual extends ComparisonOperator {
-    override def toExpr(context: PrintContext) = ">="
+  case class GreaterThanOrEqual(left: Expression, right: Expression) extends ConditionalExpression {
+    override def toExpr(context: PrintContext) = s"${left.toExpr(context)} >= ${right.toExpr(context)}"
   }
