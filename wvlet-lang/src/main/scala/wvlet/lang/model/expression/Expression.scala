@@ -28,3 +28,23 @@ object Expression:
   case class QName(names: Seq[String])(nodeLocation: Option[NodeLocation]) extends Expression {
     override def toExpr(context: PrintContext) = names.mkString(".")
   }
+
+  sealed trait ComparisonOperator extends Expression
+  case object Equal extends ComparisonOperator {
+    override def toExpr(context: PrintContext) = "="
+  }
+  case object NotEqual extends ComparisonOperator {
+    override def toExpr(context: PrintContext) = "!="
+  }
+  case object LessThan extends ComparisonOperator {
+    override def toExpr(context: PrintContext) = "<"
+  }
+  case object LessThanOrEqual extends ComparisonOperator {
+    override def toExpr(context: PrintContext) = "<="
+  }
+  case object GreaterThan extends ComparisonOperator {
+    override def toExpr(context: PrintContext) = ">"
+  }
+  case object GreaterThanOrEqual extends ComparisonOperator {
+    override def toExpr(context: PrintContext) = ">="
+  }

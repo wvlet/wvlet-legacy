@@ -34,7 +34,13 @@ enum Token(val str: String):
   case L_BRACKET extends Token("[")
   case R_BRACKET extends Token("]")
 
-  case EQ extends Token("=")
+  case EQ   extends Token("=")
+  case NEQ  extends Token("!=")
+  case LT   extends Token("<")
+  case GT   extends Token(">")
+  case LTEQ extends Token("<=")
+  case GTEQ extends Token(">=")
+
   case IN extends Token("in")
 
   case DEF    extends Token("def")

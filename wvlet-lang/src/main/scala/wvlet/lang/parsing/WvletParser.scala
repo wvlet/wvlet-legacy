@@ -14,7 +14,7 @@
 package wvlet.lang.parsing
 
 import wvlet.lang.model.expression.Expression
-import wvlet.lang.model.expression.Expression.{Identifier, QName}
+import wvlet.lang.model.expression.Expression.{ComparisonOperator, Identifier, QName}
 import wvlet.lang.model.logical.LogicalPlan
 import wvlet.lang.model.logical.LogicalPlan.{FLOWRQuery, ForItem, Return, Where}
 import wvlet.lang.parsing.WvletParser.EOFToken
@@ -147,7 +147,16 @@ class WvletParser(tokenScanner: TokenScanner) extends LogSupport:
     val currentToken = peekNextToken
     currentToken.token match {
       case Token.IDENTIFIER =>
-        parseQualifiedName
+        val qName = parseQualifiedName
+        peekNextToken.token match {
+          // expression comparisonOperator expression
+          case Token.EQ | Token.NEQ | Token.LT | Token.LTEQ | Token.GT | Token.GTEQ =>
+            val op = parseComparisonOperator
+
+
+          case _ =>
+        }
+        qName
       case _ =>
         parseError(currentToken, Token.IDENTIFIER)
     }
@@ -177,6 +186,32 @@ class WvletParser(tokenScanner: TokenScanner) extends LogSupport:
     }
 
     loop(firstToken)
+  }
+
+  private def parseComparisonOperator: ComparisonOperator = {
+    val currentToken = peekNextToken
+    currentToken.token match {
+      case Token.EQ =>
+        nextToken
+        Expression.Equal
+      case Token.NEQ =>
+        nextToken
+        Expression.NotEqual
+      case Token.LT =>
+        nextToken
+        Expression.LessThan
+      case Token.LTEQ =>
+        nextToken
+        Expression.LessThanOrEqual
+      case Token.GT =>
+        nextToken
+        Expression.GreaterThan
+      case Token.GTEQ =>
+        nextToken
+        Expression.GreaterThanOrEqual
+      case _ =>
+        parseError(currentToken, Token.EQ)
+    }
   }
 
   private def parseIdentifierRest(lastToken: TokenData): Expression =
