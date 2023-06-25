@@ -11,27 +11,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package wvlet.lang.parsing
+package wvlet.lang.compiler.parser
 
-import wvlet.airframe.control.IO
 import wvlet.airspec.AirSpec
-import wvlet.log.io.Resource
+import wvlet.lang.compiler.parser.{Token, TokenData, WvletScanner}
 
-class WvletScannerTest extends AirSpec:
+class WvletScannerTest extends AirSpec with QuerySuite:
 
-  case class TestQuery(name: String, query: String)
-
-  private def querySuite(path: String): Seq[TestQuery] = {
-    Resource
-      .listResources(path)
-      .filterNot(_.isDirectory)
-      .map: f =>
-        val name  = f.logicalPath.split("/").last.stripSuffix(".wv")
-        val query = IO.readAsString(f.url)
-        TestQuery(name, query)
-  }
-
-  test("s1: get tokens") {
+  test("s1: get tokens"):
     val tokens = WvletScanner.scan(s"""schema A:
          |  id: int,
          |  name: string
@@ -56,13 +43,8 @@ class WvletScannerTest extends AirSpec:
             TokenData(Token.IDENTIFIER, "string", _, _)
           ) =>
     }
-  }
 
-  test("basic") {
-    querySuite("query/basic").map { q =>
-      test(q.name) {
-        val tokens = WvletScanner.scan(q.query)
-        debug(tokens.mkString("\n"))
-      }
-    }
+  runSuite { q =>
+    val tokens = WvletScanner.scan(q.query)
+    debug(s"Query ${q.name}:\n${tokens.mkString("\n")}")
   }

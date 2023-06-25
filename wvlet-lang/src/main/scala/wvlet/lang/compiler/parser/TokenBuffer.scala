@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package wvlet.lang.parsing
+package wvlet.lang.compiler.parser
 
 import wvlet.log.LogSupport
 
@@ -28,9 +28,11 @@ class TokenBuffer(initialSize: Int = 1024) extends LogSupport:
     buf(len) = ch
     len += 1
 
-  def chars            = buf
-  def length           = len
-  def isEmpty: Boolean = len == 0
-  def clear(): Unit    = len = 0
+  def chars             = buf
+  def length            = len
+  def isEmpty: Boolean  = len == 0
+  def nonEmpty: Boolean = !isEmpty
+  def clear(): Unit     = len = 0
+  def last: Char        = buf(len - 1)
 
   override def toString: String = new String(buf, 0, len)

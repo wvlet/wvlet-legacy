@@ -13,32 +13,104 @@
  */
 package wvlet.lang.model.logical
 
-import wvlet.lang.model.*
+import wvlet.lang.model.SourceLocation
+import wvlet.lang.model.expression.*
+import wvlet.lang.model.expression.Expression.ReturnItem
+import wvlet.lang.model.formatter.{FormatOption, PrintContext}
 
 trait LogicalPlan {
-  def nodeLocation: Option[NodeLocation] = None
+  def modelName: String = {
+    val n = this.getClass.getSimpleName
+    n.stripSuffix("$")
+  }
+  def nodeLocation: Option[SourceLocation] = None
+  def toExpr(context: PrintContext = PrintContext.default): String
+
+  /**
+    * Return the child plans of this plan
+    * @return
+    *   child plans
+    */
+  def childPlans: Seq[LogicalPlan] = Seq.empty
+
+  def inputAttributes: AttributeList  = ???
+  def outputAttributes: AttributeList = ???
 }
 
-case class NodeLocation(line: Int, column: Int)
+object LogicalPlan:
 
-trait Relation extends LogicalPlan
+  case class SchemaDef(
+      name: String,
+      schemaItem: Seq[SchemaItem]
+  )(sourceLocation: Option[SourceLocation])
+      extends LogicalPlan {
+    override def toExpr(context: PrintContext): String = {
+      val s = new StringBuilder()
+      s ++= s"schema ${name} {"
+      for (x <- schemaItem) {
+        s ++= context.newline
+        s ++= context.indent(1)
+        s ++= x.toExpr(context)
+      }
+      s ++= context.newline
+      s ++= "}"
+      s.result()
+    }
+  }
 
-case class FlowerQuery(
-    forClause: ForClause,
-    returnClause: Option[ReturnClause] = None
-)(override val nodeLocation: Option[NodeLocation] = None)
-    extends Relation {}
+  case class SchemaItem(
+      name: String,
+      typeName: String
+  )(sourceLocation: Option[SourceLocation])
+      extends Expression {
+    override def toExpr(context: PrintContext): String = s"${name}: ${typeName}"
+  }
 
-case class ForClause(
-    binding: Seq[ForItem] = Seq.empty
-)
+  trait Relation extends LogicalPlan
+  trait UnaryRelation extends LogicalPlan:
+    def input: Relation
 
-case class ForItem(id: String, in: Expression)(nodeLocation: Option[NodeLocation])
+  case class FLOWRQuery(
+      forItems: Seq[ForItem],
+      whereClause: Option[Where] = None,
+      returnClause: Option[Return] = None
+  )(override val nodeLocation: Option[SourceLocation] = None)
+      extends Relation {
 
-case class ReturnClause(exprs: Seq[Expression])(nodeLocation: Option[NodeLocation]) extends Expression
+    override def toExpr(context: PrintContext): String = {
+      val s = new StringBuilder()
+      s ++= "for"
+      forItems.size match {
+        case 1 =>
+          s ++= " "
+          s ++= forItems.head.toExpr(context)
+        case _ =>
+          for (x <- forItems) {
+            s ++= "\n"
+            s ++= context.indent(1)
+            s ++= x.toExpr(context)
+          }
+      }
+      whereClause.foreach { w =>
+        s ++= context.newline
+        s ++= w.toExpr(context)
+      }
+      returnClause.foreach { r =>
+        s ++= context.newline
+        s ++= r.toExpr(context)
+      }
+      context.indentBlock(s.result())
+    }
+  }
 
-trait Expression {
-  def nodeLocation: Option[NodeLocation] = None
-}
+  case class ForItem(id: String, in: Expression)(nodeLocation: Option[SourceLocation]) extends Expression {
+    override def toExpr(context: PrintContext): String = s"${id} in ${in.toExpr(context)}"
+  }
 
-case class Identifier(name: String) extends Expression
+  case class Where(filterExpr: Expression)(nodeLocation: Option[SourceLocation]) extends Expression {
+    override def toExpr(context: PrintContext): String = s"where ${filterExpr.toExpr(context)}"
+  }
+
+  case class Return(exprs: Seq[ReturnItem])(nodeLocation: Option[SourceLocation]) extends Expression {
+    override def toExpr(context: PrintContext): String = s"return ${exprs.map(_.toExpr(context)).mkString(", ")}"
+  }

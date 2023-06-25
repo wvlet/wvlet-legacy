@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package wvlet.lang.parsing
+package wvlet.lang.compiler.parser
 
 enum Token(val str: String):
   case EMPTY   extends Token("<empty>")
@@ -34,7 +34,13 @@ enum Token(val str: String):
   case L_BRACKET extends Token("[")
   case R_BRACKET extends Token("]")
 
-  case EQ extends Token("=")
+  case EQ   extends Token("=")
+  case NEQ  extends Token("!=")
+  case LT   extends Token("<")
+  case GT   extends Token(">")
+  case LTEQ extends Token("<=")
+  case GTEQ extends Token(">=")
+
   case IN extends Token("in")
 
   case DEF    extends Token("def")
@@ -48,6 +54,10 @@ enum Token(val str: String):
   case FLOAT_LITERAL   extends Token("<float literal>")
   case DOUBLE_LITERAL  extends Token("<double literal>")
   case STRING_LITERAL  extends Token("<string literal>")
+
+  case NULL  extends Token("null")
+  case TRUE  extends Token("true")
+  case FALSE extends Token("false")
 
   case IDENTIFIER        extends Token("<identifier>")
   case QUOTED_IDENTIFIER extends Token("<quoted identifier>")
@@ -67,7 +77,8 @@ enum Token(val str: String):
 
 object Tokens:
   import Token.*
-  val keywords = Seq(DEF, SCHEMA, WITH, FOR, LET, WHERE, GROUP_BY, HAVING, RETURN, ORDER_BY, RUN, EXPORT, IF)
+  val keywords =
+    Seq(NULL, TRUE, FALSE, DEF, SCHEMA, WITH, FOR, LET, WHERE, GROUP_BY, HAVING, RETURN, ORDER_BY, RUN, EXPORT, IF)
   val symbols =
     Seq(COLON, COMMA, DOT, DOUBLE_QUOTE, SINGLE_QUOTE, L_PAREN, R_PAREN, L_BRACE, R_BRACE, L_BRACKET, R_BRACKET, EQ, IN)
   val allKeywords = keywords ++ symbols
