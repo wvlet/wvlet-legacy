@@ -18,9 +18,22 @@ import wvlet.lang.model.expression.*
 import wvlet.lang.model.formatter.{FormatOption, PrintContext}
 
 trait LogicalPlan {
+  def modelName: String = {
+    val n = this.getClass.getSimpleName
+    n.stripSuffix("$")
+  }
   def nodeLocation: Option[SourceLocation] = None
-
   def toExpr(context: PrintContext = PrintContext.default): String
+
+  /**
+    * Return the child plans of this plan
+    * @return
+    *   child plans
+    */
+  def childPlans: Seq[LogicalPlan] = Seq.empty
+
+  def inputAttributes: AttributeList  = ???
+  def outputAttributes: AttributeList = ???
 }
 
 object LogicalPlan:
