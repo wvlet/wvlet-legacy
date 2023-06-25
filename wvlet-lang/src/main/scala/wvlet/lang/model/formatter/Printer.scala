@@ -17,7 +17,7 @@ case class PrintContext(
     indentLevel: Int = 0,
     formatOption: FormatOption
 ) {
-  def newline: String = "\n"
+  def newline: String             = "\n"
   def indent(offset: Int): String = " " * (indentLevel + offset)
 
   def indentBlock(s: String): String = {

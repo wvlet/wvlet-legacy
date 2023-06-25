@@ -39,6 +39,33 @@ trait LogicalPlan {
 
 object LogicalPlan:
 
+  case class SchemaDef(
+      name: String,
+      schemaItem: Seq[SchemaItem]
+  )(sourceLocation: Option[SourceLocation])
+      extends LogicalPlan {
+    override def toExpr(context: PrintContext): String = {
+      val s = new StringBuilder()
+      s ++= s"schema ${name} {"
+      for (x <- schemaItem) {
+        s ++= context.newline
+        s ++= context.indent(1)
+        s ++= x.toExpr(context)
+      }
+      s ++= context.newline
+      s ++= "}"
+      s.result()
+    }
+  }
+
+  case class SchemaItem(
+      name: String,
+      typeName: String
+  )(sourceLocation: Option[SourceLocation])
+      extends Expression {
+    override def toExpr(context: PrintContext): String = s"${name}: ${typeName}"
+  }
+
   trait Relation extends LogicalPlan
   trait UnaryRelation extends LogicalPlan:
     def input: Relation

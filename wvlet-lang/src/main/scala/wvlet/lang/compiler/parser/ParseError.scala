@@ -13,6 +13,4 @@
  */
 package wvlet.lang.compiler.parser
 
-class ParseError {
-
-}
+class ParseError {}

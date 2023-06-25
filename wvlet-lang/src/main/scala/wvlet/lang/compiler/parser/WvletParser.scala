@@ -16,7 +16,7 @@ package wvlet.lang.compiler.parser
 import wvlet.lang.model.expression.Expression
 import wvlet.lang.model.expression.Expression.{ConditionalExpression, Identifier, QName, ReturnItem, StringLiteral}
 import wvlet.lang.model.logical.LogicalPlan
-import wvlet.lang.model.logical.LogicalPlan.{FLOWRQuery, ForItem, Return, Where}
+import wvlet.lang.model.logical.LogicalPlan.{FLOWRQuery, ForItem, Return, SchemaDef, SchemaItem, Where}
 import WvletParser.EOFToken
 import wvlet.log.LogSupport
 
@@ -74,6 +74,8 @@ class WvletParser(tokenScanner: TokenScanner) extends LogSupport:
         val sourceLocation = currentToken.getSourceLocation
         val returnClause   = parseReturn
         FLOWRQuery(forItems = Seq.empty, returnClause = Some(returnClause))(sourceLocation)
+      case Token.SCHEMA =>
+        parseSchema
       case Token.EOF =>
         null
       case _ =>
@@ -190,6 +192,54 @@ class WvletParser(tokenScanner: TokenScanner) extends LogSupport:
     }
   }
 
+  private def parseSchema: SchemaDef = {
+    val schemaLoc = peekNextToken.getSourceLocation
+    consumeToken(Token.SCHEMA)
+    val schemaName = parseQualifiedName
+    consumeToken(Token.COLON)
+
+    val schemaItems = Seq.newBuilder[SchemaItem]
+
+    def parseSchemaItem: Unit = {
+      val currentToken = peekNextToken
+      trace(s"parseSchemaItem: ${currentToken}")
+      currentToken.token match {
+        case Token.IDENTIFIER =>
+          val id = currentToken.text
+          nextToken
+          consumeToken(Token.COLON)
+          val dataType = parseDataType
+          schemaItems += SchemaItem(id, dataType)(currentToken.getSourceLocation)
+          parseSchemaItem
+        case _ =>
+
+      }
+    }
+    def parseSchemaItems: Unit = {
+      parseSchemaItem
+      while (peekNextToken.token == Token.COMMA) {
+        nextToken
+        parseSchemaItem
+      }
+    }
+    parseSchemaItems
+
+    SchemaDef(schemaName.toString, schemaItems.result())(schemaLoc)
+  }
+
+  private def parseDataType: String = {
+    val currentToken = peekNextToken
+    currentToken.token match {
+      case Token.IDENTIFIER =>
+        val dataType = currentToken.text
+        nextToken
+        dataType
+      // TODO: Parse array, map, nested types, etc.
+      case _ =>
+        parseError(currentToken, Token.IDENTIFIER)
+    }
+  }
+
   private def parseExpressions: Seq[Expression] =
     val expr = parseExpression
     debug(s"parse expressions: ${expr}")
@@ -264,7 +314,6 @@ class WvletParser(tokenScanner: TokenScanner) extends LogSupport:
       case _ =>
         parseError(currentToken, Token.IDENTIFIER)
     }
-
 
   private def parseQualifiedName: QName = {
     val qNameBuffer = Seq.newBuilder[String]
