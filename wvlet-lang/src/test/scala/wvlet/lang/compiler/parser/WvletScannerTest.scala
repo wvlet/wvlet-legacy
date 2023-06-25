@@ -46,5 +46,5 @@ class WvletScannerTest extends AirSpec with QuerySuite:
 
   runSuite { q =>
     val tokens = WvletScanner.scan(q.query)
-    debug(s"Query ${q.name}]:\n${tokens.mkString("\n")}")
+    debug(s"Query ${q.name}:\n${tokens.mkString("\n")}")
   }

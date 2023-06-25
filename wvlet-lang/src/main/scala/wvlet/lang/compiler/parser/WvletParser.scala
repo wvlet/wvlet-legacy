@@ -209,7 +209,7 @@ class WvletParser(tokenScanner: TokenScanner) extends LogSupport:
           nextToken
           consumeToken(Token.COLON)
           val dataType = parseDataType
-          schemaItems += SchemaItem(id, dataType)(currentToken.getSourceLocation)
+
           parseSchemaItem
         case _ =>
 
