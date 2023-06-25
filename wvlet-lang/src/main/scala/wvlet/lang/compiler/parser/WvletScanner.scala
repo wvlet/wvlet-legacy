@@ -78,6 +78,14 @@ class WvletScanner(source: ScannerSource) extends LogSupport:
     }
   }
 
+  private def consume(expectedChar: Char): Unit = {
+    val ch = peekChar()
+    if (ch != expectedChar) {
+      reportError(s"expected '${expectedChar}', but found '${ch}'", source.sourceLocationOf(cursor))
+    }
+    nextChar()
+  }
+
   // TODO Skip token until a safe location for error recovery
   def skipToken(): Unit = {}
 
@@ -146,12 +154,27 @@ class WvletScanner(source: ScannerSource) extends LogSupport:
       case ',' =>
         nextChar()
         TokenData(Token.COMMA, ",", cursor - 1, cursor)
+      case '\"' =>
+        getDoubleQuoteString()
       case SU =>
         TokenData(Token.EOF, "", cursor, cursor)
       case _ =>
         putChar(ch)
         nextChar()
         toToken()
+
+  private def getDoubleQuoteString(): TokenData = {
+    // TODO Support unicode and escape characters
+    consume('\"')
+    var ch = peekChar()
+    while (ch != '\"' && ch != SU) {
+      putChar(ch)
+      nextChar()
+      ch = peekChar()
+    }
+    consume('\"')
+    TokenData(Token.STRING_LITERAL, tokenBuffer.toString, cursor - tokenBuffer.length, cursor)
+  }
 
   @tailrec private def getOperatorRest(): TokenData =
     val ch = peekChar()

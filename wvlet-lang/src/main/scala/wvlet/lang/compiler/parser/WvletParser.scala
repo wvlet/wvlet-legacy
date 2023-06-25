@@ -14,7 +14,7 @@
 package wvlet.lang.compiler.parser
 
 import wvlet.lang.model.expression.Expression
-import wvlet.lang.model.expression.Expression.{ConditionalExpression, Identifier, QName, ReturnItem}
+import wvlet.lang.model.expression.Expression.{ConditionalExpression, Identifier, QName, ReturnItem, StringLiteral}
 import wvlet.lang.model.logical.LogicalPlan
 import wvlet.lang.model.logical.LogicalPlan.{FLOWRQuery, ForItem, Return, Where}
 import WvletParser.EOFToken
@@ -54,6 +54,14 @@ class WvletParser(tokenScanner: TokenScanner) extends LogSupport:
 
   private def nextToken: Unit =
     tokenScanner.next
+
+  def consumeToken(token: Token): Unit =
+    val currentToken = peekNextToken
+    if (currentToken.token == token) {
+      nextToken
+    } else {
+      parseError(currentToken, token)
+    }
 
   def parseStatement: LogicalPlan =
     val currentToken = peekNextToken
@@ -218,6 +226,10 @@ class WvletParser(tokenScanner: TokenScanner) extends LogSupport:
           case _ =>
             qName
         }
+      case Token.STRING_LITERAL =>
+        nextToken
+        val text = currentToken.text
+        Expression.StringLiteral(currentToken.text)(currentToken.getSourceLocation)
       case Token.TRUE =>
         nextToken
         Expression.TrueLiteral(currentToken.text)(currentToken.getSourceLocation)
@@ -252,6 +264,7 @@ class WvletParser(tokenScanner: TokenScanner) extends LogSupport:
       case _ =>
         parseError(currentToken, Token.IDENTIFIER)
     }
+
 
   private def parseQualifiedName: QName = {
     val qNameBuffer = Seq.newBuilder[String]
