@@ -11,13 +11,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package wvlet.lang.parsing
+package wvlet.lang.compiler.parser
 
 import wvlet.lang.model.expression.Expression
 import wvlet.lang.model.expression.Expression.{ConditionalExpression, Identifier, QName}
 import wvlet.lang.model.logical.LogicalPlan
 import wvlet.lang.model.logical.LogicalPlan.{FLOWRQuery, ForItem, Return, Where}
-import wvlet.lang.parsing.WvletParser.EOFToken
+import WvletParser.EOFToken
 import wvlet.log.LogSupport
 
 import scala.annotation.tailrec
@@ -92,7 +92,7 @@ class WvletParser(tokenScanner: TokenScanner) extends LogSupport:
             returnClause = Some(parseReturn)
           case _ =>
         }
-        FLOWRQuery(forItems = forItems, whereClause, returnClause)(currentToken.getNodeLocation)
+        FLOWRQuery(forItems = forItems, whereClause, returnClause)(currentToken.getSourceLocation)
       case _ =>
         null
     }
@@ -106,7 +106,7 @@ class WvletParser(tokenScanner: TokenScanner) extends LogSupport:
       nextToken
       parseIn
       val expr = parseExpression
-      items += ForItem(id, expr)(currentToken.getNodeLocation)
+      items += ForItem(id, expr)(currentToken.getSourceLocation)
       currentToken = peekNextToken
     }
     items.result
@@ -125,7 +125,7 @@ class WvletParser(tokenScanner: TokenScanner) extends LogSupport:
     if (currentToken.token == Token.WHERE) {
       nextToken
       val expr = parseExpression
-      Where(expr)(currentToken.getNodeLocation)
+      Where(expr)(currentToken.getSourceLocation)
     } else {
       parseError(currentToken, Token.WHERE)
     }
@@ -135,7 +135,7 @@ class WvletParser(tokenScanner: TokenScanner) extends LogSupport:
     if (currentToken.token == Token.RETURN) {
       nextToken
       val exprs = parseExpressions
-      Return(exprs)(currentToken.getNodeLocation)
+      Return(exprs)(currentToken.getSourceLocation)
     } else {
       parseError(currentToken, Token.RETURN)
     }
@@ -175,6 +175,8 @@ class WvletParser(tokenScanner: TokenScanner) extends LogSupport:
           case _ =>
             qName
         }
+      case Token.INTEGER_LITERAL =>
+        Expression.IntegerLiteral(currentToken.text, currentToken.text.toInt)(currentToken.getSourceLocation)
       case _ =>
         parseError(currentToken, Token.IDENTIFIER)
     }
@@ -198,7 +200,7 @@ class WvletParser(tokenScanner: TokenScanner) extends LogSupport:
           if (qName.isEmpty) {
             parseError(t, Token.IDENTIFIER)
           } else {
-            QName(qName)(firstToken.getNodeLocation)
+            QName(qName)(firstToken.getSourceLocation)
           }
       }
     }
@@ -220,5 +222,5 @@ class WvletParser(tokenScanner: TokenScanner) extends LogSupport:
             parseError(next, Token.IDENTIFIER)
         }
       case _ =>
-        Identifier(lastToken.text)(lastToken.getNodeLocation)
+        Identifier(lastToken.text)(lastToken.getSourceLocation)
     }

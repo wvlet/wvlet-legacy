@@ -11,10 +11,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package wvlet.lang.parsing
+package wvlet.lang.model
 
-
-
-class ParseError {
-
+case class SourceLocation(
+    // 1-origin line number
+    line: Int,
+    // 1-origin column number
+    column: Int
+) {
+  override def toString: String = s"${line}:${column}"
 }

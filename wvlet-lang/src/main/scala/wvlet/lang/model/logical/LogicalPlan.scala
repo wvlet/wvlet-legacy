@@ -13,12 +13,12 @@
  */
 package wvlet.lang.model.logical
 
-import wvlet.lang.model.NodeLocation
+import wvlet.lang.model.SourceLocation
 import wvlet.lang.model.expression.*
 import wvlet.lang.model.formatter.{FormatOption, PrintContext}
 
 trait LogicalPlan {
-  def nodeLocation: Option[NodeLocation] = None
+  def nodeLocation: Option[SourceLocation] = None
 
   def toExpr(context: PrintContext = PrintContext.default): String
 }
@@ -33,7 +33,7 @@ object LogicalPlan:
       forItems: Seq[ForItem],
       whereClause: Option[Where] = None,
       returnClause: Option[Return] = None
-  )(override val nodeLocation: Option[NodeLocation] = None)
+  )(override val nodeLocation: Option[SourceLocation] = None)
       extends Relation {
 
     override def toExpr(context: PrintContext): String = {
@@ -62,14 +62,14 @@ object LogicalPlan:
     }
   }
 
-  case class ForItem(id: String, in: Expression)(nodeLocation: Option[NodeLocation]) extends Expression {
+  case class ForItem(id: String, in: Expression)(nodeLocation: Option[SourceLocation]) extends Expression {
     override def toExpr(context: PrintContext): String = s"${id} in ${in.toExpr(context)}"
   }
 
-  case class Where(filterExpr: Expression)(nodeLocation: Option[NodeLocation]) extends Expression {
+  case class Where(filterExpr: Expression)(nodeLocation: Option[SourceLocation]) extends Expression {
     override def toExpr(context: PrintContext): String = s"where ${filterExpr.toExpr(context)}"
   }
 
-  case class Return(exprs: Seq[Expression])(nodeLocation: Option[NodeLocation]) extends Expression {
+  case class Return(exprs: Seq[Expression])(nodeLocation: Option[SourceLocation]) extends Expression {
     override def toExpr(context: PrintContext): String = s"return ${exprs.map(_.toExpr(context)).mkString(", ")}"
   }

@@ -11,6 +11,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package wvlet.lang.model
+package wvlet.lang.compiler.parser
 
-case class NodeLocation(line: Int, column: Int)
+import wvlet.airspec.AirSpec
+import wvlet.lang.compiler.parser.WvletParser
+
+class WvletParserTest extends AirSpec with QuerySuite:
+
+  runSuite { q =>
+    val plan = WvletParser.parse(q.query)
+    debug(s"[wv]\n${q.query}\n\n[plan]\n${plan}\n\n[result]\n${plan.toExpr()}")
+  }

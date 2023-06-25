@@ -11,13 +11,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package wvlet.lang.parsing
+package wvlet.lang.compiler.parser
 
-import wvlet.airspec.AirSpec
+class ParseError {
 
-class WvletParserTest extends AirSpec with QuerySuite:
-
-  runSuite { q =>
-    val plan = WvletParser.parse(q.query)
-    debug(s"[wv]\n${q.query}\n\n[plan]\n${plan}\n\n[result]\n${plan.toExpr()}")
-  }
+}
