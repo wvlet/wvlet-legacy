@@ -33,6 +33,7 @@ object WvletScanner extends LogSupport:
     val tokens    = Seq.newBuilder[TokenData]
     var tokenData = scanner.nextToken()
     while tokenData.token != Token.EOF do
+      debug(s"token: ${tokenData}")
       tokens += tokenData
       tokenData = scanner.nextToken()
     tokens.result()
@@ -234,16 +235,19 @@ class WvletScanner(source: ScannerSource) extends LogSupport:
     var tokenType = Token.INTEGER_LITERAL
 
     if (base == 10 && ch == '.') {
+      putChar(ch)
+      nextChar()
       val lch = peekChar()
       if ('0' <= lch && lch <= '9') {
-        putChar('.')
-        nextChar()
         tokenType = getFraction()
       }
     } else
       (ch: @switch) match {
         case 'e' | 'E' | 'f' | 'F' | 'd' | 'D' =>
-          if (base == 10) then tokenType = getFraction()
+          if (base == 10) {
+            nextChar()
+            tokenType = getFraction()
+          }
         case 'l' | 'L' =>
           nextChar()
           tokenType = Token.LONG_LITERAL
@@ -258,10 +262,12 @@ class WvletScanner(source: ScannerSource) extends LogSupport:
 
   private def getFraction(): Token = {
     var tokenType = Token.DECIMAL_LITERAL
-    val ch        = peekChar()
+    var ch        = peekChar()
+    trace(s"getFraction ch[${cursor}]: '${ch}'")
     while ('0' <= ch && ch <= '9' || isNumberSeparator(ch)) {
       putChar(ch)
       nextChar()
+      ch = peekChar()
     }
     checkNoTrailingNumberSeparator()
     if (ch == 'e' || ch == 'E') {
@@ -269,20 +275,23 @@ class WvletScanner(source: ScannerSource) extends LogSupport:
       nextChar()
       var lookaheadCh = peekChar()
       if (lookaheadCh == '+' || lookaheadCh == '-') {
-        putChar(ch)
+        putChar(lookaheadCh)
         nextChar()
         lookaheadCh = peekChar()
       }
       if ('0' <= lookaheadCh && lookaheadCh <= '9' || isNumberSeparator(ch)) {
         putChar(ch)
         nextChar()
+        ch = peekChar()
         if (ch == '+' || ch == '-') {
           putChar(ch)
           nextChar()
+          ch = peekChar()
         }
         while ('0' <= ch && ch <= '9' || isNumberSeparator(ch)) {
           putChar(ch)
           nextChar()
+          ch = peekChar()
         }
         checkNoTrailingNumberSeparator()
       }

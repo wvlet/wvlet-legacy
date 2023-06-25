@@ -19,6 +19,7 @@ enum Token(val str: String):
   case EOF     extends Token("<eof>")
   case NEWLINE extends Token("<newline>")
   case INDENT  extends Token("  ")
+  case NULL    extends Token("null")
 
   case COLON extends Token(":")
   case COMMA extends Token(",")
@@ -55,6 +56,7 @@ enum Token(val str: String):
   case DOUBLE_LITERAL  extends Token("<double literal>")
   case STRING_LITERAL  extends Token("<string literal>")
 
+
   case IDENTIFIER        extends Token("<identifier>")
   case QUOTED_IDENTIFIER extends Token("<quoted identifier>")
 
@@ -73,7 +75,7 @@ enum Token(val str: String):
 
 object Tokens:
   import Token.*
-  val keywords = Seq(DEF, SCHEMA, WITH, FOR, LET, WHERE, GROUP_BY, HAVING, RETURN, ORDER_BY, RUN, EXPORT, IF)
+  val keywords = Seq(NULL, DEF, SCHEMA, WITH, FOR, LET, WHERE, GROUP_BY, HAVING, RETURN, ORDER_BY, RUN, EXPORT, IF)
   val symbols =
     Seq(COLON, COMMA, DOT, DOUBLE_QUOTE, SINGLE_QUOTE, L_PAREN, R_PAREN, L_BRACE, R_BRACE, L_BRACKET, R_BRACKET, EQ, IN)
   val allKeywords = keywords ++ symbols

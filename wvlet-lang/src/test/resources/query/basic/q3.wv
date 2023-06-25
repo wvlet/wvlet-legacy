@@ -9,4 +9,5 @@ return
     e1: 1.23e-10,
     e2: 1.23e+10,
     b1: true,
-    b2: false
+    b2: false,
+    n1: null
