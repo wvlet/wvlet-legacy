@@ -1,6 +1,5 @@
--- return various literals
 return
-    i: 1
+    i: 1,
     h: 0x00ff,
     f1: 1.0,
     f2: 1.1f,
@@ -10,4 +9,5 @@ return
     e2: 1.23e+10,
     b1: true,
     b2: false,
-    n1: null
+    n1: null,
+    s1: "hello"

@@ -27,7 +27,18 @@ object Expression:
     override def toExpr(context: PrintContext): String = name
   }
   case class QName(names: Seq[String])(nodeLocation: Option[SourceLocation]) extends Expression {
+    override def toString                      = names.mkString(".")
     override def toExpr(context: PrintContext) = names.mkString(".")
+  }
+
+  case class ReturnItem(alias: Option[QName], expr: Expression) extends Expression {
+    override def toExpr(context: PrintContext) = {
+      val exprStr = expr.toExpr(context)
+      alias match {
+        case Some(a) => s"${exprStr}: ${a}"
+        case None    => exprStr
+      }
+    }
   }
 
   sealed trait Literal extends Expression {
@@ -39,6 +50,7 @@ object Expression:
   case class LongLiteral(stringValue: String, value: Long)(sourceLocation: Option[SourceLocation])     extends Literal
   case class FloatLiteral(stringValue: String, value: Float)(sourceLocation: Option[SourceLocation])   extends Literal
   case class DoubleLiteral(stringValue: String, value: Double)(sourceLocation: Option[SourceLocation]) extends Literal
+  case class ExpLiteral(stringValue: String, value: Double)(sourceLocation: Option[SourceLocation])    extends Literal
   case class NullLiteral(stringValue: String)(sourceLocation: Option[SourceLocation])                  extends Literal
   sealed trait BooleanLiteral extends Literal {
     def booleanValue: Boolean

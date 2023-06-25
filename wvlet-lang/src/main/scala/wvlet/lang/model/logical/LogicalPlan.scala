@@ -15,6 +15,7 @@ package wvlet.lang.model.logical
 
 import wvlet.lang.model.SourceLocation
 import wvlet.lang.model.expression.*
+import wvlet.lang.model.expression.Expression.ReturnItem
 import wvlet.lang.model.formatter.{FormatOption, PrintContext}
 
 trait LogicalPlan {
@@ -83,6 +84,6 @@ object LogicalPlan:
     override def toExpr(context: PrintContext): String = s"where ${filterExpr.toExpr(context)}"
   }
 
-  case class Return(exprs: Seq[Expression])(nodeLocation: Option[SourceLocation]) extends Expression {
+  case class Return(exprs: Seq[ReturnItem])(nodeLocation: Option[SourceLocation]) extends Expression {
     override def toExpr(context: PrintContext): String = s"return ${exprs.map(_.toExpr(context)).mkString(", ")}"
   }

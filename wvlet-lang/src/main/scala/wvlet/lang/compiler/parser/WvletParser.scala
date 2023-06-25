@@ -14,7 +14,7 @@
 package wvlet.lang.compiler.parser
 
 import wvlet.lang.model.expression.Expression
-import wvlet.lang.model.expression.Expression.{ConditionalExpression, Identifier, QName}
+import wvlet.lang.model.expression.Expression.{ConditionalExpression, Identifier, QName, ReturnItem}
 import wvlet.lang.model.logical.LogicalPlan
 import wvlet.lang.model.logical.LogicalPlan.{FLOWRQuery, ForItem, Return, Where}
 import WvletParser.EOFToken
@@ -60,7 +60,12 @@ class WvletParser(tokenScanner: TokenScanner) extends LogSupport:
     currentToken.token match {
       case Token.FOR =>
         parseFLOWRQuery
-
+      case Token.RETURN =>
+        // return-only plan
+        debug(s"return: ${currentToken}")
+        val sourceLocation = currentToken.getSourceLocation
+        val returnClause   = parseReturn
+        FLOWRQuery(forItems = Seq.empty, returnClause = Some(returnClause))(sourceLocation)
       case Token.EOF =>
         null
       case _ =>
@@ -134,14 +139,52 @@ class WvletParser(tokenScanner: TokenScanner) extends LogSupport:
     val currentToken = peekNextToken
     if (currentToken.token == Token.RETURN) {
       nextToken
-      val exprs = parseExpressions
-      Return(exprs)(currentToken.getSourceLocation)
+      val returnItems = parseReturnItems
+      Return(returnItems)(currentToken.getSourceLocation)
     } else {
       parseError(currentToken, Token.RETURN)
     }
 
+  private def parseReturnItems: Seq[ReturnItem] = {
+    val items = Seq.newBuilder[ReturnItem]
+
+    @tailrec
+    def loop: Unit = {
+      val ri = parseReturnItem
+      items += ri
+      warn(s"parseReturnItems loop: ${ri}, nextToken:${peekNextToken}")
+      if (peekNextToken.token == Token.COMMA) {
+        nextToken
+        loop
+      }
+    }
+    loop
+    items.result()
+  }
+
+  private def parseReturnItem: ReturnItem = {
+    val currentToken = peekNextToken
+    warn(s"parseReturnItem: ${currentToken}")
+    currentToken.token match {
+      case Token.IDENTIFIER =>
+        val qName = parseQualifiedName
+        peekNextToken.token match {
+          case Token.COLON =>
+            nextToken
+            val expr = parseExpression
+            ReturnItem(Some(qName), expr)
+          case _ =>
+            ReturnItem(None, qName)
+        }
+      case _ =>
+        val expr = parseExpression
+        ReturnItem(None, expr)
+    }
+  }
+
   private def parseExpressions: Seq[Expression] =
     val expr = parseExpression
+    debug(s"parse expressions: ${expr}")
     peekNextToken.token match {
       case Token.COMMA =>
         nextToken
@@ -175,18 +218,47 @@ class WvletParser(tokenScanner: TokenScanner) extends LogSupport:
           case _ =>
             qName
         }
+      case Token.TRUE =>
+        nextToken
+        Expression.TrueLiteral(currentToken.text)(currentToken.getSourceLocation)
+      case Token.FALSE =>
+        nextToken
+        Expression.FalseLiteral(currentToken.text)(currentToken.getSourceLocation)
+      case Token.NULL =>
+        nextToken
+        Expression.NullLiteral(currentToken.text)(currentToken.getSourceLocation)
       case Token.INTEGER_LITERAL =>
-        Expression.IntegerLiteral(currentToken.text, currentToken.text.toInt)(currentToken.getSourceLocation)
+        nextToken
+        currentToken.text match {
+          case hex if hex.startsWith("0x") || hex.startsWith("0X") =>
+            Expression.IntegerLiteral(hex, Integer.parseInt(hex.substring(2), 16))(currentToken.getSourceLocation)
+          case _ =>
+            Expression.IntegerLiteral(currentToken.text, currentToken.text.toInt)(currentToken.getSourceLocation)
+        }
+      case Token.DECIMAL_LITERAL =>
+        nextToken
+        Expression.DecimalLiteral(currentToken.text, BigDecimal(currentToken.text))(currentToken.getSourceLocation)
+      case Token.FLOAT_LITERAL =>
+        nextToken
+        Expression.FloatLiteral(currentToken.text, currentToken.text.toFloat)(currentToken.getSourceLocation)
+      case Token.DOUBLE_LITERAL =>
+        nextToken
+        Expression.DoubleLiteral(currentToken.text, currentToken.text.toDouble)(currentToken.getSourceLocation)
+      case Token.EXP_LITERAL =>
+        nextToken
+        Expression.ExpLiteral(currentToken.text, java.lang.Double.parseDouble(currentToken.text))(
+          currentToken.getSourceLocation
+        )
       case _ =>
         parseError(currentToken, Token.IDENTIFIER)
     }
 
-  private def parseQualifiedName: Expression = {
+  private def parseQualifiedName: QName = {
     val qNameBuffer = Seq.newBuilder[String]
     val firstToken  = peekNextToken
 
     @tailrec
-    def loop(t: TokenData): Expression = {
+    def loop(t: TokenData): QName = {
       t.token match {
         case Token.IDENTIFIER =>
           qNameBuffer += t.text

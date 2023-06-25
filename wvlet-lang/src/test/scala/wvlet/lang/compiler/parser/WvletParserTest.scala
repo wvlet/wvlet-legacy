@@ -20,5 +20,6 @@ class WvletParserTest extends AirSpec with QuerySuite:
 
   runSuite { q =>
     val plan = WvletParser.parse(q.query)
+    plan shouldNotBe null
     debug(s"[wv]\n${q.query}\n\n[plan]\n${plan}\n\n[result]\n${plan.toExpr()}")
   }

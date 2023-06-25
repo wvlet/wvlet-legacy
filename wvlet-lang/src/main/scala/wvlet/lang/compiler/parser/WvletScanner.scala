@@ -124,16 +124,18 @@ class WvletScanner(source: ScannerSource) extends LogSupport:
       case '0' =>
         var base: Int = 10
         def fetchLeadingZero(): Unit = {
+          putChar(ch)
           nextChar()
-          ch match {
+          var nextCh = peekChar()
+          nextCh match {
             case 'x' | 'X' =>
               base = 16
+              putChar(nextCh)
               nextChar()
+              nextCh = peekChar()
             case _ =>
               base = 10
-              putChar('0')
           }
-          val nextCh = peekChar()
           if (base != 10 && !isNumberSeparator(nextCh) && digit2int(nextCh, base) < 0)
             error("invalid literal number")
         }
@@ -245,7 +247,6 @@ class WvletScanner(source: ScannerSource) extends LogSupport:
       (ch: @switch) match {
         case 'e' | 'E' | 'f' | 'F' | 'd' | 'D' =>
           if (base == 10) {
-            nextChar()
             tokenType = getFraction()
           }
         case 'l' | 'L' =>
@@ -273,13 +274,13 @@ class WvletScanner(source: ScannerSource) extends LogSupport:
     if (ch == 'e' || ch == 'E') {
       putChar(ch)
       nextChar()
-      var lookaheadCh = peekChar()
-      if (lookaheadCh == '+' || lookaheadCh == '-') {
-        putChar(lookaheadCh)
+      ch = peekChar()
+      if (ch == '+' || ch == '-') {
+        putChar(ch)
         nextChar()
-        lookaheadCh = peekChar()
+        ch = peekChar()
       }
-      if ('0' <= lookaheadCh && lookaheadCh <= '9' || isNumberSeparator(ch)) {
+      if ('0' <= ch && ch <= '9' || isNumberSeparator(ch)) {
         putChar(ch)
         nextChar()
         ch = peekChar()
