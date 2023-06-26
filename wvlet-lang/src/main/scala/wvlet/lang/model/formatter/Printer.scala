@@ -18,7 +18,7 @@ case class PrintContext(
     formatOption: FormatOption
 ) {
   def newline: String             = "\n"
-  def indent(offset: Int): String = " " * (indentLevel + offset)
+  def indent(offset: Int): String = "  " * (indentLevel + offset)
 
   def indentBlock(s: String): String = {
     s.split("""\n""")

@@ -35,7 +35,7 @@ object Expression:
     override def toExpr(context: PrintContext) = {
       val exprStr = expr.toExpr(context)
       alias match {
-        case Some(a) => s"${exprStr}: ${a}"
+        case Some(a) => s"${a}: ${exprStr}"
         case None    => exprStr
       }
     }
