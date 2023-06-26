@@ -162,7 +162,6 @@ class WvletParser(tokenScanner: TokenScanner) extends LogSupport:
     def loop: Unit = {
       val ri = parseReturnItem
       items += ri
-      warn(s"parseReturnItems loop: ${ri}, nextToken:${peekNextToken}")
       if (peekNextToken.token == Token.COMMA) {
         nextToken
         loop
@@ -174,7 +173,6 @@ class WvletParser(tokenScanner: TokenScanner) extends LogSupport:
 
   private def parseReturnItem: ReturnItem = {
     val currentToken = peekNextToken
-    warn(s"parseReturnItem: ${currentToken}")
     currentToken.token match {
       case Token.IDENTIFIER =>
         val qName = parseQualifiedName
@@ -209,7 +207,7 @@ class WvletParser(tokenScanner: TokenScanner) extends LogSupport:
           nextToken
           consumeToken(Token.COLON)
           val dataType = parseDataType
-
+          schemaItems += SchemaItem(id, dataType)(currentToken.getSourceLocation)
           parseSchemaItem
         case _ =>
 

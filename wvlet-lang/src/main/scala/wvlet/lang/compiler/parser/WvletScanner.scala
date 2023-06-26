@@ -22,7 +22,7 @@ import scala.collection.mutable
 
 // TODO Add line, offset
 case class TokenData(token: Token, text: String, start: Int, end: Int) {
-  override def toString: String = s"[${start},${end}] '${text}' <${token}>"
+  override def toString: String = f"[${start}%3d,${end}%3d] ${token}%10s: '${text}'"
   // TODO
   def getSourceLocation: Option[SourceLocation] = None
 }

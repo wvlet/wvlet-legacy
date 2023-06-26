@@ -46,14 +46,12 @@ object LogicalPlan:
       extends LogicalPlan {
     override def toExpr(context: PrintContext): String = {
       val s = new StringBuilder()
-      s ++= s"schema ${name} {"
+      s ++= s"schema ${name}:"
       for (x <- schemaItem) {
         s ++= context.newline
         s ++= context.indent(1)
         s ++= x.toExpr(context)
       }
-      s ++= context.newline
-      s ++= "}"
       s.result()
     }
   }
@@ -79,7 +77,7 @@ object LogicalPlan:
 
     override def toExpr(context: PrintContext): String = {
       val s = new StringBuilder()
-      s ++= "for"
+      if (forItems.nonEmpty) then s ++= "for"
       forItems.size match {
         case 1 =>
           s ++= " "
