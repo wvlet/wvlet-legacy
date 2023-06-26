@@ -29,8 +29,9 @@ case class TokenData(token: Token, text: String, start: Int, end: Int) {
 
 object WvletScanner extends LogSupport:
   def scan(text: String): Seq[TokenData] = {
-    val scanner   = new WvletScanner(StringSource(text))
-    val tokens    = Seq.newBuilder[TokenData]
+    val scanner = new WvletScanner(StringSource(text))
+    val tokens  = Seq.newBuilder[TokenData]
+    scanner.nextChar()
     var tokenData = scanner.nextToken()
     while tokenData.token != Token.EOF do
       debug(s"token: ${tokenData}")
@@ -61,7 +62,13 @@ object WvletScanner extends LogSupport:
 class WvletScanner(source: ScannerSource) extends LogSupport:
   import WvletScanner.*
 
-  private var cursor: Int = 0
+  // The last read character
+  private var ch: Char = _
+  // The 1-character ahead offset of the last read character
+  private var offset: Int = 0
+
+  // THe offset before the last read character
+  private var lastOffset: Int = 0
 
   /**
     */
@@ -74,14 +81,13 @@ class WvletScanner(source: ScannerSource) extends LogSupport:
 
   private def checkNoTrailingNumberSeparator(): Unit = {
     if (tokenBuffer.nonEmpty && isNumberSeparator(tokenBuffer.last)) {
-      reportError("trailing number separator", source.sourceLocationOf(cursor))
+      reportError("trailing number separator", source.sourceLocationOf(offset))
     }
   }
 
   private def consume(expectedChar: Char): Unit = {
-    val ch = peekChar()
     if (ch != expectedChar) {
-      reportError(s"expected '${expectedChar}', but found '${ch}'", source.sourceLocationOf(cursor))
+      reportError(s"expected '${expectedChar}', but found '${ch}'", source.sourceLocationOf(offset))
     }
     nextChar()
   }
@@ -90,29 +96,27 @@ class WvletScanner(source: ScannerSource) extends LogSupport:
   def skipToken(): Unit = {}
 
   def nextToken(): TokenData =
-    if (cursor >= source.length)
-      TokenData(Token.EOF, "", cursor, cursor)
+    if (offset >= source.length)
+      TokenData(Token.EOF, "", lastOffset, offset)
     else
       fetchToken()
 
-  private def peekChar(): Char =
-    if (cursor >= source.length)
-      SU
-    else
-      source.text.charAt(cursor)
-
-  private def nextChar(): Unit =
-    cursor += 1
+  private def nextChar(): Unit = {
+    val index = offset
+    lastOffset = index
+    offset = index + 1
+    if (index >= source.length) {
+      ch = SU
+    } else {
+      ch = source.text.charAt(index)
+    }
+  }
 
   private def putChar(ch: Char): Unit =
     tokenBuffer.append(ch)
 
-  private def lookAheadChar(): Char =
-    source.text.charAt(cursor + 1)
-
   private def fetchToken(): TokenData =
-    val ch = peekChar()
-    trace(s"fetchToken ch[${cursor}]: '${String.valueOf(ch)}'")
+    trace(s"fetchToken ch[${offset}]: '${String.valueOf(ch)}'")
     (ch: @switch) match
       case ' ' | '\t' | CR | LF | FF =>
         // Skip white space characters
@@ -134,17 +138,15 @@ class WvletScanner(source: ScannerSource) extends LogSupport:
         def fetchLeadingZero(): Unit = {
           putChar(ch)
           nextChar()
-          var nextCh = peekChar()
-          nextCh match {
+          ch match {
             case 'x' | 'X' =>
               base = 16
-              putChar(nextCh)
+              putChar(ch)
               nextChar()
-              nextCh = peekChar()
             case _ =>
               base = 10
           }
-          if (base != 10 && !isNumberSeparator(nextCh) && digit2int(nextCh, base) < 0)
+          if (base != 10 && !isNumberSeparator(ch) && digit2int(ch, base) < 0)
             error("invalid literal number")
         }
         fetchLeadingZero()
@@ -153,11 +155,11 @@ class WvletScanner(source: ScannerSource) extends LogSupport:
         getNumber(base = 10)
       case ',' =>
         nextChar()
-        TokenData(Token.COMMA, ",", cursor - 1, cursor)
+        TokenData(Token.COMMA, ",", offset - 1, offset)
       case '\"' =>
         getDoubleQuoteString()
       case SU =>
-        TokenData(Token.EOF, "", cursor, cursor)
+        TokenData(Token.EOF, "", offset, offset)
       case _ =>
         putChar(ch)
         nextChar()
@@ -166,19 +168,16 @@ class WvletScanner(source: ScannerSource) extends LogSupport:
   private def getDoubleQuoteString(): TokenData = {
     // TODO Support unicode and escape characters
     consume('\"')
-    var ch = peekChar()
     while (ch != '\"' && ch != SU) {
       putChar(ch)
       nextChar()
-      ch = peekChar()
     }
     consume('\"')
-    TokenData(Token.STRING_LITERAL, tokenBuffer.toString, cursor - tokenBuffer.length, cursor)
+    TokenData(Token.STRING_LITERAL, tokenBuffer.toString, offset - tokenBuffer.length, offset)
   }
 
   @tailrec private def getOperatorRest(): TokenData =
-    val ch = peekChar()
-    trace(s"getOperatorRest[${cursor}]: ch: '${String.valueOf(ch)}'")
+    trace(s"getOperatorRest[${offset}]: ch: '${String.valueOf(ch)}'")
     (ch: @switch) match {
       case '~' | '!' | '@' | '#' | '%' | '^' | '*' | '+' | '-' | '<' | '>' | '?' | ':' | '=' | '&' | '|' | '\\' =>
         putChar(ch)
@@ -202,8 +201,7 @@ class WvletScanner(source: ScannerSource) extends LogSupport:
     }
 
   private def getIdentRest(): TokenData =
-    val ch = peekChar()
-    trace(s"getIdentRest[${cursor}]: ch: '${String.valueOf(ch)}'")
+    trace(s"getIdentRest[${offset}]: ch: '${String.valueOf(ch)}'")
     (ch: @switch) match {
       case 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H' | 'I' | 'J' | 'K' | 'L' | 'M' | 'N' | 'O' | 'P' | 'Q' | 'R' |
           'S' | 'T' | 'U' | 'V' | 'W' | 'X' | 'Y' | 'Z' | '$' | 'a' | 'b' | 'c' | 'd' | 'e' | 'f' | 'g' | 'h' | 'i' |
@@ -241,20 +239,18 @@ class WvletScanner(source: ScannerSource) extends LogSupport:
 
   private def toToken(): TokenData =
     val currentTokenStr = getAndClearTokenBuffer()
-    trace(s"toToken at ${cursor}: '${currentTokenStr}'")
+    trace(s"toToken at ${offset}: '${currentTokenStr}'")
     Tokens.allKeywords.find(x => x.str == currentTokenStr) match {
-      case Some(keyword) =>
-        TokenData(keyword, currentTokenStr, cursor - currentTokenStr.length, cursor)
+      case Some(tokenType) =>
+        TokenData(tokenType, currentTokenStr, offset - currentTokenStr.length, offset)
       case None =>
-        TokenData(Token.IDENTIFIER, currentTokenStr, cursor - currentTokenStr.length, cursor)
+        TokenData(Token.IDENTIFIER, currentTokenStr, offset - currentTokenStr.length, offset)
     }
 
   private def getNumber(base: Int): TokenData = {
-    var ch = peekChar()
     while (isNumberSeparator(ch) || digit2int(ch, base) >= 0) {
       putChar(ch)
       nextChar()
-      ch = peekChar()
     }
     checkNoTrailingNumberSeparator()
     var tokenType = Token.INTEGER_LITERAL
@@ -262,8 +258,7 @@ class WvletScanner(source: ScannerSource) extends LogSupport:
     if (base == 10 && ch == '.') {
       putChar(ch)
       nextChar()
-      val lch = peekChar()
-      if ('0' <= lch && lch <= '9') {
+      if ('0' <= ch && ch <= '9') {
         tokenType = getFraction()
       }
     } else
@@ -281,41 +276,34 @@ class WvletScanner(source: ScannerSource) extends LogSupport:
     checkNoTrailingNumberSeparator()
 
     val strVal = getAndClearTokenBuffer()
-    TokenData(tokenType, strVal, cursor - strVal.length, cursor)
+    TokenData(tokenType, strVal, offset - strVal.length, offset)
   }
 
   private def getFraction(): Token = {
     var tokenType = Token.DECIMAL_LITERAL
-    var ch        = peekChar()
-    trace(s"getFraction ch[${cursor}]: '${ch}'")
+    trace(s"getFraction ch[${offset}]: '${ch}'")
     while ('0' <= ch && ch <= '9' || isNumberSeparator(ch)) {
       putChar(ch)
       nextChar()
-      ch = peekChar()
     }
     checkNoTrailingNumberSeparator()
     if (ch == 'e' || ch == 'E') {
       putChar(ch)
       nextChar()
-      ch = peekChar()
       if (ch == '+' || ch == '-') {
         putChar(ch)
         nextChar()
-        ch = peekChar()
       }
       if ('0' <= ch && ch <= '9' || isNumberSeparator(ch)) {
         putChar(ch)
         nextChar()
-        ch = peekChar()
         if (ch == '+' || ch == '-') {
           putChar(ch)
           nextChar()
-          ch = peekChar()
         }
         while ('0' <= ch && ch <= '9' || isNumberSeparator(ch)) {
           putChar(ch)
           nextChar()
-          ch = peekChar()
         }
         checkNoTrailingNumberSeparator()
       }
