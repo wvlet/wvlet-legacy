@@ -32,6 +32,7 @@ object Main extends LogSupport {
         dom.document.body.appendChild(elem)
       case other => other
     }
+    info(s"Hello wvlet")
 
     val mainPanel = new MainPanel()
     DOMRenderer.renderTo(mainNode, mainPanel)

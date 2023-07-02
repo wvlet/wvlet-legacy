@@ -74,7 +74,7 @@ object LogicalPlan:
       returnClause: Option[Return] = None
   )(override val nodeLocation: Option[SourceLocation] = None)
       extends Relation {
-
+    
     override def toExpr(context: PrintContext): String = {
       val s = new StringBuilder()
       if (forItems.nonEmpty) then s ++= "for"

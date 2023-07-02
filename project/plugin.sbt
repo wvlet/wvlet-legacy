@@ -22,9 +22,13 @@ addDependencyTreePlugin
 
 // For Scala.js
 val SCALAJS_VERSION = sys.env.getOrElse("SCALAJS_VERSION", "1.13.2")
+libraryDependencies += "org.scala-js" %% "scalajs-env-selenium" % "1.1.1"
 addSbtPlugin("org.scala-js" % "sbt-scalajs" % SCALAJS_VERSION)
-libraryDependencies ++= (
-  Seq("org.scala-js" %% "scalajs-env-jsdom-nodejs" % "1.1.0")
+libraryDependencies ++= Seq(
+  // "org.seleniumhq.selenium" % "selenium-java" % "4.10.0",
+  // selenium-java requires Guava
+  "com.google.guava" % "guava" % "31.1-jre",
+  "org.scala-js" %% "scalajs-env-jsdom-nodejs" % "1.1.0"
 )
 addSbtPlugin("org.scalablytyped.converter" % "sbt-converter" % "1.0.0-beta42")
 

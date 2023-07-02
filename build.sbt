@@ -32,7 +32,7 @@ val buildSettings = Seq[Setting[_]](
   sonatypeProfileName := "org.wvlet",
   publishTo           := sonatypePublishToBundle.value,
   libraryDependencies ++= Seq(
-    "org.wvlet.airframe" %% "airspec" % AIRSPEC_VERSION % Test
+    "org.wvlet.airframe" %%% "airspec" % AIRSPEC_VERSION % Test
   ),
   testFrameworks += new TestFramework("wvlet.airspec.Framework")
 )
@@ -161,6 +161,9 @@ lazy val apiClient =
     ).dependsOn(api.jvm)
 
 import org.scalajs.linker.interface.ModuleSplitStyle
+import org.openqa.selenium.chrome.ChromeOptions
+import org.openqa.selenium.safari.SafariOptions
+import org.scalajs.jsenv.selenium.SeleniumJSEnv
 
 val publicDev  = taskKey[String]("output directory for `npm run dev`")
 val publicProd = taskKey[String]("output directory for `npm run build`")
@@ -168,6 +171,7 @@ val publicProd = taskKey[String]("output directory for `npm run build`")
 lazy val ui = project
   .in(file("wvlet-ui"))
   .enablePlugins(ScalaJSPlugin)
+  //.enablePlugins(ScalaJSJUnitPlugin)
   .enablePlugins(ScalablyTypedConverterExternalNpmPlugin)
   .enablePlugins(AirframeHttpPlugin)
   .settings(
@@ -175,20 +179,21 @@ lazy val ui = project
     airframeHttpClients := Seq(
       "wvlet.dataflow.api.frontend:rpc:FrontendRPC"
     ),
+    // Test / jsEnv := new org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv(),
+    Test / jsEnv := {
+      val options = new ChromeOptions()
+      options.setHeadless(true)
+      //val options = new SafariOptions()
+      new SeleniumJSEnv(options,
+        SeleniumJSEnv.Config()
+          .withKeepAlive(true)
+      )
+    },
+    Test / parallelExecution := false,
     scalaJSUseMainModuleInitializer := true,
-    scalaJSLinkerConfig ~= {
-      linkerConfig(_)
-    },
-    Compile / fullLinkJS / scalaJSLinkerConfig ~= {
-      linkerConfig(_)
-        // Workaround for the error:
-        // Surfaces.scala(235:12:Return): java.io.Serializable expected but java.lang.Class found for tree of type org.scalajs.ir.Trees$Apply
-        .withCheckIR(false)
-    },
-    Test / fullLinkJS / scalaJSLinkerConfig ~= {
-      linkerConfig(_)
-        .withCheckIR(false)
-    },
+//    scalaJSLinkerConfig ~= {
+//      linkerConfig(_)
+//    },
     externalNpm := {
       import java.nio.file.{Files, Paths}
       val yarnProg = Files.exists(Paths.get("/opt/homebrew/bin/yarn")) match {
@@ -197,13 +202,14 @@ lazy val ui = project
         case false => "yarn"
       }
       // Use Yarn instead of npm
-      scala.sys.process.Process(List(yarnProg, "--silent"), baseDirectory.value).!
+      // scala.sys.process.Process(List(yarnProg, "--silent"), baseDirectory.value).!
       baseDirectory.value
     },
     libraryDependencies ++= Seq(
       "org.wvlet.airframe" %%% "airframe"         % AIRFRAME_VERSION,
       "org.wvlet.airframe" %%% "airframe-http"    % AIRFRAME_VERSION,
-      "org.wvlet.airframe" %%% "airframe-rx-html" % AIRFRAME_VERSION
+      "org.wvlet.airframe" %%% "airframe-rx-html" % AIRFRAME_VERSION,
+      "org.seleniumhq.selenium" % "selenium-java" % "4.10.0" % Test
     ),
     publicDev  := s"target/scala-${scalaVersion.value}/ui-fastopt",
     publicProd := s"target/scala-${scalaVersion.value}/ui-opt"
@@ -217,7 +223,8 @@ def linkerConfig(config: StandardConfig): StandardConfig = {
   config
     .withSourceMap(true)
     .withModuleKind(ModuleKind.ESModule)
-    .withModuleSplitStyle(ModuleSplitStyle.SmallModulesFor(List("wvlet.dataflow.ui")))
+    //.withModuleSplitStyle(ModuleSplitStyle.SmallModulesFor(List("wvlet.dataflow.ui")))
+    .withModuleSplitStyle(ModuleSplitStyle.SmallestModules)
 }
 
 def linkerOutputDirectory(v: Attributed[org.scalajs.linker.interface.Report]): File = {
