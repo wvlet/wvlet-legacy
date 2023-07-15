@@ -17,6 +17,7 @@ import wvlet.airframe.rx.html.*
 import wvlet.airframe.rx.html.all.*
 import wvlet.airspec.AirSpec
 import org.scalajs.dom.document
+import wvlet.dataflow.ui.component.MainPanel
 
 class JSTest extends AirSpec {
   test("sample") {
@@ -29,5 +30,9 @@ class JSTest extends AirSpec {
       override def render: RxElement = div("hello dom")
     }
     DOMRenderer.render(rx)
+  }
+
+  test("render monaco") {
+    DOMRenderer.render(MainPanel())
   }
 }

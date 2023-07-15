@@ -161,9 +161,12 @@ lazy val apiClient =
     ).dependsOn(api.jvm)
 
 import org.scalajs.linker.interface.ModuleSplitStyle
-import org.openqa.selenium.chrome.ChromeOptions
+import org.openqa.selenium.{Capabilities,WebDriver}
+import org.openqa.selenium.chrome.{ChromeDriver,ChromeOptions}
 import org.openqa.selenium.safari.SafariOptions
+import org.openqa.selenium.remote.server.{DriverFactory, DriverProvider}
 import org.scalajs.jsenv.selenium.SeleniumJSEnv
+import org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv
 
 val publicDev  = taskKey[String]("output directory for `npm run dev`")
 val publicProd = taskKey[String]("output directory for `npm run build`")
@@ -179,21 +182,29 @@ lazy val ui = project
     airframeHttpClients := Seq(
       "wvlet.dataflow.api.frontend:rpc:FrontendRPC"
     ),
-    // Test / jsEnv := new org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv(),
-    Test / jsEnv := {
-      val options = new ChromeOptions()
-      options.setHeadless(true)
-      //val options = new SafariOptions()
-      new SeleniumJSEnv(options,
-        SeleniumJSEnv.Config()
-          .withKeepAlive(true)
-      )
-    },
+    Test / jsEnv := new JSDOMNodeJSEnv(JSDOMNodeJSEnv.Config().withArgs(List("--experimental-vm-modules"))),
+    //Test / classLoaderLayeringStrategy := ClassLoaderLayeringStrategy.Flat,
+//    Test / jsEnv := {
+//      val options = new ChromeOptions()
+//      // options.setHeadless(true)
+//      //val options = new SafariOptions()
+//      new SeleniumJSEnv(options,
+//        SeleniumJSEnv.Config()
+//          .withDriverFactory(new DriverFactory {
+//            override def registerDriverProvider(driverProvider: DriverProvider) = ???
+//            override def newInstance(capabilities: Capabilities): WebDriver = {
+//              val options = new ChromeOptions()
+//              val driver = new ChromeDriver(options)
+//              driver
+//            }
+//          })
+//      )
+//    },
     Test / parallelExecution := false,
     scalaJSUseMainModuleInitializer := true,
-//    scalaJSLinkerConfig ~= {
-//      linkerConfig(_)
-//    },
+    scalaJSLinkerConfig ~= {
+      linkerConfig(_)
+    },
     externalNpm := {
       import java.nio.file.{Files, Paths}
       val yarnProg = Files.exists(Paths.get("/opt/homebrew/bin/yarn")) match {
@@ -223,8 +234,8 @@ def linkerConfig(config: StandardConfig): StandardConfig = {
   config
     .withSourceMap(true)
     .withModuleKind(ModuleKind.ESModule)
-    //.withModuleSplitStyle(ModuleSplitStyle.SmallModulesFor(List("wvlet.dataflow.ui")))
-    .withModuleSplitStyle(ModuleSplitStyle.SmallestModules)
+    .withModuleSplitStyle(ModuleSplitStyle.SmallModulesFor(List("wvlet.dataflow.ui")))
+    //.withModuleSplitStyle(ModuleSplitStyle.SmallestModules)
 }
 
 def linkerOutputDirectory(v: Attributed[org.scalajs.linker.interface.Report]): File = {

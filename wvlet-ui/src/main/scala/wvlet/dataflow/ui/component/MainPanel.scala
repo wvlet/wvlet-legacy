@@ -29,16 +29,16 @@ class MainPanel extends RxElement {
   private val rpcClient = FrontendRPC.newRPCAsyncClient(Http.client.newJSClient)
 
   override def render: RxElement = {
-    //import typings.monacoEditor.mod.editor
-//    editor.create(
-//      dom.document.getElementById("editor").asInstanceOf[dom.HTMLElement],
-//      editor
-//        .IStandaloneEditorConstructionOptions()
-//        .setValue(s"SELECT 1")
-//        .setLanguage("sql")
-//        .setTheme("vs-dark")
-//    )
-//
+    import typings.monacoEditor.mod.editor
+    editor.create(
+      dom.document.getElementById("editor").asInstanceOf[dom.HTMLElement],
+      editor
+        .IStandaloneEditorConstructionOptions()
+        .setValue(s"SELECT 1")
+        .setLanguage("sql")
+        .setTheme("vs-dark")
+    )
+
     div(
       cls -> "p-2",
       "Hello wvlet!",
