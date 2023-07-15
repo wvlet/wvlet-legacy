@@ -1,5 +1,41 @@
 [
   {
+    "type": "comparisonOperator",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "comparison_expression",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "comparisonOperator",
+          "named": true
+        },
+        {
+          "type": "comparison_expression",
+          "named": true
+        },
+        {
+          "type": "identifier",
+          "named": true
+        },
+        {
+          "type": "number",
+          "named": true
+        },
+        {
+          "type": "qname",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": "flowr_expr",
     "named": true,
     "fields": {},
@@ -13,6 +49,10 @@
         },
         {
           "type": "return_expr",
+          "named": true
+        },
+        {
+          "type": "where_expr",
           "named": true
         }
       ]
@@ -53,6 +93,21 @@
     }
   },
   {
+    "type": "qname",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "identifier",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": "return_expr",
     "named": true,
     "fields": {},
@@ -76,7 +131,19 @@
       "required": true,
       "types": [
         {
+          "type": "comparison_expression",
+          "named": true
+        },
+        {
           "type": "identifier",
+          "named": true
+        },
+        {
+          "type": "number",
+          "named": true
+        },
+        {
+          "type": "qname",
           "named": true
         }
       ]
@@ -113,7 +180,66 @@
     }
   },
   {
+    "type": "where_expr",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "comparison_expression",
+          "named": true
+        },
+        {
+          "type": "identifier",
+          "named": true
+        },
+        {
+          "type": "number",
+          "named": true
+        },
+        {
+          "type": "qname",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "!=",
+    "named": false
+  },
+  {
     "type": ",",
+    "named": false
+  },
+  {
+    "type": ".",
+    "named": false
+  },
+  {
+    "type": ":",
+    "named": false
+  },
+  {
+    "type": "<",
+    "named": false
+  },
+  {
+    "type": "<=",
+    "named": false
+  },
+  {
+    "type": "=",
+    "named": false
+  },
+  {
+    "type": ">",
+    "named": false
+  },
+  {
+    "type": ">=",
     "named": false
   },
   {
@@ -129,7 +255,15 @@
     "named": false
   },
   {
+    "type": "number",
+    "named": true
+  },
+  {
     "type": "return",
+    "named": false
+  },
+  {
+    "type": "where",
     "named": false
   }
 ]

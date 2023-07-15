@@ -1,5 +1,5 @@
 ======================
-Simple for and return
+for + return
 ======================
 
 for x in A

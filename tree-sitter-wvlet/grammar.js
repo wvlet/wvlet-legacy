@@ -6,6 +6,7 @@ module.exports = grammar({
 
     flowr_expr: $ => seq(
         optional($.for_expr),
+        optional($.where_expr),
         $.return_expr
     ),
 
@@ -24,6 +25,11 @@ module.exports = grammar({
         $.identifier
     ),
 
+    where_expr: $ => seq(
+        'where',
+        $._expression
+    ),
+
     return_expr: $ => seq(
         'return',
         sep1(',', $.return_item)
@@ -34,11 +40,45 @@ module.exports = grammar({
     ),
 
     _expression: $ => choice(
-        $.identifier
+        $.qname,
+        $.identifier,
+        $.number,
+        $._conditional_expression
+    ),
+
+    _conditional_expression: $ => choice(
+        $.comparison_expression
+    ),
+
+    comparison_expression: $ => prec.left(1,
+        seq(
+            $._expression,
+            $.comparisonOperator,
+            $._expression
+        )
+    ),
+
+    comparisonOperator: $ => choice(
+        '=',
+        '<',
+        '>',
+        '<=',
+        '>=',
+        '!='
+    ),
+
+    qname : $ => seq($._identifier, repeat1(seq('.', $._identifier))),
+
+    named_identifier: $ => seq(
+        $.identifier,
+        ':',
+        $._expression
     ),
 
     // An identifier is a sequence of one or more letters, numbers, or underscores.
     identifier: $ => /[a-zA-Z_][a-zA-Z0-9_]*/,
+
+    _identifier: $ => $.identifier,
 
     // Number strings are sequences of digits, possibly separated by underscores.
     number: $ => /\d[\d_]*/,
