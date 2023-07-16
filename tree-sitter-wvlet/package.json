@@ -1,0 +1,33 @@
+{
+  "name": "tree-sitter-wvlet",
+  "version": "23.7.0",
+  "description": "wvlet tree-sitter grammar",
+  "main": "bindings/node",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/wvlet/wvlet.git"
+  },
+  "author": "Taro L. Saito",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/wvlet/wvlet/issues"
+  },
+  "homepage": "https://github.com/wvlet/wvlet#readme",
+  "dependencies": {
+    "nan": "^2.17.0"
+  },
+  "devDependencies": {
+    "tree-sitter-cli": "^0.20.8"
+  },
+  "tree-sitter": [
+    {
+      "scope": "source.wv",
+      "file-types": [
+        "wv"
+      ]
+    }
+  ]
+}

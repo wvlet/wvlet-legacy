@@ -1,0 +1,28 @@
+======================
+for + return
+======================
+
+// simple for
+for x in A
+return x
+
+---
+
+(source_file
+  (comment)
+  (flowr_expr
+    (for_expr
+      (for_item
+        (identifier)
+        (table_expr
+          (identifier)
+        )
+      )
+    )
+    (return_expr
+      (return_item
+        (identifier)
+      )
+    )
+  )
+)

@@ -1,0 +1,8 @@
+for a in A
+//^keyword
+//  ^string
+//    ^keyword
+//       ^string
+return a
+//^keyword
+//     ^string

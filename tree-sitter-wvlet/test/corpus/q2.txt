@@ -1,0 +1,37 @@
+===================
+for + where
+===================
+
+for a in A
+where a.id = 1
+return a
+
+---
+
+(source_file
+  (flowr_expr
+    (for_expr
+      (for_item
+        (identifier)
+        (table_expr
+          (identifier)
+        )
+      )
+    )
+    (where_expr
+      (comparison_expression
+        (qname
+          (identifier)
+          (identifier)
+        )
+        (comparisonOperator)
+        (number)
+      )
+    )
+    (return_expr
+      (return_item
+        (identifier)
+      )
+    )
+  )
+)
