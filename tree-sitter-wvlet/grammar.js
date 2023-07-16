@@ -1,5 +1,11 @@
+const PREC = {
+  comment: 1,
+}
+
 module.exports = grammar({
   name: 'wvlet',
+
+  extras: $ => [$.comment, /\s/],
 
   rules: {
     source_file: $ => choice($.flowr_expr),
@@ -82,6 +88,9 @@ module.exports = grammar({
 
     // Number strings are sequences of digits, possibly separated by underscores.
     number: $ => /\d[\d_]*/,
+
+    comment: $ => seq(token("//"), choice($._comment_text)),
+    _comment_text: $ => token(prec(PREC.comment, /.*/)),
   }
 });
 
