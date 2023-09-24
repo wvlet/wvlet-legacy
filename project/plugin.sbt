@@ -26,7 +26,7 @@ addSbtPlugin("org.scala-js" % "sbt-scalajs" % SCALAJS_VERSION)
 libraryDependencies ++= (
   Seq("org.scala-js" %% "scalajs-env-jsdom-nodejs" % "1.1.0")
 )
-addSbtPlugin("org.scalablytyped.converter" % "sbt-converter" % "1.0.0-beta42")
+addSbtPlugin("org.scalablytyped.converter" % "sbt-converter" % "1.0.0-beta43")
 
 // For setting explicit versions for each commit
 addSbtPlugin("com.github.sbt" % "sbt-dynver" % "5.0.1")
