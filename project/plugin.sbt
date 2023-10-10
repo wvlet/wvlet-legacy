@@ -32,7 +32,7 @@ addSbtPlugin("org.scalablytyped.converter" % "sbt-converter" % "1.0.0-beta43")
 addSbtPlugin("com.github.sbt" % "sbt-dynver" % "5.0.1")
 
 // Documentation
-addSbtPlugin("org.scalameta" % "sbt-mdoc" % "2.3.7")
+addSbtPlugin("org.scalameta" % "sbt-mdoc" % "2.3.8")
 
 addSbtPlugin("org.xerial.sbt" % "sbt-pack" % "0.17")
 
