@@ -12,6 +12,4 @@
  * limitations under the License.
  */
 
-// import './style.css'
-// import 'scalajs:main.js';
 import '@public/main.js'

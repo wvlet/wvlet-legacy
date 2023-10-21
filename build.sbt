@@ -1,5 +1,4 @@
-val SCALA_2_13 = "2.13.8"
-val SCALA_3    = "3.3.1"
+val SCALA_3 = IO.read(file("SCALA_VERSION")).trim
 
 val AIRFRAME_VERSION    = sys.env.getOrElse("AIRFRAME_VERSION", "23.10.0")
 val AIRSPEC_VERSION     = "23.10.0"
@@ -165,56 +164,51 @@ import org.scalajs.linker.interface.ModuleSplitStyle
 val publicDev  = taskKey[String]("output directory for `npm run dev`")
 val publicProd = taskKey[String]("output directory for `npm run build`")
 
-lazy val ui = project
-  .in(file("wvlet-ui"))
+lazy val uiLib = project
+  .in(file("wvlet-ui-lib"))
   .enablePlugins(ScalaJSPlugin)
-  .enablePlugins(ScalablyTypedConverterExternalNpmPlugin)
   .enablePlugins(AirframeHttpPlugin)
   .settings(
     buildSettings,
     airframeHttpClients := Seq(
       "wvlet.dataflow.api.frontend:rpc:FrontendRPC"
     ),
-    scalaJSUseMainModuleInitializer := true,
-    scalaJSLinkerConfig ~= {
-      linkerConfig(_)
-    },
-    Compile / fullLinkJS / scalaJSLinkerConfig ~= {
-      linkerConfig(_)
-        // Workaround for the error:
-        // Surfaces.scala(235:12:Return): java.io.Serializable expected but java.lang.Class found for tree of type org.scalajs.ir.Trees$Apply
-        .withCheckIR(false)
-    },
-    Test / fullLinkJS / scalaJSLinkerConfig ~= {
-      linkerConfig(_)
-        .withCheckIR(false)
-    },
-    externalNpm := {
-      import java.nio.file.{Files, Paths}
-      val yarnProg = Files.exists(Paths.get("/opt/homebrew/bin/yarn")) match {
-        // Workaround for IntelliJ sbt project loader on Mac OS X
-        case true  => "/opt/homebrew/bin/yarn"
-        case false => "yarn"
-      }
-      // Use Yarn instead of npm
-      scala.sys.process.Process(List(yarnProg, "--silent"), baseDirectory.value).!
-      baseDirectory.value
-    },
+    Test / jsEnv := new org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv(),
     libraryDependencies ++= Seq(
       "org.wvlet.airframe" %%% "airframe"         % AIRFRAME_VERSION,
       "org.wvlet.airframe" %%% "airframe-http"    % AIRFRAME_VERSION,
       "org.wvlet.airframe" %%% "airframe-rx-html" % AIRFRAME_VERSION
+    )
+  )
+  .dependsOn(api.js)
+
+lazy val ui = project
+  .in(file("wvlet-ui"))
+  .enablePlugins(ScalaJSPlugin)
+  .enablePlugins(ScalablyTypedConverterExternalNpmPlugin)
+  .settings(
+    buildSettings,
+    scalaJSUseMainModuleInitializer := true,
+    scalaJSLinkerConfig ~= {
+      linkerConfig(_)
+    },
+    externalNpm := {
+      scala.sys.process.Process(List("npm", "install", "--silent", "--no-audit", "--no-fund"), baseDirectory.value).!
+      baseDirectory.value
+    },
+    libraryDependencies ++= Seq(
     ),
     publicDev  := s"target/scala-${scalaVersion.value}/ui-fastopt",
     publicProd := s"target/scala-${scalaVersion.value}/ui-opt"
     // Adding a build step here didn't work well with 'yarn build'
     // publicProd := linkerOutputDirectory((Compile / fullLinkJS).value).relativeTo(baseDirectory.value).get.getPath()
   )
-  .dependsOn(api.js)
+  .dependsOn(uiLib)
 
 import org.scalajs.linker.interface.{StandardConfig, OutputPatterns}
 def linkerConfig(config: StandardConfig): StandardConfig = {
   config
+    .withCheckIR(true)
     .withSourceMap(true)
     .withModuleKind(ModuleKind.ESModule)
     .withModuleSplitStyle(ModuleSplitStyle.SmallModulesFor(List("wvlet.dataflow.ui")))
