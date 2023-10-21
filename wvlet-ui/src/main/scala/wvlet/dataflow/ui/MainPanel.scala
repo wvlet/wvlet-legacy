@@ -11,16 +11,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package wvlet.dataflow.ui.component
+package wvlet.dataflow.ui
 
-import typings.monacoEditor.mod.editor
+import org.scalajs.dom
 import wvlet.airframe.http.Http
 import wvlet.airframe.rx.Rx
-import wvlet.airframe.rx.html.RxElement
-import wvlet.airframe.rx.html._
+import wvlet.airframe.rx.html.*
 import wvlet.airframe.rx.html.all.*
 import wvlet.dataflow.api.frontend.FrontendRPC
-import org.scalajs.dom
+import wvlet.dataflow.ui.component.Editor
 
 import java.net.http.HttpClient
 
@@ -29,23 +28,15 @@ class MainPanel extends RxElement {
   private val rpcClient = FrontendRPC.newRPCAsyncClient(Http.client.newJSClient)
 
   override def render: RxElement = {
-    editor.create(
-      dom.document.getElementById("editor").asInstanceOf[dom.HTMLElement],
-      editor
-        .IStandaloneEditorConstructionOptions()
-        .setValue(s"SELECT 1")
-        .setLanguage("sql")
-        .setTheme("vs-dark")
-    )
-
     div(
       cls -> "p-2",
       "Hello wvlet!",
-      Rx.intervalMillis(500).flatMap { i =>
-        rpcClient.FrontendApi.serviceInfo().map { serviceInfo =>
-          p(s"Server up time:${serviceInfo.upTime}")
-        }
-      }
+//      Rx.intervalMillis(500).flatMap { i =>
+//        rpcClient.FrontendApi.serviceInfo().map { serviceInfo =>
+//          p(s"Server up time:${serviceInfo.upTime}")
+//        }
+//      },
+      new Editor()
     )
   }
 }

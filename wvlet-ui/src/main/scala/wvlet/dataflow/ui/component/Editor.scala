@@ -11,19 +11,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package wvlet.dataflow.ui
+package wvlet.dataflow.ui.component
 
-import wvlet.airframe.rx.html.DOMRenderer
-import wvlet.log.LogSupport
+import wvlet.airframe.rx.html.*
+import all.*
+import typings.monacoEditor.mod.editor
 import org.scalajs.dom
 
-object Main extends LogSupport {
-  def main(args: Array[String]): Unit = {
-    renderMain()
+class Editor extends RxElement {
+  override def onMount: Unit = {
+    editor.create(
+      dom.document.getElementById("editor").asInstanceOf[dom.HTMLElement],
+      editor
+        .IStandaloneEditorConstructionOptions()
+        .setValue(s"SELECT 1")
+        .setLanguage("sql")
+        .setTheme("vs-dark")
+    )
   }
 
-  def renderMain(): Unit = {
-    val mainPanel = new MainPanel()
-    mainPanel.renderTo("main")
-  }
+  override def render: RxElement = div(
+    id    -> "editor",
+    style -> "width: 800px; height: 250px; border: 1px solid grey;"
+  )
 }

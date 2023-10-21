@@ -11,47 +11,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { spawnSync } from "child_process";
 import { defineConfig } from "vite";
-//import scalaJSPlugin from "@scala-js/vite-plugin-scalajs";
+import fs from 'fs'
 
 function isDev() {
     return process.env.NODE_ENV !== "production";
 }
 
-function printSbtTask(task) {
-    const args = ["--error", "--batch", "-Dsbt.supershell=false", `print ${task}`];
-    const options = {
-        cwd: "..",
-        stdio: [
-            "ignore", // StdIn.
-            "pipe", // StdOut.
-            "inherit", // StdErr.
-        ],
-    };
-    const result = process.platform === 'win32'
-        ? spawnSync("sbt.bat", args.map(x => `"${x}"`), {shell: true, ...options})
-        : spawnSync("sbt", args, options);
-
-    if (result.error)
-        throw result.error;
-    if (result.status !== 0)
-
-        throw new Error(`sbt process failed with exit code ${result.status}`);
-    return result.stdout.toString('utf8').trim();
-}
-
-const replacementForPublic = isDev()
-     ? printSbtTask("ui/publicDev")
-     : printSbtTask("ui/publicProd");
+const scalaVersion = fs.readFileSync("../SCALA_VERSION").toString().trim();
+const suffix = isDev() ? "-fastopt" : "-opt";
+const replacementForPublic= `target/scala-${scalaVersion}/ui${suffix}`;
 
 export default defineConfig({
-    // plugins: [
-    //     scalaJSPlugin({
-    //         cwd: '..',
-    //         projectID: 'ui',
-    //     })
-    // ],
     server: {
         open: true,
         proxy: {
