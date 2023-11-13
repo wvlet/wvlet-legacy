@@ -15,45 +15,29 @@ package wvlet.dataflow.api.v1
 
 /**
   */
-sealed trait TaskStatus {
-  def isDone: Boolean
-  def name: String = toString
-}
-
-object TaskStatus {
+enum TaskStatus(val isDone: Boolean):
+  def name: String = this.toString
 
   /**
     * Task is queued at the coordinator
     */
-  case object QUEUED extends TaskStatus {
-    override def isDone: Boolean = false
-  }
+  case QUEUED extends TaskStatus(isDone = false)
 
   /**
     * Task is starting at the coordinator
     */
-  case object STARTING extends TaskStatus {
-    override def isDone: Boolean = false
-  }
+  case STARTING extends TaskStatus(isDone = false)
 
   /**
     * Task is running at a worker
     */
-  case object RUNNING extends TaskStatus {
-    override def isDone: Boolean = false
-  }
-  case object FINISHED extends TaskStatus {
-    override def isDone: Boolean = true
-  }
-  case object FAILED extends TaskStatus {
-    override def isDone: Boolean = true
-  }
-  case object CANCELLED extends TaskStatus {
-    override def isDone: Boolean = true
-  }
+  case RUNNING   extends TaskStatus(isDone = false)
+  case FINISHED  extends TaskStatus(isDone = true)
+  case FAILED    extends TaskStatus(isDone = true)
+  case CANCELLED extends TaskStatus(isDone = true)
 
-  def all: Seq[TaskStatus] = Seq(QUEUED, STARTING, RUNNING, FINISHED, FAILED, CANCELLED)
+  def all: Seq[TaskStatus] = TaskStatus.values
+
   def unapply(s: String): Option[TaskStatus] = {
     all.find(_.name == s)
   }
-}
