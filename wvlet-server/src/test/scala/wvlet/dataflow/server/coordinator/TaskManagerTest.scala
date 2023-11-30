@@ -25,7 +25,7 @@ import scala.annotation.tailrec
 
 /**
   */
-class TaskManagerTest extends AirSpec {
+class TaskManagerTest extends AirSpec:
 
   override def design: Design = ServerModule.testServerAndClient
 
@@ -45,11 +45,10 @@ class TaskManagerTest extends AirSpec {
       debug(taskList)
 
       @tailrec
-      def loop(t: TaskId, maxRetry: Int): Unit = {
-        if (maxRetry < 0) {
-          fail("Cannot update the status")
-        } else {
-          client.TaskApi.getTask(t) match {
+      def loop(t: TaskId, maxRetry: Int): Unit =
+        if maxRetry < 0 then fail("Cannot update the status")
+        else
+          client.TaskApi.getTask(t) match
             case None =>
               fail(s"Task ${t} is not found")
             case Some(ref) if ref.status != TaskStatus.QUEUED =>
@@ -57,11 +56,7 @@ class TaskManagerTest extends AirSpec {
             case Some(ref) =>
               Thread.sleep(100)
               loop(t, maxRetry - 1)
-          }
-        }
-      }
 
       loop(ret.id, 30)
     }
   }
-}

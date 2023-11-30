@@ -18,11 +18,10 @@ import wvlet.lang.model.expression.*
 import wvlet.lang.model.expression.Expression.ReturnItem
 import wvlet.lang.model.formatter.{FormatOption, PrintContext}
 
-trait LogicalPlan {
-  def modelName: String = {
+trait LogicalPlan:
+  def modelName: String =
     val n = this.getClass.getSimpleName
     n.stripSuffix("$")
-  }
   def nodeLocation: Option[SourceLocation] = None
   def toExpr(context: PrintContext = PrintContext.default): String
 
@@ -35,7 +34,6 @@ trait LogicalPlan {
 
   def inputAttributes: AttributeList  = ???
   def outputAttributes: AttributeList = ???
-}
 
 object LogicalPlan:
 
@@ -43,26 +41,22 @@ object LogicalPlan:
       name: String,
       schemaItem: Seq[SchemaItem]
   )(sourceLocation: Option[SourceLocation])
-      extends LogicalPlan {
-    override def toExpr(context: PrintContext): String = {
+      extends LogicalPlan:
+    override def toExpr(context: PrintContext): String =
       val s = new StringBuilder()
       s ++= s"schema ${name}:"
-      for (x <- schemaItem) {
+      for x <- schemaItem do
         s ++= context.newline
         s ++= context.indent(1)
         s ++= x.toExpr(context)
-      }
       s.result()
-    }
-  }
 
   case class SchemaItem(
       name: String,
       typeName: String
   )(sourceLocation: Option[SourceLocation])
-      extends Expression {
+      extends Expression:
     override def toExpr(context: PrintContext): String = s"${name}: ${typeName}"
-  }
 
   trait Relation extends LogicalPlan
   trait UnaryRelation extends LogicalPlan:
@@ -73,22 +67,20 @@ object LogicalPlan:
       whereClause: Option[Where] = None,
       returnClause: Option[Return] = None
   )(override val nodeLocation: Option[SourceLocation] = None)
-      extends Relation {
+      extends Relation:
 
-    override def toExpr(context: PrintContext): String = {
+    override def toExpr(context: PrintContext): String =
       val s = new StringBuilder()
-      if (forItems.nonEmpty) then s ++= "for"
-      forItems.size match {
+      if forItems.nonEmpty then s ++= "for"
+      forItems.size match
         case 1 =>
           s ++= " "
           s ++= forItems.head.toExpr(context)
         case _ =>
-          for (x <- forItems) {
+          for x <- forItems do
             s ++= "\n"
             s ++= context.indent(1)
             s ++= x.toExpr(context)
-          }
-      }
       whereClause.foreach { w =>
         s ++= context.newline
         s ++= w.toExpr(context)
@@ -98,17 +90,12 @@ object LogicalPlan:
         s ++= r.toExpr(context)
       }
       context.indentBlock(s.result())
-    }
-  }
 
-  case class ForItem(id: String, in: Expression)(nodeLocation: Option[SourceLocation]) extends Expression {
+  case class ForItem(id: String, in: Expression)(nodeLocation: Option[SourceLocation]) extends Expression:
     override def toExpr(context: PrintContext): String = s"${id} in ${in.toExpr(context)}"
-  }
 
-  case class Where(filterExpr: Expression)(nodeLocation: Option[SourceLocation]) extends Expression {
+  case class Where(filterExpr: Expression)(nodeLocation: Option[SourceLocation]) extends Expression:
     override def toExpr(context: PrintContext): String = s"where ${filterExpr.toExpr(context)}"
-  }
 
-  case class Return(exprs: Seq[ReturnItem])(nodeLocation: Option[SourceLocation]) extends Expression {
+  case class Return(exprs: Seq[ReturnItem])(nodeLocation: Option[SourceLocation]) extends Expression:
     override def toExpr(context: PrintContext): String = s"return ${exprs.map(_.toExpr(context)).mkString(", ")}"
-  }

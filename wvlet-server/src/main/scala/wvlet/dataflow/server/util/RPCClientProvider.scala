@@ -26,13 +26,13 @@ import scala.annotation.tailrec
 /**
   * Provide gRPC clients and closes created clients when closing this provider
   */
-class RPCClientProvider extends LogSupport with AutoCloseable {
+class RPCClientProvider extends LogSupport with AutoCloseable:
 
   import scala.jdk.CollectionConverters.*
 
   private val clientHolder = new ConcurrentHashMap[String, AutoCloseable]().asScala
 
-  def getCoordinatorClient(name: String, nodeAddress: ServerAddress): CoordinatorClient = {
+  def getCoordinatorClient(name: String, nodeAddress: ServerAddress): CoordinatorClient =
     clientHolder
       .getOrElseUpdate(
         nodeAddress.toString,
@@ -42,9 +42,8 @@ class RPCClientProvider extends LogSupport with AutoCloseable {
             .newSyncClient(nodeAddress.hostAndPort)
         )
       ).asInstanceOf[CoordinatorClient]
-  }
 
-  def getWorkerClient(name: String, nodeAddress: ServerAddress): WorkerClient = {
+  def getWorkerClient(name: String, nodeAddress: ServerAddress): WorkerClient =
     clientHolder
       .getOrElseUpdate(
         nodeAddress.toString,
@@ -54,9 +53,6 @@ class RPCClientProvider extends LogSupport with AutoCloseable {
             .newSyncClient(nodeAddress.hostAndPort)
         )
       ).asInstanceOf[WorkerClient]
-  }
 
-  override def close(): Unit = {
-    Control.closeResources(clientHolder.values.toSeq: _*)
-  }
-}
+  override def close(): Unit =
+    Control.closeResources(clientHolder.values.toSeq*)

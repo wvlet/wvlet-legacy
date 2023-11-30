@@ -22,26 +22,21 @@ import java.time.Instant
 
 /**
   */
-class TaskApiImpl(taskManager: TaskManager) extends TaskApi with LogSupport {
+class TaskApiImpl(taskManager: TaskManager) extends TaskApi with LogSupport:
 
-  override def newTask(request: TaskRequest): TaskRef = {
+  override def newTask(request: TaskRequest): TaskRef =
     taskManager.dispatchTask(request)
-  }
 
-  override def getTask(taskId: TaskId): Option[TaskRef] = {
+  override def getTask(taskId: TaskId): Option[TaskRef] =
     taskManager.getTaskRef(taskId)
-  }
 
-  override def listTasks(taskListRequest: TaskListRequest): TaskList = {
+  override def listTasks(taskListRequest: TaskListRequest): TaskList =
     val tasks = taskManager.getAllTasks
-    val selectedTasks = taskListRequest.limit match {
+    val selectedTasks = taskListRequest.limit match
       case Some(limit) => tasks.take(tasks.size.min(limit))
       case None        => tasks
-    }
     TaskList(
       tasks = selectedTasks
     )
-  }
 
   override def cancelTask(taskId: TaskId): Option[TaskRef] = ???
-}

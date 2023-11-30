@@ -20,15 +20,14 @@ import wvlet.log.LogSupport
 
 import scala.annotation.tailrec
 
-object TaskUtil extends LogSupport {
+object TaskUtil extends LogSupport:
 
-  def waitCompletion(client: ApiClient, taskId: TaskId, maxRetry: Int = 30): TaskRef = {
+  def waitCompletion(client: ApiClient, taskId: TaskId, maxRetry: Int = 30): TaskRef =
     @tailrec
-    def loop(retryCount: Int): TaskRef = {
-      if (retryCount >= maxRetry) {
-        throw new IllegalStateException(s"Task: ${taskId} didn't finish in time")
-      } else {
-        client.TaskApi.getTask(taskId) match {
+    def loop(retryCount: Int): TaskRef =
+      if retryCount >= maxRetry then throw new IllegalStateException(s"Task: ${taskId} didn't finish in time")
+      else
+        client.TaskApi.getTask(taskId) match
           case None =>
             throw new IllegalArgumentException(s"No task for ${taskId} is found")
           case Some(ref) if ref.status != TaskStatus.QUEUED =>
@@ -38,10 +37,4 @@ object TaskUtil extends LogSupport {
             debug(ref)
             Thread.sleep(100 * (retryCount + 1))
             loop(retryCount + 1)
-        }
-      }
-    }
     loop(0)
-  }
-
-}

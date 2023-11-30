@@ -19,7 +19,7 @@ import wvlet.dataflow.server.ServerModule.CoordinatorClient
 
 /**
   */
-class ServerMainTest extends AirSpec {
+class ServerMainTest extends AirSpec:
 
   override def design: Design = ServerModule.testServerAndClient
 
@@ -35,5 +35,3 @@ class ServerMainTest extends AirSpec {
       list.find(_.isCoordinator) shouldBe defined
     }
   }
-
-}

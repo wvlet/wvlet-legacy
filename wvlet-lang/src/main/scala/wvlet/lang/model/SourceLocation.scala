@@ -18,6 +18,5 @@ case class SourceLocation(
     line: Int,
     // 1-origin column number
     column: Int
-) {
+):
   override def toString: String = s"${line}:${column}"
-}

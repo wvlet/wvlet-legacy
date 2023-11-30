@@ -19,12 +19,10 @@ import java.time.Instant
 
 /**
   */
-object Cluster {
+object Cluster:
   type NodeId = String
 
   case class Node(name: NodeId, address: String, isCoordinator: Boolean, startedAt: Instant)
-  case class NodeInfo(node: Node, lastHeartbeatAt: Instant) {
+  case class NodeInfo(node: Node, lastHeartbeatAt: Instant):
     def isCoordinator: Boolean       = node.isCoordinator
     def serverAddress: ServerAddress = ServerAddress(node.address)
-  }
-}

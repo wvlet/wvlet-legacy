@@ -21,14 +21,13 @@ import scala.annotation.{switch, tailrec}
 import scala.collection.mutable
 
 // TODO Add line, offset
-case class TokenData(token: Token, text: String, start: Int, end: Int) {
+case class TokenData(token: Token, text: String, start: Int, end: Int):
   override def toString: String = f"[${start}%3d,${end}%3d] ${token}%10s: '${text}'"
   // TODO
   def getSourceLocation: Option[SourceLocation] = None
-}
 
 object WvletScanner extends LogSupport:
-  def scan(text: String): Seq[TokenData] = {
+  def scan(text: String): Seq[TokenData] =
     val scanner = new WvletScanner(StringSource(text))
     val tokens  = Seq.newBuilder[TokenData]
     scanner.nextChar()
@@ -38,7 +37,6 @@ object WvletScanner extends LogSupport:
       tokens += tokenData
       tokenData = scanner.nextToken()
     tokens.result()
-  }
 
   inline val LF = '\u000A'
   inline val FF = '\u000C'
@@ -50,14 +48,13 @@ object WvletScanner extends LogSupport:
   /**
     * Convert a charactor to an integer value using the given base. Returns -1 upon failures
     */
-  def digit2int(ch: Char, base: Int): Int = {
+  def digit2int(ch: Char, base: Int): Int =
     val num =
-      if (ch <= '9') then ch - '0'
-      else if ('a' <= ch && ch <= 'z') ch - 'a' + 10
-      else if ('A' <= ch && ch <= 'Z') ch - 'A' + 10
+      if ch <= '9' then ch - '0'
+      else if 'a' <= ch && ch <= 'z' then ch - 'a' + 10
+      else if 'A' <= ch && ch <= 'Z' then ch - 'A' + 10
       else -1
-    if (0 <= num && num < base) num else -1
-  }
+    if 0 <= num && num < base then num else -1
 
 class WvletScanner(source: ScannerSource) extends LogSupport:
   import WvletScanner.*
@@ -75,42 +72,31 @@ class WvletScanner(source: ScannerSource) extends LogSupport:
   private var lineOffset: Int = -1
   protected val tokenBuffer   = TokenBuffer()
 
-  private def reportError(msg: String, loc: SourceLocation): Unit = {
+  private def reportError(msg: String, loc: SourceLocation): Unit =
     error(s"${msg} at ${loc}")
-  }
 
-  private def checkNoTrailingNumberSeparator(): Unit = {
-    if (tokenBuffer.nonEmpty && isNumberSeparator(tokenBuffer.last)) {
+  private def checkNoTrailingNumberSeparator(): Unit =
+    if tokenBuffer.nonEmpty && isNumberSeparator(tokenBuffer.last) then
       reportError("trailing number separator", source.sourceLocationOf(offset))
-    }
-  }
 
-  private def consume(expectedChar: Char): Unit = {
-    if (ch != expectedChar) {
+  private def consume(expectedChar: Char): Unit =
+    if ch != expectedChar then
       reportError(s"expected '${expectedChar}', but found '${ch}'", source.sourceLocationOf(offset))
-    }
     nextChar()
-  }
 
   // TODO Skip token until a safe location for error recovery
   def skipToken(): Unit = {}
 
   def nextToken(): TokenData =
-    if (offset >= source.length)
-      TokenData(Token.EOF, "", lastOffset, offset)
-    else
-      fetchToken()
+    if offset >= source.length then TokenData(Token.EOF, "", lastOffset, offset)
+    else fetchToken()
 
-  private def nextChar(): Unit = {
+  private def nextChar(): Unit =
     val index = offset
     lastOffset = index
     offset = index + 1
-    if (index >= source.length) {
-      ch = SU
-    } else {
-      ch = source.text.charAt(index)
-    }
-  }
+    if index >= source.length then ch = SU
+    else ch = source.text.charAt(index)
 
   private def putChar(ch: Char): Unit =
     tokenBuffer.append(ch)
@@ -135,20 +121,17 @@ class WvletScanner(source: ScannerSource) extends LogSupport:
         getOperatorRest()
       case '0' =>
         var base: Int = 10
-        def fetchLeadingZero(): Unit = {
+        def fetchLeadingZero(): Unit =
           putChar(ch)
           nextChar()
-          ch match {
+          ch match
             case 'x' | 'X' =>
               base = 16
               putChar(ch)
               nextChar()
             case _ =>
               base = 10
-          }
-          if (base != 10 && !isNumberSeparator(ch) && digit2int(ch, base) < 0)
-            error("invalid literal number")
-        }
+          if base != 10 && !isNumberSeparator(ch) && digit2int(ch, base) < 0 then error("invalid literal number")
         fetchLeadingZero()
         getNumber(base)
       case '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' =>
@@ -165,20 +148,18 @@ class WvletScanner(source: ScannerSource) extends LogSupport:
         nextChar()
         toToken()
 
-  private def getDoubleQuoteString(): TokenData = {
+  private def getDoubleQuoteString(): TokenData =
     // TODO Support unicode and escape characters
     consume('\"')
-    while (ch != '\"' && ch != SU) {
+    while ch != '\"' && ch != SU do
       putChar(ch)
       nextChar()
-    }
     consume('\"')
     TokenData(Token.STRING_LITERAL, tokenBuffer.toString, offset - tokenBuffer.length, offset)
-  }
 
   @tailrec private def getOperatorRest(): TokenData =
     trace(s"getOperatorRest[${offset}]: ch: '${String.valueOf(ch)}'")
-    (ch: @switch) match {
+    (ch: @switch) match
       case '~' | '!' | '@' | '#' | '%' | '^' | '*' | '+' | '-' | '<' | '>' | '?' | ':' | '=' | '&' | '|' | '\\' =>
         putChar(ch)
         nextChar()
@@ -198,11 +179,10 @@ class WvletScanner(source: ScannerSource) extends LogSupport:
 //      }
 //      else if isSupplementary(ch, isSpecial) then getOperatorRest()
 //      else finishNamed()
-    }
 
   private def getIdentRest(): TokenData =
     trace(s"getIdentRest[${offset}]: ch: '${String.valueOf(ch)}'")
-    (ch: @switch) match {
+    (ch: @switch) match
       case 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H' | 'I' | 'J' | 'K' | 'L' | 'M' | 'N' | 'O' | 'P' | 'Q' | 'R' |
           'S' | 'T' | 'U' | 'V' | 'W' | 'X' | 'Y' | 'Z' | '$' | 'a' | 'b' | 'c' | 'd' | 'e' | 'f' | 'g' | 'h' | 'i' |
           'j' | 'k' | 'l' | 'm' | 'n' | 'o' | 'p' | 'q' | 'r' | 's' | 't' | 'u' | 'v' | 'w' | 'x' | 'y' | 'z' | '0' |
@@ -228,96 +208,78 @@ class WvletScanner(source: ScannerSource) extends LogSupport:
 //        getIdentRest()
 //      else
 //        finishNamed()
-    }
   // def insertToken(token: Token, offset: Int): Unit = { ... }
 
-  private def getAndClearTokenBuffer(): String = {
+  private def getAndClearTokenBuffer(): String =
     val str = tokenBuffer.toString
     tokenBuffer.clear()
     str
-  }
 
   private def toToken(): TokenData =
     val currentTokenStr = getAndClearTokenBuffer()
     trace(s"toToken at ${offset}: '${currentTokenStr}'")
-    Tokens.allKeywords.find(x => x.str == currentTokenStr) match {
+    Tokens.allKeywords.find(x => x.str == currentTokenStr) match
       case Some(tokenType) =>
         TokenData(tokenType, currentTokenStr, offset - currentTokenStr.length, offset)
       case None =>
         TokenData(Token.IDENTIFIER, currentTokenStr, offset - currentTokenStr.length, offset)
-    }
 
-  private def getNumber(base: Int): TokenData = {
-    while (isNumberSeparator(ch) || digit2int(ch, base) >= 0) {
+  private def getNumber(base: Int): TokenData =
+    while isNumberSeparator(ch) || digit2int(ch, base) >= 0 do
       putChar(ch)
       nextChar()
-    }
     checkNoTrailingNumberSeparator()
     var tokenType = Token.INTEGER_LITERAL
 
-    if (base == 10 && ch == '.') {
+    if base == 10 && ch == '.' then
       putChar(ch)
       nextChar()
-      if ('0' <= ch && ch <= '9') {
-        tokenType = getFraction()
-      }
-    } else
-      (ch: @switch) match {
+      if '0' <= ch && ch <= '9' then tokenType = getFraction()
+    else
+      (ch: @switch) match
         case 'e' | 'E' | 'f' | 'F' | 'd' | 'D' =>
-          if (base == 10) {
-            tokenType = getFraction()
-          }
+          if base == 10 then tokenType = getFraction()
         case 'l' | 'L' =>
           nextChar()
           tokenType = Token.LONG_LITERAL
         case _ =>
-      }
 
     checkNoTrailingNumberSeparator()
 
     val strVal = getAndClearTokenBuffer()
     TokenData(tokenType, strVal, offset - strVal.length, offset)
-  }
 
-  private def getFraction(): Token = {
+  private def getFraction(): Token =
     var tokenType = Token.DECIMAL_LITERAL
     trace(s"getFraction ch[${offset}]: '${ch}'")
-    while ('0' <= ch && ch <= '9' || isNumberSeparator(ch)) {
+    while '0' <= ch && ch <= '9' || isNumberSeparator(ch) do
       putChar(ch)
       nextChar()
-    }
     checkNoTrailingNumberSeparator()
-    if (ch == 'e' || ch == 'E') {
+    if ch == 'e' || ch == 'E' then
       putChar(ch)
       nextChar()
-      if (ch == '+' || ch == '-') {
+      if ch == '+' || ch == '-' then
         putChar(ch)
         nextChar()
-      }
-      if ('0' <= ch && ch <= '9' || isNumberSeparator(ch)) {
+      if '0' <= ch && ch <= '9' || isNumberSeparator(ch) then
         putChar(ch)
         nextChar()
-        if (ch == '+' || ch == '-') {
+        if ch == '+' || ch == '-' then
           putChar(ch)
           nextChar()
-        }
-        while ('0' <= ch && ch <= '9' || isNumberSeparator(ch)) {
+        while '0' <= ch && ch <= '9' || isNumberSeparator(ch) do
           putChar(ch)
           nextChar()
-        }
         checkNoTrailingNumberSeparator()
-      }
       tokenType = Token.EXP_LITERAL
-    }
-    if (ch == 'd' || ch == 'D') {
+    if ch == 'd' || ch == 'D' then
       putChar(ch)
       nextChar()
       tokenType = Token.DOUBLE_LITERAL
-    } else if (ch == 'f' || ch == 'F') {
+    else if ch == 'f' || ch == 'F' then
       putChar(ch)
       nextChar()
       tokenType = Token.FLOAT_LITERAL
-    }
     // checkNoLetter()
     tokenType
-  }

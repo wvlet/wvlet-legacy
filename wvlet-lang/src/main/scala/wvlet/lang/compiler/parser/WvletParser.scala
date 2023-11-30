@@ -35,10 +35,8 @@ class TokenScanner(tokens: IndexedSeq[TokenData]):
   private var cursor = 0
 
   def peekNext: TokenData =
-    if (cursor < tokens.size)
-      tokens(cursor)
-    else
-      WvletParser.EOFToken
+    if cursor < tokens.size then tokens(cursor)
+    else WvletParser.EOFToken
 
   def next: Unit =
     cursor += 1
@@ -57,15 +55,12 @@ class WvletParser(tokenScanner: TokenScanner) extends LogSupport:
 
   def consumeToken(token: Token): Unit =
     val currentToken = peekNextToken
-    if (currentToken.token == token) {
-      nextToken
-    } else {
-      parseError(currentToken, token)
-    }
+    if currentToken.token == token then nextToken
+    else parseError(currentToken, token)
 
   def parseStatement: LogicalPlan =
     val currentToken = peekNextToken
-    currentToken.token match {
+    currentToken.token match
       case Token.FOR =>
         parseFLOWRQuery
       case Token.RETURN =>
@@ -80,11 +75,10 @@ class WvletParser(tokenScanner: TokenScanner) extends LogSupport:
         null
       case _ =>
         null
-    }
 
   def parseFLOWRQuery: FLOWRQuery =
     val currentToken = peekNextToken
-    currentToken.token match {
+    currentToken.token match
       case Token.FOR =>
         nextToken
         val forItems: Seq[ForItem] = parseForItems
@@ -94,103 +88,85 @@ class WvletParser(tokenScanner: TokenScanner) extends LogSupport:
         // TODO parse group by, join, etc.
         var whereClause: Option[Where]   = None
         var returnClause: Option[Return] = None
-        next.token match {
+        next.token match
           case Token.WHERE =>
             whereClause = Some(parseWhere)
-            peekNextToken.token match {
+            peekNextToken.token match
               case Token.RETURN =>
                 returnClause = Some(parseReturn)
               case _ =>
-            }
 
           case Token.RETURN =>
             returnClause = Some(parseReturn)
           case _ =>
-        }
         FLOWRQuery(forItems = forItems, whereClause, returnClause)(currentToken.getSourceLocation)
       case _ =>
         null
-    }
 
   private def parseForItems: Seq[ForItem] =
     // identifier IN expr
     val items        = Seq.newBuilder[ForItem]
     var currentToken = peekNextToken
-    while (currentToken.token == Token.IDENTIFIER) {
+    while currentToken.token == Token.IDENTIFIER do
       val id = currentToken.text
       nextToken
       parseIn
       val expr = parseExpression
       items += ForItem(id, expr)(currentToken.getSourceLocation)
       currentToken = peekNextToken
-    }
     items.result
 
-  private def parseIn: Unit = {
+  private def parseIn: Unit =
     val currentToken = peekNextToken
-    if (currentToken.token == Token.IN) {
-      nextToken
-    } else {
-      parseError(currentToken, Token.IN)
-    }
-  }
+    if currentToken.token == Token.IN then nextToken
+    else parseError(currentToken, Token.IN)
 
   private def parseWhere: Where =
     val currentToken = peekNextToken
-    if (currentToken.token == Token.WHERE) {
+    if currentToken.token == Token.WHERE then
       nextToken
       val expr = parseExpression
       Where(expr)(currentToken.getSourceLocation)
-    } else {
-      parseError(currentToken, Token.WHERE)
-    }
+    else parseError(currentToken, Token.WHERE)
 
   private def parseReturn: Return =
     val currentToken = peekNextToken
-    if (currentToken.token == Token.RETURN) {
+    if currentToken.token == Token.RETURN then
       nextToken
       val returnItems = parseReturnItems
       Return(returnItems)(currentToken.getSourceLocation)
-    } else {
-      parseError(currentToken, Token.RETURN)
-    }
+    else parseError(currentToken, Token.RETURN)
 
-  private def parseReturnItems: Seq[ReturnItem] = {
+  private def parseReturnItems: Seq[ReturnItem] =
     val items = Seq.newBuilder[ReturnItem]
 
     @tailrec
-    def loop: Unit = {
+    def loop: Unit =
       val ri = parseReturnItem
       items += ri
-      if (peekNextToken.token == Token.COMMA) {
+      if peekNextToken.token == Token.COMMA then
         nextToken
         loop
-      }
-    }
     loop
     items.result()
-  }
 
-  private def parseReturnItem: ReturnItem = {
+  private def parseReturnItem: ReturnItem =
     val currentToken = peekNextToken
-    currentToken.token match {
+    currentToken.token match
       case Token.IDENTIFIER =>
         val qName = parseQualifiedName
-        peekNextToken.token match {
+        peekNextToken.token match
           case Token.COLON =>
             nextToken
             val expr = parseExpression
             ReturnItem(Some(qName), expr)
           case _ =>
             ReturnItem(None, qName)
-        }
       case _ =>
         val expr = parseExpression
         ReturnItem(None, expr)
-    }
-  }
 
-  private def parseSchema: SchemaDef = {
+  private def parseSchema: SchemaDef =
     val schemaLoc = peekNextToken.getSourceLocation
     consumeToken(Token.SCHEMA)
     val schemaName = parseQualifiedName
@@ -198,10 +174,10 @@ class WvletParser(tokenScanner: TokenScanner) extends LogSupport:
 
     val schemaItems = Seq.newBuilder[SchemaItem]
 
-    def parseSchemaItem: Unit = {
+    def parseSchemaItem: Unit =
       val currentToken = peekNextToken
       trace(s"parseSchemaItem: ${currentToken}")
-      currentToken.token match {
+      currentToken.token match
         case Token.IDENTIFIER =>
           val id = currentToken.text
           nextToken
@@ -211,23 +187,18 @@ class WvletParser(tokenScanner: TokenScanner) extends LogSupport:
           parseSchemaItem
         case _ =>
 
-      }
-    }
-    def parseSchemaItems: Unit = {
+    def parseSchemaItems: Unit =
       parseSchemaItem
-      while (peekNextToken.token == Token.COMMA) {
+      while peekNextToken.token == Token.COMMA do
         nextToken
         parseSchemaItem
-      }
-    }
     parseSchemaItems
 
     SchemaDef(schemaName.toString, schemaItems.result())(schemaLoc)
-  }
 
-  private def parseDataType: String = {
+  private def parseDataType: String =
     val currentToken = peekNextToken
-    currentToken.token match {
+    currentToken.token match
       case Token.IDENTIFIER =>
         val dataType = currentToken.text
         nextToken
@@ -235,33 +206,30 @@ class WvletParser(tokenScanner: TokenScanner) extends LogSupport:
       // TODO: Parse array, map, nested types, etc.
       case _ =>
         parseError(currentToken, Token.IDENTIFIER)
-    }
-  }
 
   private def parseExpressions: Seq[Expression] =
     val expr = parseExpression
     debug(s"parse expressions: ${expr}")
-    peekNextToken.token match {
+    peekNextToken.token match
       case Token.COMMA =>
         nextToken
         expr +: parseExpressions
       case _ =>
         Seq(expr)
-    }
 
   private def parseExpression: Expression =
     val currentToken = peekNextToken
-    currentToken.token match {
+    currentToken.token match
       case Token.IDENTIFIER =>
         val qName = parseQualifiedName
         val op    = peekNextToken
-        op.token match {
+        op.token match
           // expression comparisonOperator expression
           case Token.EQ | Token.NEQ | Token.LT | Token.LTEQ | Token.GT | Token.GTEQ =>
             val ops = op.token
             nextToken
             val rhs = parseExpression
-            ops match {
+            ops match
               case Token.EQ   => Expression.Equal(qName, rhs)
               case Token.NEQ  => Expression.NotEqual(qName, rhs)
               case Token.LT   => Expression.LessThan(qName, rhs)
@@ -270,10 +238,8 @@ class WvletParser(tokenScanner: TokenScanner) extends LogSupport:
               case Token.GTEQ => Expression.GreaterThanOrEqual(qName, rhs)
               case other =>
                 parseError(op, Token.EQ)
-            }
           case _ =>
             qName
-        }
       case Token.STRING_LITERAL =>
         nextToken
         val text = currentToken.text
@@ -289,12 +255,11 @@ class WvletParser(tokenScanner: TokenScanner) extends LogSupport:
         Expression.NullLiteral(currentToken.text)(currentToken.getSourceLocation)
       case Token.INTEGER_LITERAL =>
         nextToken
-        currentToken.text match {
+        currentToken.text match
           case hex if hex.startsWith("0x") || hex.startsWith("0X") =>
             Expression.IntegerLiteral(hex, Integer.parseInt(hex.substring(2), 16))(currentToken.getSourceLocation)
           case _ =>
             Expression.IntegerLiteral(currentToken.text, currentToken.text.toInt)(currentToken.getSourceLocation)
-        }
       case Token.DECIMAL_LITERAL =>
         nextToken
         Expression.DecimalLiteral(currentToken.text, BigDecimal(currentToken.text))(currentToken.getSourceLocation)
@@ -311,15 +276,14 @@ class WvletParser(tokenScanner: TokenScanner) extends LogSupport:
         )
       case _ =>
         parseError(currentToken, Token.IDENTIFIER)
-    }
 
-  private def parseQualifiedName: QName = {
+  private def parseQualifiedName: QName =
     val qNameBuffer = Seq.newBuilder[String]
     val firstToken  = peekNextToken
 
     @tailrec
-    def loop(t: TokenData): QName = {
-      t.token match {
+    def loop(t: TokenData): QName =
+      t.token match
         case Token.IDENTIFIER =>
           qNameBuffer += t.text
           nextToken
@@ -329,30 +293,22 @@ class WvletParser(tokenScanner: TokenScanner) extends LogSupport:
           loop(peekNextToken)
         case _ =>
           val qName = qNameBuffer.result()
-          if (qName.isEmpty) {
-            parseError(t, Token.IDENTIFIER)
-          } else {
-            QName(qName)(firstToken.getSourceLocation)
-          }
-      }
-    }
+          if qName.isEmpty then parseError(t, Token.IDENTIFIER)
+          else QName(qName)(firstToken.getSourceLocation)
 
     loop(firstToken)
-  }
 
   private def parseIdentifierRest(lastToken: TokenData): Expression =
     val currentToken = peekNextToken
-    currentToken.token match {
+    currentToken.token match
       case Token.DOT =>
         nextToken
         val next = peekNextToken
-        next.token match {
+        next.token match
           case Token.IDENTIFIER =>
             nextToken
             parseIdentifierRest(next)
           case _ =>
             parseError(next, Token.IDENTIFIER)
-        }
       case _ =>
         Identifier(lastToken.text)(lastToken.getSourceLocation)
-    }

@@ -18,26 +18,17 @@ import wvlet.log.LogSupport
 
 /**
   */
-trait TaskStateListener {
+trait TaskStateListener:
   def onStateChange(taskRef: TaskRef): Unit
-}
 
-object TaskStateListener extends LogSupport {
-  def defaultListener: TaskStateListener = new TaskStateListener {
-    override def onStateChange(taskRef: TaskRef): Unit = {
-      taskRef.taskError match {
+object TaskStateListener extends LogSupport:
+  def defaultListener: TaskStateListener = new TaskStateListener:
+    override def onStateChange(taskRef: TaskRef): Unit =
+      taskRef.taskError match
         case None =>
-          if (!taskRef.isFailed) {
-            info(taskRef)
-          } else {
-            warn(taskRef)
-          }
+          if !taskRef.isFailed then info(taskRef)
+          else warn(taskRef)
         case Some(TaskError(_, _, None)) =>
           warn(taskRef)
         case Some(TaskError(_, _, Some(cause))) =>
           warn(taskRef, cause)
-      }
-
-    }
-  }
-}

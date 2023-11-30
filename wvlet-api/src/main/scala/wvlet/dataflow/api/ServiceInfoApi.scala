@@ -28,7 +28,7 @@ case class ServiceInfo(
 /**
   * A base trait for returning the server process information
   */
-abstract trait ServiceInfoApi {
+abstract trait ServiceInfoApi:
 
   /**
     * The process identifier that can be used for checking whether the node is restarted or not
@@ -36,8 +36,6 @@ abstract trait ServiceInfoApi {
   private val id: ULID                  = ULID.newULID
   private val serviceStartTime: Instant = Instant.now()
 
-  def serviceInfo: ServiceInfo = {
+  def serviceInfo: ServiceInfo =
     val uptimeMillis = Instant.now().toEpochMilli - serviceStartTime.toEpochMilli
     ServiceInfo(launchId = id, upTime = ElapsedTime.succinctMillis(uptimeMillis))
-  }
-}

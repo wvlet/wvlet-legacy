@@ -21,7 +21,7 @@ import java.util.concurrent.TimeUnit
 
 /**
   */
-object OkHttpClientService extends LogSupport {
+object OkHttpClientService extends LogSupport:
   def design: Design =
     Design.newDesign
       .bind[OkHttpClient].toInstance {
@@ -38,4 +38,3 @@ object OkHttpClientService extends LogSupport {
         okHttpClient.dispatcher().executorService().shutdown()
         okHttpClient.connectionPool().evictAll()
       }
-}

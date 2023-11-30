@@ -21,74 +21,64 @@ import java.util.concurrent.{Executors, ForkJoinPool, ForkJoinWorkerThread, Thre
 
 class ThreadManager(name: String, numThreads: Int = Runtime.getRuntime.availableProcessors() * 2)
     extends AutoCloseable
-    with LogSupport {
-  private val executorService = {
+    with LogSupport:
+  private val executorService =
     new ForkJoinPool(
       // The number of threads
       numThreads,
-      new ForkJoinWorkerThreadFactory() {
+      new ForkJoinWorkerThreadFactory():
         private val threadCount = new AtomicInteger()
-        override def newThread(pool: ForkJoinPool): ForkJoinWorkerThread = {
+        override def newThread(pool: ForkJoinPool): ForkJoinWorkerThread =
           val thread     = ForkJoinPool.defaultForkJoinWorkerThreadFactory.newThread(pool)
           val threadName = s"${name}-${threadCount.getAndIncrement()}"
           // Using damon threads
           thread.setDaemon(true)
           thread.setName(threadName)
           thread
-        }
-      },
+      ,
       // Use the default behavior for unrecoverable exceptions
       null,
       // Enable asyncMode
       true
     )
-  }
 
-  def submit[U](body: => U): Unit = {
-    executorService.submit(new Runnable {
-      override def run(): Unit = body
-    })
-  }
+  def submit[U](body: => U): Unit =
+    executorService.submit(
+      new Runnable:
+        override def run(): Unit = body
+    )
 
-  override def close(): Unit = {
+  override def close(): Unit =
     info(s"[${name}] Terminating the thread manager")
     executorService.shutdownNow()
-  }
-}
 
 /**
   * Scheduled thread manager
   */
-class ScheduledThreadManager(name: String, numThreads: Int = 1) extends AutoCloseable with LogSupport {
+class ScheduledThreadManager(name: String, numThreads: Int = 1) extends AutoCloseable with LogSupport:
   private val scheduledExecutorService = Executors.newScheduledThreadPool(numThreads)
 
-  def scheduleOneshotTask[U](delay: Long, unit: TimeUnit)(body: => U): Unit = {
+  def scheduleOneshotTask[U](delay: Long, unit: TimeUnit)(body: => U): Unit =
     scheduledExecutorService.schedule(
-      new Runnable {
-        override def run(): Unit = {
+      new Runnable:
+        override def run(): Unit =
           body
-        }
-      },
+      ,
       delay,
       unit
     )
-  }
 
-  def scheduleWithFixedDelay[U](initialDelay: Long, period: Long, unit: TimeUnit)(body: () => U): Unit = {
+  def scheduleWithFixedDelay[U](initialDelay: Long, period: Long, unit: TimeUnit)(body: () => U): Unit =
     scheduledExecutorService.scheduleWithFixedDelay(
-      new Runnable {
-        override def run(): Unit = {
+      new Runnable:
+        override def run(): Unit =
           body()
-        }
-      },
+      ,
       initialDelay,
       period,
       unit
     )
-  }
 
-  override def close(): Unit = {
+  override def close(): Unit =
     info(s"[${name}] Terminating the thread manager")
     scheduledExecutorService.shutdownNow()
-  }
-}

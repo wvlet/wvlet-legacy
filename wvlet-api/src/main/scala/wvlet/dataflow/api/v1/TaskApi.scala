@@ -13,7 +13,7 @@
  */
 package wvlet.dataflow.api.v1
 
-import wvlet.airframe.http._
+import wvlet.airframe.http.*
 import wvlet.airframe.ulid.ULID
 import wvlet.dataflow.api.v1.TaskApi.{Tags, TaskBody, TaskId}
 
@@ -23,26 +23,22 @@ import java.time.Instant
   * A public API for submitting tasks
   */
 @RPC
-trait TaskApi {
+trait TaskApi:
   def newTask(request: TaskRequest): TaskRef
   def getTask(taskId: TaskId): Option[TaskRef]
   def listTasks(taskListRequest: TaskListRequest): TaskList
   def cancelTask(taskId: TaskId): Option[TaskRef]
-}
 
-object TaskApi extends RxRouterProvider {
+object TaskApi extends RxRouterProvider:
   override def router: RxRouter = RxRouter.of[TaskApi]
 
   type TaskId   = ULID
   type TaskBody = Map[String, Any]
-  object TaskBody {
+  object TaskBody:
     val empty: TaskBody = Map.empty
-  }
   type Tags = Seq[String]
-  object Tags {
+  object Tags:
     val empty: Tags = Seq.empty
-  }
-}
 
 //sealed trait TaskTrigger
 //object TaskTrigger {
@@ -77,19 +73,16 @@ case class TaskRef(
     updatedAt: Instant,
     completedAt: Option[Instant] = None,
     taskError: Option[TaskError] = None
-) {
+):
   private var lastHeartBeat: Instant = updatedAt
-  def recordHeartbeat: Unit = {
+  def recordHeartbeat: Unit =
     lastHeartBeat = Instant.now()
-  }
-  override def toString: String = {
-    taskError match {
+  override def toString: String =
+    taskError match
       case Some(err) =>
         s"[T/${id}] ${status}:${err.errorCode} ${taskPlugin}.${methodName}: ${err.message}"
       case None =>
         s"[T/${id}] ${status}: ${taskPlugin}.${methodName}"
-    }
-  }
   def createdAt: Instant = id.toInstant
   def isFailed: Boolean  = status == TaskStatus.FAILED
   def isDone: Boolean    = status.isDone
@@ -103,7 +96,6 @@ case class TaskRef(
   def withError(errorCode: RPCStatus, message: String, cause: Throwable): TaskRef = withError(
     TaskError(errorCode, message, Option(cause))
   )
-}
 case class TaskListRequest(
     limit: Option[Int] = None
 )
@@ -113,8 +105,6 @@ case class TaskList(
     timestamp: Instant = Instant.now()
 )
 
-case class TaskError(errorCode: RPCStatus, message: String, cause: Option[Throwable] = None) {
-  override def toString: String = {
+case class TaskError(errorCode: RPCStatus, message: String, cause: Option[Throwable] = None):
+  override def toString: String =
     s"[${errorCode}] ${message}"
-  }
-}

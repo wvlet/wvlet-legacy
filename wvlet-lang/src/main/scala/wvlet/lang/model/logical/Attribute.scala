@@ -15,6 +15,5 @@ package wvlet.lang.model.logical
 
 trait Attribute {}
 
-trait AttributeList {
+trait AttributeList:
   def size: Int
-}

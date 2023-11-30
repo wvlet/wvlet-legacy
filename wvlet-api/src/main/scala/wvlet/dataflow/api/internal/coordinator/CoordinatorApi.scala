@@ -27,15 +27,13 @@ import java.time.Instant
   * A coordinator can have multiple worker nodes for distributed processing.
   */
 @RPC
-trait CoordinatorApi extends ServiceInfoApi {
-  import CoordinatorApi._
+trait CoordinatorApi extends ServiceInfoApi:
+  import CoordinatorApi.*
 
   def listNodes: Seq[NodeInfo]
   def register(node: Node): Unit
   def updateTaskStatus(request: UpdateTaskRequest): Unit
-}
 
-object CoordinatorApi extends RxRouterProvider {
+object CoordinatorApi extends RxRouterProvider:
   override def router: RxRouter = RxRouter.of[CoordinatorApi]
   case class UpdateTaskRequest(taskId: TaskId, status: TaskStatus, error: Option[TaskError] = None)
-}

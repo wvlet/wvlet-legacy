@@ -20,34 +20,28 @@ import wvlet.log.LogSupport
 import java.sql.DriverManager
 import java.util.Properties
 
-class TrinoJDBCRunner(driver: TrinoJDBCDriver) {
+class TrinoJDBCRunner(driver: TrinoJDBCDriver):
 
-  def withConnection[U](service: TrinoService, schema: String)(body: TrinoConnection => U): U = {
+  def withConnection[U](service: TrinoService, schema: String)(body: TrinoConnection => U): U =
     Control.withResource(driver.newConnection(service.address, service.connector, schema, service.user)) { conn =>
       body(conn)
     }
-  }
-}
 
-class TrinoJDBCDriver extends AutoCloseable with LogSupport {
+class TrinoJDBCDriver extends AutoCloseable with LogSupport:
 
-  private val driver: TrinoDriver = {
+  private val driver: TrinoDriver =
     info("Initializing TrinoDriver")
     Class.forName("io.trino.jdbc.TrinoDriver")
     // Need to cast to TrinoDriver to set session properties
     DriverManager.getDriver(s"jdbc:trino://").asInstanceOf[TrinoDriver]
-  }
 
-  def newConnection(hostname: String, catalog: String, schema: String, user: String): TrinoConnection = {
+  def newConnection(hostname: String, catalog: String, schema: String, user: String): TrinoConnection =
     val p = new Properties()
     p.setProperty("user", user)
     val connectAddress = s"jdbc:trino://${hostname}/${catalog}/${schema}"
     val conn           = driver.connect(connectAddress, p).asInstanceOf[TrinoConnection]
     conn
-  }
 
-  override def close(): Unit = {
+  override def close(): Unit =
     info(s"Closing TrinoJDBCDriver")
     driver.close()
-  }
-}

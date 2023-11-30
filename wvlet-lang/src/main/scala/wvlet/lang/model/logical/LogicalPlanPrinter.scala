@@ -18,17 +18,16 @@ import wvlet.log.LogSupport
 import java.io.{PrintWriter, StringWriter}
 import scala.collection.Seq
 
-object LogicalPlanPrinter extends LogSupport {
-  def print(m: LogicalPlan): String = {
+object LogicalPlanPrinter extends LogSupport:
+  def print(m: LogicalPlan): String =
     val s = new StringWriter()
     val p = new PrintWriter(s)
     print(m, p, 0)
     p.close()
     s.toString
-  }
 
-  def print(m: LogicalPlan, out: PrintWriter, level: Int): Unit = {
-    m match {
+  def print(m: LogicalPlan, out: PrintWriter, level: Int): Unit =
+    m match
       case _ =>
         val ws = "  " * level
 
@@ -52,13 +51,12 @@ object LogicalPlanPrinter extends LogSupport {
 //            s": ${printAttr(inputAttrs)} => ${printAttr(outputAttrs)}"
 //          }
 
-        val prefix = m match {
+        val prefix = m match
 //          case t: TableScan =>
 //            s"${ws}[${m.modelName}] ${t.table.fullName}${functionSig}"
           case _ =>
             // s"${ws}[${m.modelName}]${functionSig}"
             s"${ws}[${m.modelName}]"
-        }
 
 //        attr.length match {
 //          case 0 =>
@@ -69,9 +67,4 @@ object LogicalPlanPrinter extends LogSupport {
 //            val attrStr = attr.map(x => s"${attrWs}- ${x}").mkString("\n")
 //            out.println(attrStr)
 //        }
-        for (c <- m.childPlans) {
-          print(c, out, level + 1)
-        }
-    }
-  }
-}
+        for c <- m.childPlans do print(c, out, level + 1)

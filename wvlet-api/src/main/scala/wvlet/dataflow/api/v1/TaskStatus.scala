@@ -38,6 +38,5 @@ enum TaskStatus(val isDone: Boolean):
 
   def all: Seq[TaskStatus] = TaskStatus.values
 
-  def unapply(s: String): Option[TaskStatus] = {
+  def unapply(s: String): Option[TaskStatus] =
     all.find(_.name == s)
-  }
