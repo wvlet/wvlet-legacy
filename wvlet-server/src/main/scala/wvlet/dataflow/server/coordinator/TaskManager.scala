@@ -100,7 +100,7 @@ class TaskManager(
     if activeWorkerNodes.isEmpty then
       warn(s"[${taskRef.id}] No worker node is available")
       taskRef
-    else {
+    else
       info(s"[${taskRef.id}] Dispatch task")
       val nodeIndex         = Random.nextInt(activeWorkerNodes.size)
       val targetWorkerNode  = activeWorkerNodes(nodeIndex)
@@ -109,7 +109,6 @@ class TaskManager(
       val taskExecutionInfo = workerClient.WorkerApi.runTask(taskRef.id, taskRequest)
       debug(taskExecutionInfo)
       getTaskRef(taskRef.id).getOrElse(updatedTask)
-    }
 
   def getTaskRef(taskId: TaskId): Option[TaskRef] =
     taskRefs.get(taskId)
