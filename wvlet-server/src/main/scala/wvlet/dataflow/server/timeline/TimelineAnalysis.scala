@@ -30,7 +30,7 @@ object TimelineAnalysis extends LogSupport:
   ): Unit =
     if list.isEmpty then {
       // do nothing
-    } else {
+    } else
       val sorted = list.sortBy(_.startAt).toIndexedSeq
       val length = sorted.length
       // sorted intervals on endAt values
@@ -76,4 +76,3 @@ object TimelineAnalysis extends LogSupport:
       // final report
       sweepLine = Long.MaxValue
       report
-    }
