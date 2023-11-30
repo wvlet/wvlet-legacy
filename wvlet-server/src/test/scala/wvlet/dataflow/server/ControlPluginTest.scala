@@ -23,7 +23,7 @@ import wvlet.dataflow.plugin.sqlite.SQLitePlugin.RunQuery
 import wvlet.dataflow.server.ServerModule.ApiClient
 import wvlet.dataflow.server.util.TaskUtil
 
-class ControlPluginTest extends AirSpec {
+class ControlPluginTest extends AirSpec:
   override def design: Design = ServerModule.testServerAndClient
 
   test("run control task") { (client: ApiClient) =>
@@ -68,4 +68,3 @@ class ControlPluginTest extends AirSpec {
       info(lastState)
     }
   }
-}

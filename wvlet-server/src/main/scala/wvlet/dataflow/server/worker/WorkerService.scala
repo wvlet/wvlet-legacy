@@ -34,7 +34,7 @@ class WorkerService(
     workerServer: WorkerServer,
     rpcClientProvider: RPCClientProvider,
     executor: WorkerBackgroundExecutor
-) extends LogSupport {
+) extends LogSupport:
   private lazy val coordinatorClient = rpcClientProvider.getCoordinatorClient(
     s"${workerConfig.name}-${self.name}",
     workerConfig.coordinatorAddress
@@ -42,22 +42,17 @@ class WorkerService(
 
   // Polling coordinator every 5 seconds for heartbeat
   executor.scheduleAtFixedRate(
-    () => {
+    () =>
       trace(s"register: ${self}")
-      try {
-        coordinatorClient.CoordinatorApi.register(self)
-      } catch {
-        case e: Throwable => warn(e)
-      }
-
-    },
+      try coordinatorClient.CoordinatorApi.register(self)
+      catch case e: Throwable => warn(e)
+    ,
     0,
     5,
     TimeUnit.SECONDS
   )
-}
 
-object WorkerService {
+object WorkerService:
 
   type WorkerBackgroundExecutor = ScheduledExecutorService
   type WorkerSelf               = Node
@@ -72,5 +67,3 @@ object WorkerService {
       Executors.newSingleThreadScheduledExecutor()
     )
     .onShutdown(_.shutdownNow())
-
-}

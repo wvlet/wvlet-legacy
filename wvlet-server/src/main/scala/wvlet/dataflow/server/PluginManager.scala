@@ -29,28 +29,23 @@ import java.util.concurrent.ConcurrentHashMap
 import scala.annotation.tailrec
 import scala.jdk.CollectionConverters.*
 
-class PluginManager(session: Session) extends LogSupport {
+class PluginManager(session: Session) extends LogSupport:
   private val plugins = new ConcurrentHashMap[String, TaskPlugin]().asScala
 
-  def addPlugin(plugin: TaskPlugin): Unit = {
+  def addPlugin(plugin: TaskPlugin): Unit =
     plugins.getOrElseUpdate(plugin.pluginName, plugin)
-  }
 
-  def addPluginOfSurface(pluginSurface: Surface): Unit = {
-    session.get[TaskPlugin](pluginSurface) match {
+  def addPluginOfSurface(pluginSurface: Surface): Unit =
+    session.get[TaskPlugin](pluginSurface) match
       case plugin: TaskPlugin =>
         addPlugin(plugin)
       case null =>
         warn(s"Failed to instantiate plugin: ${pluginSurface.name}")
-    }
-  }
 
-  def getPlugin(name: String): Option[TaskPlugin] = {
+  def getPlugin(name: String): Option[TaskPlugin] =
     plugins.get(name)
-  }
-}
 
-object PluginManager {
+object PluginManager:
   def design: Design =
     Design.newDesign
       .bind[PluginManager].toSingleton
@@ -60,18 +55,16 @@ object PluginManager {
         x.addPlugin(TrinoPlugin)
       }
       .bind[PluginContext].to[PluginContextImpl]
-}
 
-class PluginContextImpl(client: ApiClient) extends PluginContext with LogSupport {
-  override def newTask(taskRequest: TaskRequest): TaskRef = {
+class PluginContextImpl(client: ApiClient) extends PluginContext with LogSupport:
+  override def newTask(taskRequest: TaskRequest): TaskRef =
     client.TaskApi.newTask(taskRequest)
-  }
 
-  override def await(taskId: TaskId): TaskRef = {
+  override def await(taskId: TaskId): TaskRef =
     debug(s"Awaiting task completion: ${taskId}")
     @tailrec
-    def loop(): TaskRef = {
-      client.TaskApi.getTask(taskId) match {
+    def loop(): TaskRef =
+      client.TaskApi.getTask(taskId) match
         case None =>
           throw RPCStatus.NOT_FOUND_U5.newException(
             s"Unknown task: ${taskId}"
@@ -81,8 +74,4 @@ class PluginContextImpl(client: ApiClient) extends PluginContext with LogSupport
         case _ =>
           Thread.sleep(100)
           loop()
-      }
-    }
     loop()
-  }
-}

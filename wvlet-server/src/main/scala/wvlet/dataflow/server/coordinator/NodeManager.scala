@@ -22,18 +22,17 @@ import java.util.concurrent.ConcurrentHashMap
 
 /**
   */
-class NodeManager(coordinatorConfig: CoordinatorConfig) extends LogSupport {
-  import scala.jdk.CollectionConverters._
+class NodeManager(coordinatorConfig: CoordinatorConfig) extends LogSupport:
+  import scala.jdk.CollectionConverters.*
 
-  private val self: Node = {
+  private val self: Node =
     val localHost = InetAddress.getLocalHost
     val localAddr = s"${localHost.getHostAddress}:${coordinatorConfig.serverAddress.port}"
     Node(name = coordinatorConfig.name, address = localAddr, isCoordinator = true, startedAt = Instant.now())
-  }
 
   private val heartBeatRecord = new ConcurrentHashMap[Node, Instant]().asScala
 
-  def heartBeat(node: Node): Unit = {
+  def heartBeat(node: Node): Unit =
     heartBeatRecord.getOrElseUpdate(
       node, {
         info(s"A new worker node is joined: ${node}")
@@ -41,14 +40,11 @@ class NodeManager(coordinatorConfig: CoordinatorConfig) extends LogSupport {
       }
     )
     heartBeatRecord.put(node, Instant.now())
-  }
 
-  def listNodes: Seq[NodeInfo] = {
+  def listNodes: Seq[NodeInfo] =
     val b = Seq.newBuilder[NodeInfo]
     b += NodeInfo(self, Instant.now())
     heartBeatRecord.foreach { case (n, hb) => b += NodeInfo(n, hb) }
     b.result()
-  }
 
   def listWorkerNodes: Seq[NodeInfo] = listNodes.filterNot(_.isCoordinator)
-}

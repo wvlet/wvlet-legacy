@@ -24,7 +24,7 @@ case class TimeInterval(
     endAt: Long,
     color: Option[String] = None,
     tags: Map[String, Any] = Map.empty
-) extends Ordered[TimeInterval] {
+) extends Ordered[TimeInterval]:
   require(startAt <= endAt, s"startAt (${startAt}) must be <= endAt (${endAt})")
 
   override def toString: String = s"${name}:[$startAt, $endAt)"
@@ -33,54 +33,35 @@ case class TimeInterval(
 
   def length: Long = endAt - startAt
 
-  def contains(other: TimeInterval): Boolean = {
+  def contains(other: TimeInterval): Boolean =
     startAt <= other.startAt && other.endAt <= endAt
-  }
-  def contains(pos: Long): Boolean = {
+  def contains(pos: Long): Boolean =
     startAt <= pos && pos < endAt
-  }
 
-  def precedes(other: TimeInterval): Boolean = {
+  def precedes(other: TimeInterval): Boolean =
     endAt <= other.startAt
-  }
 
-  def follows(other: TimeInterval): Boolean = {
+  def follows(other: TimeInterval): Boolean =
     other.endAt <= startAt
-  }
 
-  def overlaps(other: TimeInterval): Boolean = {
-    if (startAt <= other.startAt) {
-      other.startAt < endAt
-    } else {
-      startAt < other.endAt
-    }
-  }
+  def overlaps(other: TimeInterval): Boolean =
+    if startAt <= other.startAt then other.startAt < endAt
+    else startAt < other.endAt
 
-  override def compare(other: TimeInterval): Int = {
+  override def compare(other: TimeInterval): Int =
     val diff = startAt - other.startAt
-    if (diff == 0) {
-      endAt.compareTo(other.endAt)
-    } else {
-      if (diff < 0) -1 else 1
-    }
-  }
-}
+    if diff == 0 then endAt.compareTo(other.endAt)
+    else if diff < 0 then -1
+    else 1
 
-object TimeInterval {
+object TimeInterval:
 
   /**
     * Order intervals first by the endAt, then by the startAt
     */
-  def intervalSweepOrdering: Ordering[TimeInterval] = new Ordering[TimeInterval] {
-    override def compare(x: TimeInterval, y: TimeInterval): Int = {
+  def intervalSweepOrdering: Ordering[TimeInterval] = new Ordering[TimeInterval]:
+    override def compare(x: TimeInterval, y: TimeInterval): Int =
       val diff = y.endAt - x.endAt
-      if (diff == 0) {
-        y.startAt.compareTo(x.startAt)
-      } else if (diff < 0) {
-        -1
-      } else {
-        1
-      }
-    }
-  }
-}
+      if diff == 0 then y.startAt.compareTo(x.startAt)
+      else if diff < 0 then -1
+      else 1

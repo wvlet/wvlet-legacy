@@ -43,7 +43,7 @@ class TaskManager(
     rpcClientProvider: RPCClientProvider,
     listeners: Seq[TaskStateListener] = Seq(TaskStateListener.defaultListener)
 ) extends AutoCloseable
-    with LogSupport {
+    with LogSupport:
 
   private val threadManager = new ScheduledThreadManager(name = "task-manager")
 
@@ -54,28 +54,24 @@ class TaskManager(
   private val expiredTasks    = new LinkedBlockingQueue[TaskRef]().asScala
 
   @PostConstruct
-  def start: Unit = {
+  def start: Unit =
     // Start a background thread that
     threadManager.scheduleWithFixedDelay(0, 1, TimeUnit.SECONDS) { () =>
       checkPendingTasks
     }
-  }
 
-  override def close(): Unit = {
+  override def close(): Unit =
     threadManager.close()
-  }
 
-  private def checkPendingTasks: Unit = {
+  private def checkPendingTasks: Unit =
     // Wake up queued tasks
-    for {
+    for
       queuedTask        <- taskRefs.values if queuedTask.status == TaskStatus.QUEUED;
       queuedTaskRequest <- taskRequests.get(queuedTask.id)
-    } {
-      dispatchTaskInternal(queuedTask, queuedTaskRequest)
-    }
+    do dispatchTaskInternal(queuedTask, queuedTaskRequest)
 
     // Remove expired tasks
-    for (task <- taskRefs.values if task.status.isDone) {}
+    for task <- taskRefs.values if task.status.isDone do {}
 
     //
 //      val queuedTime = ElapsedTime.nanosSince(TimeUnit.SECONDS.toNanos(queuedTask.createdAt.getEpochSecond))
@@ -92,21 +88,19 @@ class TaskManager(
 //        warn(s"Found queued: ${queuedTaskRequest}")
 //        dispatchTaskInternal(queuedTask, queuedTaskRequest)
 //      }
-  }
 
-  def dispatchTask(request: TaskRequest): TaskRef = {
+  def dispatchTask(request: TaskRequest): TaskRef =
     debug(s"New task: ${request}")
     val taskRef = getOrCreateTask(request)
     dispatchTaskInternal(taskRef, request)
     taskRef
-  }
 
-  private def dispatchTaskInternal(taskRef: TaskRef, taskRequest: TaskRequest): TaskRef = {
+  private def dispatchTaskInternal(taskRef: TaskRef, taskRequest: TaskRequest): TaskRef =
     val activeWorkerNodes = nodeManager.listWorkerNodes
-    if (activeWorkerNodes.isEmpty) {
+    if activeWorkerNodes.isEmpty then
       warn(s"[${taskRef.id}] No worker node is available")
       taskRef
-    } else {
+    else {
       info(s"[${taskRef.id}] Dispatch task")
       val nodeIndex         = Random.nextInt(activeWorkerNodes.size)
       val targetWorkerNode  = activeWorkerNodes(nodeIndex)
@@ -116,13 +110,11 @@ class TaskManager(
       debug(taskExecutionInfo)
       getTaskRef(taskRef.id).getOrElse(updatedTask)
     }
-  }
 
-  def getTaskRef(taskId: TaskId): Option[TaskRef] = {
+  def getTaskRef(taskId: TaskId): Option[TaskRef] =
     taskRefs.get(taskId)
-  }
 
-  def getOrCreateTask(request: TaskRequest): TaskRef = {
+  def getOrCreateTask(request: TaskRequest): TaskRef =
     val taskId = registeredTasks.getOrElseUpdate(
       request.idempotentKey, {
         ULID.newULID
@@ -144,40 +136,28 @@ class TaskManager(
     )
     taskRequests.getOrElseUpdate(taskId, request)
     taskRef
-  }
 
-  def updateTask(taskId: TaskId)(updater: TaskRef => TaskRef): TaskRef = {
-    taskRefs.get(taskId) match {
+  def updateTask(taskId: TaskId)(updater: TaskRef => TaskRef): TaskRef =
+    taskRefs.get(taskId) match
       case Some(originalTaskRef) =>
         val newTask = updater(originalTaskRef)
         taskRefs += taskId -> newTask
-        if (originalTaskRef.status != newTask.status) {
-          listeners.foreach(_.onStateChange(newTask))
-        }
+        if originalTaskRef.status != newTask.status then listeners.foreach(_.onStateChange(newTask))
         newTask
       case None =>
         throw RPCStatus.NOT_FOUND_U5.newException(s"Unknown ${taskId}")
-    }
-  }
 
-  def getAllTasks: Seq[TaskRef] = {
+  def getAllTasks: Seq[TaskRef] =
     taskRefs.values.toSeq
-  }
 
-  def cancelTask(taskId: TaskId): TaskRef = {
-    getTaskRef(taskId) match {
+  def cancelTask(taskId: TaskId): TaskRef =
+    getTaskRef(taskId) match
       case Some(taskRef) =>
         // TODO: Cancel the task
         taskRef
       case None =>
         throw RPCStatus.NOT_FOUND_U5.newException(s"Unknown ${taskId}")
-    }
-  }
 
-}
-
-object TaskManager {
+object TaskManager:
   def design: Design = Design.newDesign
     .bind[TaskManager].toSingleton
-
-}

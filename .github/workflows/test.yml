@@ -26,13 +26,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
       - name: scalafmt
         run: ./sbt scalafmtCheckAll
   test_scala_3:
     name: Scala 3
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v3
         with:

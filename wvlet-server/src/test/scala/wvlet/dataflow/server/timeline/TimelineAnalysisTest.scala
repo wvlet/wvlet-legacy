@@ -17,7 +17,7 @@ import wvlet.airspec.AirSpec
 import wvlet.dataflow.api.v1.timeline.TimeInterval
 import wvlet.dataflow.server.timeline.TimelineAnalysis.PeakChange
 
-class TimelineAnalysisTest extends AirSpec {
+class TimelineAnalysisTest extends AirSpec:
   test("sweep") {
     // 1  2      5  6 7  8      10   12 13 14 15 16
     // |---------|              |----|  |-----|
@@ -37,9 +37,7 @@ class TimelineAnalysisTest extends AirSpec {
 
     TimelineAnalysis.findPeakTimes(
       lst,
-      reporter = (x: PeakChange) => {
-        peaks += x
-      }
+      reporter = (x: PeakChange) => peaks += x
     )
 
     peaks.result() shouldBe Seq(
@@ -57,5 +55,3 @@ class TimelineAnalysisTest extends AirSpec {
       PeakChange(16, 0)
     )
   }
-
-}

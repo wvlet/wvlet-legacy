@@ -19,6 +19,5 @@ case class CoordinatorConfig(
     name: String = "coordinator",
     // self-address
     serverAddress: ServerAddress
-) {
+):
   def port: Int = serverAddress.port
-}

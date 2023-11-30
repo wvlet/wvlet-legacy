@@ -16,9 +16,8 @@ package wvlet.lang.model.formatter
 case class FormatOption(
     maxWidth: Int = 120,
     indentLength: Int = 2
-) {
+):
   def indent(level: Int = 0): String = " " * (indentLength * level)
-}
 
 object FormatOption:
   val default = FormatOption()

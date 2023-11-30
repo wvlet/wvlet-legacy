@@ -16,22 +16,20 @@ package wvlet.lang.model.formatter
 case class PrintContext(
     indentLevel: Int = 0,
     formatOption: FormatOption
-) {
+):
   def newline: String             = "\n"
   def indent(offset: Int): String = "  " * (indentLevel + offset)
 
-  def indentBlock(s: String): String = {
+  def indentBlock(s: String): String =
     s.split("""\n""")
       .map { line =>
         s"${formatOption.indent(indentLevel)}$line"
       }
       .mkString("\n")
-  }
   def withIndent: PrintContext                                   = copy(indentLevel = indentLevel + 1)
   def withOutdent: PrintContext                                  = copy(indentLevel = indentLevel - 1)
   def withIndentLevel(level: Int): PrintContext                  = copy(indentLevel = level)
   def withFormatOption(formatOption: FormatOption): PrintContext = copy(formatOption = formatOption)
-}
 
 object PrintContext:
   val default = PrintContext(indentLevel = 0, formatOption = FormatOption.default)

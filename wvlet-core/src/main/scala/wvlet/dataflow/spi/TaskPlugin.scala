@@ -33,13 +33,10 @@ case class TaskInput(
     idempotentKey: ULID = ULID.newULID
 )
 
-object TaskInput {
-  def apply(taskId: TaskId, request: TaskRequest): TaskInput = {
+object TaskInput:
+  def apply(taskId: TaskId, request: TaskRequest): TaskInput =
     TaskInput(taskId, request.taskPlugin, request.methodName, request.taskBody, request.tags, request.idempotentKey)
-  }
-}
 
-trait TaskPlugin extends LogSupport {
+trait TaskPlugin extends LogSupport:
   def pluginName: String
   def run(input: TaskInput): Cancelable
-}

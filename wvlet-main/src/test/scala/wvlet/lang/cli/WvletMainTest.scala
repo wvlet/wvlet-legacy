@@ -15,7 +15,7 @@ package wvlet.lang.cli
 
 import wvlet.airspec.AirSpec
 
-class WvletMainTest extends AirSpec {
+class WvletMainTest extends AirSpec:
   test("run main") {
     WvletMain.execute("")
   }
@@ -23,4 +23,3 @@ class WvletMainTest extends AirSpec {
   test("show help") {
     WvletMain.execute("--help")
   }
-}

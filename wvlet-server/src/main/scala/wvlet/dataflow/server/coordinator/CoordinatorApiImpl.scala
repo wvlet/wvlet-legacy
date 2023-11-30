@@ -19,27 +19,21 @@ import wvlet.log.LogSupport
 
 /**
   */
-class CoordinatorApiImpl(nodeManager: NodeManager, taskManager: TaskManager) extends CoordinatorApi with LogSupport {
-  override def listNodes: Seq[NodeInfo] = {
+class CoordinatorApiImpl(nodeManager: NodeManager, taskManager: TaskManager) extends CoordinatorApi with LogSupport:
+  override def listNodes: Seq[NodeInfo] =
     nodeManager.listNodes
-  }
-  override def register(node: Node): Unit = {
+  override def register(node: Node): Unit =
     nodeManager.heartBeat(node)
-  }
 
-  override def updateTaskStatus(request: CoordinatorApi.UpdateTaskRequest): Unit = {
-    try {
+  override def updateTaskStatus(request: CoordinatorApi.UpdateTaskRequest): Unit =
+    try
       taskManager.updateTask(request.taskId) { task =>
-        request.error match {
+        request.error match
           case None =>
             task.withStatus(request.status)
           case Some(err) =>
             task.withError(err)
-        }
       }
-    } catch {
+    catch
       case e: Throwable =>
         warn(e)
-    }
-  }
-}

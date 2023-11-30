@@ -16,43 +16,32 @@ package wvlet.lang.compiler.parser
 import wvlet.airframe.control.IO
 import wvlet.lang.model.SourceLocation
 
-trait ScannerSource {
+trait ScannerSource:
   def text: String
   def length: Int
 
-  def sourceLocationOf(offset: Int): SourceLocation = {
+  def sourceLocationOf(offset: Int): SourceLocation =
     val pos = SourcePosition(this, offset)
     pos.toSourceLocation
-  }
-}
-case class SourceFile(path: String) extends ScannerSource {
+case class SourceFile(path: String) extends ScannerSource:
   override lazy val text: String = IO.readAsString(new java.io.File(path))
   override def length: Int       = text.length
-}
-case class StringSource(override val text: String) extends ScannerSource {
+case class StringSource(override val text: String) extends ScannerSource:
   override val length: Int = text.length
-}
 
-case class SourcePosition(source: ScannerSource, offset: Int) {
-  def line: Int = {
+case class SourcePosition(source: ScannerSource, offset: Int):
+  def line: Int =
     var i    = 0
     var line = 1
-    while (i < offset) {
-      if (source.text.charAt(i) == '\n') {
-        line += 1
-      }
+    while i < offset do
+      if source.text.charAt(i) == '\n' then line += 1
       i += 1
-    }
     line
-  }
-  def column: Int = {
+  def column: Int =
     var i   = offset
     var col = 1
-    while (i > 0 && source.text.charAt(i) != '\n') {
+    while i > 0 && source.text.charAt(i) != '\n' do
       col += 1
       i -= 1
-    }
     col
-  }
   def toSourceLocation: SourceLocation = SourceLocation(line, column)
-}

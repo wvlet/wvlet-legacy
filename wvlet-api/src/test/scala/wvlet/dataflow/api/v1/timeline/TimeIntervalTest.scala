@@ -17,7 +17,7 @@ import wvlet.airspec.AirSpec
 
 import java.util.concurrent.TimeUnit
 
-class TimeIntervalTest extends AirSpec {
+class TimeIntervalTest extends AirSpec:
   test("time interval predicates") {
     val t0 = TimeInterval("t0", 50L, 80L)
     val t1 = TimeInterval("t1", 100L, 200L)
@@ -67,4 +67,3 @@ class TimeIntervalTest extends AirSpec {
       t1.compare(t2) < 0 shouldBe true
     }
   }
-}

@@ -19,24 +19,19 @@ import wvlet.airframe.rx.Cancelable
 import wvlet.dataflow.spi.{TaskInput, TaskPlugin}
 import wvlet.log.LogSupport
 
-object SQLitePlugin extends TaskPlugin {
+object SQLitePlugin extends TaskPlugin:
   override def pluginName: String = "sqlite"
 
-  case class RunQuery(service: String, query: String, schema: Option[String] = None) extends LogSupport {
-    def run: Unit = {
+  case class RunQuery(service: String, query: String, schema: Option[String] = None) extends LogSupport:
+    def run: Unit =
       info(s"run sqlite query\n${query}")
-    }
-  }
 
-  override def run(input: TaskInput): Cancelable = {
-    input.methodName match {
+  override def run(input: TaskInput): Cancelable =
+    input.methodName match
       case "runQuery" =>
         val command = MessageCodec.of[RunQuery].fromMap(input.taskBody)
         command.run
       case other =>
         throw RPCStatus.NOT_FOUND_U5.newException(s"unknown method: ${other}")
-    }
     // TODO Support cancellation
     Cancelable.empty
-  }
-}

@@ -21,11 +21,10 @@ import wvlet.dataflow.api.v1.timeline.TimeInterval
 import java.time.Instant
 
 @RPC
-trait FrontendApi extends ServiceInfoApi {
+trait FrontendApi extends ServiceInfoApi:
   def getTimeline(request: TimelineRequest): TimelineResponse
-}
 
-object FrontendApi extends RxRouterProvider {
+object FrontendApi extends RxRouterProvider:
   override def router: RxRouter = RxRouter.of[FrontendApi]
 
   case class TimelineRequest(
@@ -36,5 +35,3 @@ object FrontendApi extends RxRouterProvider {
       endAt: Long,
       entries: Seq[TimeInterval]
   )
-
-}

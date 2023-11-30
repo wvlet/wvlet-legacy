@@ -19,31 +19,25 @@ import wvlet.airframe.rx.Cancelable
 import wvlet.dataflow.api.v1.TaskRequest
 import wvlet.dataflow.spi.{PluginContext, TaskInput, TaskPlugin}
 
-object ControlPlugin {
+object ControlPlugin:
   case class AndThenTask(firstTask: TaskRequest, nextTask: TaskRequest)
-}
 
 import wvlet.dataflow.plugin.control.ControlPlugin.*
-class ControlPlugin(pluginContext: PluginContext) extends TaskPlugin {
+class ControlPlugin(pluginContext: PluginContext) extends TaskPlugin:
 
   override def pluginName: String = "control"
 
-  override def run(input: TaskInput): Cancelable = {
-    input.methodName match {
+  override def run(input: TaskInput): Cancelable =
+    input.methodName match
       case "andThen" =>
         val t = MessageCodec.of[AndThenTask].fromMap(input.taskBody)
         runAndThenTask(t)
       case other =>
         throw RPCStatus.NOT_FOUND_U5.newException(s"unknown method: ${other}")
-    }
     Cancelable.empty
-  }
 
-  def runAndThenTask(t: AndThenTask): Unit = {
+  def runAndThenTask(t: AndThenTask): Unit =
     val firstTaskRef = pluginContext.newTask(t.firstTask)
     pluginContext.await(firstTaskRef.id)
     // TODO Await
     val nextTaskRef = pluginContext.newTask(t.nextTask)
-  }
-
-}

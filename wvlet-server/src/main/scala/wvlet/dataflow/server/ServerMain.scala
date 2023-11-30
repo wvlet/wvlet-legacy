@@ -19,20 +19,17 @@ import wvlet.log.{LogSupport, Logger}
 
 /**
   */
-object ServerMain {
-  def main(args: Array[String]): Unit = {
+object ServerMain:
+  def main(args: Array[String]): Unit =
     Logger.init
     Launcher.of[ServerMain].execute(args)
-  }
-}
 
 class ServerMain(@option(prefix = "-h,--help", description = "Show help messages", isHelp = true) help: Boolean)
-    extends LogSupport {
+    extends LogSupport:
 
   @command(isDefault = true)
-  def default: Unit = {
+  def default: Unit =
     info(s"Type --help to see the list of sub commands")
-  }
 
   @command(description = "Start wvlet server")
   def server(
@@ -42,12 +39,10 @@ class ServerMain(@option(prefix = "-h,--help", description = "Show help messages
       workerPort: Int = 9091,
       @option(prefix = "-f", description = "frontend server port")
       frontendServerPort: Int = 9092
-  ): Unit = {
+  ): Unit =
     ServerModule
       .standaloneDesign(coordinatorPort, workerPort, frontendServerPort)
       .withProductionMode
       .build[CoordinatorServer] { server =>
         server.awaitTermination()
       }
-  }
-}

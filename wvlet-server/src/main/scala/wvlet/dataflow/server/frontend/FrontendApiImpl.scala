@@ -15,8 +15,6 @@ package wvlet.dataflow.server.frontend
 
 import wvlet.dataflow.api.frontend.FrontendApi
 
-class FrontendApiImpl extends FrontendApi {
-  override def getTimeline(request: FrontendApi.TimelineRequest): FrontendApi.TimelineResponse = {
+class FrontendApiImpl extends FrontendApi:
+  override def getTimeline(request: FrontendApi.TimelineRequest): FrontendApi.TimelineResponse =
     ???
-  }
-}

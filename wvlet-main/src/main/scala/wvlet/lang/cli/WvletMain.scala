@@ -17,25 +17,20 @@ import wvlet.airframe.launcher.{Launcher, command, option}
 import wvlet.dataflow.api.BuildInfo
 import wvlet.log.LogSupport
 
-object WvletMain {
-  def main(args: Array[String]): Unit = {
+object WvletMain:
+  def main(args: Array[String]): Unit =
     Launcher.of[WvletMain].execute(args)
-  }
 
-  def execute(argLine: String): Unit = {
+  def execute(argLine: String): Unit =
     Launcher.of[WvletMain].execute(argLine)
-  }
-}
 
 class WvletMain(
     @option(prefix = "-h,--help", description = "display help messages", isHelp = true)
     displayHelp: Boolean
-) extends LogSupport {
+) extends LogSupport:
   info(s"wvlet: version ${BuildInfo.version} ${BuildInfo.builtAtString}")
 
   @command(description = "Start a UI server")
   def ui(): Unit = {
     // TODO
   }
-
-}

@@ -16,8 +16,7 @@ package wvlet.dataflow.spi
 import wvlet.dataflow.api.v1.TaskApi.TaskId
 import wvlet.dataflow.api.v1.{TaskRef, TaskRequest}
 
-trait PluginContext {
+trait PluginContext:
   def newTask(taskRequest: TaskRequest): TaskRef
 
   def await(taskId: TaskId): TaskRef
-}

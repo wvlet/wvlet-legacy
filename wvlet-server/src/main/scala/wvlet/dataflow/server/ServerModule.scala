@@ -33,78 +33,64 @@ case class WorkerConfig(
     name: String = "worker-1",
     serverAddress: ServerAddress,
     coordinatorAddress: ServerAddress
-) {
+):
   def port: Int = serverAddress.port
-}
 
 case class FrontendServerConfig(
     name: String = "frontend-server",
     serverAddress: ServerAddress,
     coordinatorAddress: ServerAddress
-) {
+):
   def port: Int = serverAddress.port
-}
 
 /**
   */
-object ServerModule extends LogSupport {
+object ServerModule extends LogSupport:
   class CoordinatorClient(client: SyncClient) extends CoordinatorRPC.RPCSyncClient(client)
   class WorkerClient(client: SyncClient)      extends WorkerRPC.RPCSyncClient(client)
   class ApiClient(client: SyncClient)         extends WvletRPC.RPCSyncClient(client)
 
-  class CoordinatorServer(config: CoordinatorConfig, session: Session) extends AutoCloseable {
+  class CoordinatorServer(config: CoordinatorConfig, session: Session) extends AutoCloseable:
     private var server: Option[NettyServer] = None
     def localAddress: String                = config.serverAddress.hostAndPort
     @PostConstruct
-    def start: Unit = {
+    def start: Unit =
       server = Some(coordinatorServer(config).newServer(session))
-    }
 
-    def awaitTermination(): Unit = {
+    def awaitTermination(): Unit =
       server.foreach(_.awaitTermination())
-    }
 
-    override def close(): Unit = {
+    override def close(): Unit =
       server.foreach(_.close())
-    }
-  }
 
-  class WorkerServer(config: WorkerConfig, session: Session) extends AutoCloseable {
+  class WorkerServer(config: WorkerConfig, session: Session) extends AutoCloseable:
     private var server: Option[NettyServer] = None
     def localAddress: String                = config.serverAddress.hostAndPort
 
     @PostConstruct
-    def start: Unit = {
+    def start: Unit =
       server = Some(workerServer(config).newServer(session))
-    }
 
-    def awaitTermination(): Unit = {
+    def awaitTermination(): Unit =
       server.foreach(_.awaitTermination())
-    }
 
-    override def close(): Unit = {
+    override def close(): Unit =
       server.foreach(_.close())
-    }
-  }
 
-  class FrontendServer(config: FrontendServerConfig, session: Session) extends AutoCloseable {
+  class FrontendServer(config: FrontendServerConfig, session: Session) extends AutoCloseable:
     private var server: Option[NettyServer] = None
 
     def localAddress: String = config.serverAddress.hostAndPort
 
     @PostConstruct
-    def start: Unit = {
+    def start: Unit =
       server = Some(frontendServer(config).newServer(session))
-    }
 
-    def awaitTermination(): Unit = {
+    def awaitTermination(): Unit =
       server.foreach(_.awaitTermination())
-    }
 
-    override def close(): Unit = {
+    override def close(): Unit =
       server.foreach(_.close())
-    }
-  }
 
   def coordinatorRouter = RxRouter.of(
     RxRouter.of[ServiceInfoApi],
@@ -134,41 +120,36 @@ object ServerModule extends LogSupport {
       .withPort(config.port)
       .withRouter(workerRouter)
 
-  private def frontendServer(config: FrontendServerConfig): NettyServerConfig = {
+  private def frontendServer(config: FrontendServerConfig): NettyServerConfig =
     Netty.server
       .withName(config.name)
       .withPort(config.port)
       .withRouter(frontendServerRouter)
-  }
 
-  def coordinatorDesign(config: CoordinatorConfig): Design = {
+  def coordinatorDesign(config: CoordinatorConfig): Design =
     newDesign
       .bind[CoordinatorConfig].toInstance(config)
       .bind[CoordinatorServer].toSingleton
       .add(TaskManager.design)
-  }
 
-  def workerDesign(config: WorkerConfig): Design = {
+  def workerDesign(config: WorkerConfig): Design =
     WorkerService.design
       .bind[WorkerConfig].toInstance(config)
       .bind[WorkerServer].toSingleton
       .add(PluginManager.design)
-  }
 
-  def frontendServerDesign(config: FrontendServerConfig): Design = {
+  def frontendServerDesign(config: FrontendServerConfig): Design =
     newDesign
       .bind[FrontendServerConfig].toInstance(config)
       .bind[FrontendServer].toSingleton
-  }
 
-  private def randomPort(num: Int): Seq[Int] = {
+  private def randomPort(num: Int): Seq[Int] =
     val sockets = (0 until num).map(i => new ServerSocket(0))
     val ports   = sockets.map(_.getLocalPort).toIndexedSeq
     sockets.foreach(_.close())
     ports
-  }
 
-  def standaloneDesign(coordinatorPort: Int, workerPort: Int, frontendServerPort: Int): Design = {
+  def standaloneDesign(coordinatorPort: Int, workerPort: Int, frontendServerPort: Int): Design =
     coordinatorDesign(CoordinatorConfig(serverAddress = ServerAddress(s"localhost:${coordinatorPort}")))
       .add(
         workerDesign(
@@ -192,13 +173,12 @@ object ServerModule extends LogSupport {
       .bind[CoordinatorClient].toInstance {
         CoordinatorClient(Http.client.withName("coordinator-client").newSyncClient(s"localhost:${coordinatorPort}"))
       }
-  }
 
   /**
     * Design for launching a test server and client
     * @return
     */
-  def testServerAndClient: Design = {
+  def testServerAndClient: Design =
     val Seq(coordinatorPort, workerPort) = randomPort(2)
     coordinatorDesign(CoordinatorConfig(serverAddress = ServerAddress(s"localhost:${coordinatorPort}")))
       .add(
@@ -217,6 +197,3 @@ object ServerModule extends LogSupport {
       }
       // Add this design to start up worker service early
       .bind[WorkerService].toEagerSingleton
-
-  }
-}

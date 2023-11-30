@@ -32,10 +32,10 @@ import java.time.Instant
   */
 class WorkerApiImpl(node: WorkerSelf, coordinatorClient: CoordinatorClient, pluginManager: PluginManager)
     extends WorkerApi
-    with LogSupport {
-  override def runTask(taskId: TaskId, task: TaskRequest): WorkerApi.TaskExecutionInfo = {
+    with LogSupport:
+  override def runTask(taskId: TaskId, task: TaskRequest): WorkerApi.TaskExecutionInfo =
     debug(s"run task: ${task}")
-    pluginManager.getPlugin(task.taskPlugin) match {
+    pluginManager.getPlugin(task.taskPlugin) match
       case Some(plugin) =>
         coordinatorClient.CoordinatorApi.updateTaskStatus(UpdateTaskRequest(taskId, TaskStatus.RUNNING))
         debug(s"Running ${task.taskPlugin}:${task.methodName}")
@@ -49,19 +49,17 @@ class WorkerApiImpl(node: WorkerSelf, coordinatorClient: CoordinatorClient, plug
             Some(err)
           )
         )
-    }
     TaskExecutionInfo(taskId, nodeId = node.name, startedAt = Instant.now())
-  }
 
-  private def runTaskInternal(plugin: TaskPlugin, taskInput: TaskInput): Cancelable = {
-    try {
+  private def runTaskInternal(plugin: TaskPlugin, taskInput: TaskInput): Cancelable =
+    try
       plugin.run(taskInput)
       coordinatorClient.CoordinatorApi.updateTaskStatus(
         UpdateTaskRequest(taskInput.taskId, TaskStatus.FINISHED)
       )
       // TODO Support cancellation
       Cancelable.empty
-    } catch {
+    catch
       case e: Throwable =>
         error(s"Task failed", e)
         coordinatorClient.CoordinatorApi.updateTaskStatus(
@@ -73,10 +71,7 @@ class WorkerApiImpl(node: WorkerSelf, coordinatorClient: CoordinatorClient, plug
         )
         // TODO Support cancellation
         Cancelable.empty
-    }
-  }
 
   override def getTask(taskId: TaskId): Option[TaskRef]      = ???
   override def cancelTask(taskId: TaskId): Option[TaskRef]   = ???
   override def listTasks(request: TaskListRequest): TaskList = ???
-}
