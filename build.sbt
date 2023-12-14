@@ -3,7 +3,7 @@ val SCALA_3 = IO.read(file("SCALA_VERSION")).trim
 val AIRFRAME_VERSION    = sys.env.getOrElse("AIRFRAME_VERSION", "23.11.3")
 val AIRSPEC_VERSION     = "23.11.3"
 val SCALAJS_DOM_VERSION = "2.4.0"
-val TRINO_VERSION       = "434"
+val TRINO_VERSION       = "435"
 
 ThisBuild / scalaVersion := SCALA_3
 ThisBuild / resolvers ++= Resolver.sonatypeOssRepos("snapshots")
@@ -206,19 +206,17 @@ lazy val ui = project
   .dependsOn(uiLib)
 
 import org.scalajs.linker.interface.{StandardConfig, OutputPatterns}
-def linkerConfig(config: StandardConfig): StandardConfig = {
+def linkerConfig(config: StandardConfig): StandardConfig =
   config
     .withCheckIR(true)
     .withSourceMap(true)
     .withModuleKind(ModuleKind.ESModule)
     .withModuleSplitStyle(ModuleSplitStyle.SmallModulesFor(List("wvlet.dataflow.ui")))
-}
 
-def linkerOutputDirectory(v: Attributed[org.scalajs.linker.interface.Report]): File = {
+def linkerOutputDirectory(v: Attributed[org.scalajs.linker.interface.Report]): File =
   v.get(scalaJSLinkerOutputDirectory.key).getOrElse {
     throw new MessageOnlyException(
       "Linking report was not attributed with output directory. " +
         "Please report this as a Scala.js bug."
     )
   }
-}
