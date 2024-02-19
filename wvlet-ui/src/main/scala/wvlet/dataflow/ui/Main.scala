@@ -17,13 +17,10 @@ import wvlet.airframe.rx.html.DOMRenderer
 import wvlet.log.LogSupport
 import org.scalajs.dom
 
-object Main extends LogSupport {
-  def main(args: Array[String]): Unit = {
+object Main extends LogSupport:
+  def main(args: Array[String]): Unit =
     renderMain()
-  }
 
-  def renderMain(): Unit = {
+  def renderMain(): Unit =
     val mainPanel = new MainPanel()
     mainPanel.renderTo("main")
-  }
-}

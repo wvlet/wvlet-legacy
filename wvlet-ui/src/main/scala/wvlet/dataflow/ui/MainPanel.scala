@@ -23,11 +23,11 @@ import wvlet.dataflow.ui.component.Editor
 
 import java.net.http.HttpClient
 
-class MainPanel extends RxElement {
+class MainPanel extends RxElement:
 
   private val rpcClient = FrontendRPC.newRPCAsyncClient(Http.client.newJSClient)
 
-  override def render: RxElement = {
+  override def render: RxElement =
     div(
       cls -> "p-2",
       "Hello wvlet!",
@@ -38,5 +38,3 @@ class MainPanel extends RxElement {
 //      },
       new Editor()
     )
-  }
-}
