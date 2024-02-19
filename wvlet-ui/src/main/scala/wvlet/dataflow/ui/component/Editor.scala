@@ -18,8 +18,8 @@ import all.*
 import typings.monacoEditor.mod.editor
 import org.scalajs.dom
 
-class Editor extends RxElement {
-  override def onMount: Unit = {
+class Editor extends RxElement:
+  override def onMount: Unit =
     editor.create(
       dom.document.getElementById("editor").asInstanceOf[dom.HTMLElement],
       editor
@@ -28,10 +28,8 @@ class Editor extends RxElement {
         .setLanguage("sql")
         .setTheme("vs-dark")
     )
-  }
 
   override def render: RxElement = div(
     id    -> "editor",
     style -> "width: 800px; height: 250px; border: 1px solid grey;"
   )
-}
