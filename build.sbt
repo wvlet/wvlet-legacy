@@ -1,6 +1,6 @@
 val SCALA_3 = IO.read(file("SCALA_VERSION")).trim
 
-val AIRFRAME_VERSION    = sys.env.getOrElse("AIRFRAME_VERSION", "24.1.2")
+val AIRFRAME_VERSION    = sys.env.getOrElse("AIRFRAME_VERSION", "24.2.1")
 val AIRSPEC_VERSION     = "24.1.2"
 val SCALAJS_DOM_VERSION = "2.4.0"
 val TRINO_VERSION       = "439"
