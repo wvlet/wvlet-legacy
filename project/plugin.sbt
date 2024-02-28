@@ -34,6 +34,6 @@ addSbtPlugin("com.github.sbt" % "sbt-dynver" % "5.0.1")
 // Documentation
 addSbtPlugin("org.scalameta" % "sbt-mdoc" % "2.5.2")
 
-addSbtPlugin("org.xerial.sbt" % "sbt-pack" % "0.18")
+addSbtPlugin("org.xerial.sbt" % "sbt-pack" % "0.19")
 
 scalacOptions ++= Seq("-deprecation", "-feature")
