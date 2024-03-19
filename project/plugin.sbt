@@ -21,7 +21,7 @@ addSbtPlugin("io.spray" % "sbt-revolver" % "0.10.0")
 addDependencyTreePlugin
 
 // For Scala.js
-val SCALAJS_VERSION = sys.env.getOrElse("SCALAJS_VERSION", "1.15.0")
+val SCALAJS_VERSION = sys.env.getOrElse("SCALAJS_VERSION", "1.16.0")
 addSbtPlugin("org.scala-js" % "sbt-scalajs" % SCALAJS_VERSION)
 libraryDependencies ++= (
   Seq("org.scala-js" %% "scalajs-env-jsdom-nodejs" % "1.1.0")
