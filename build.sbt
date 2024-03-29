@@ -10,7 +10,7 @@ ThisBuild / resolvers ++= Resolver.sonatypeOssRepos("snapshots")
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
 
-val buildSettings = Seq[Setting[_]](
+val buildSettings = Seq[Setting[?]](
   organization        := "org.wvlet.lang",
   description         := "A framework for building functional data flows",
   crossPaths          := true,
