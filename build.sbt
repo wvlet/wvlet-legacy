@@ -100,7 +100,7 @@ lazy val server =
         "org.wvlet.airframe" %% "airframe-http-netty" % AIRFRAME_VERSION,
         "org.wvlet.airframe" %% "airframe-launcher"   % AIRFRAME_VERSION,
         // Add DuckDB test
-        "org.duckdb" % "duckdb_jdbc" % "0.10.1"
+        "org.duckdb" % "duckdb_jdbc" % "0.10.2"
       ),
       Test / classLoaderLayeringStrategy := ClassLoaderLayeringStrategy.Flat
     )
