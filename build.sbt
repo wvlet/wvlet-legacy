@@ -3,7 +3,7 @@ val SCALA_3 = IO.read(file("SCALA_VERSION")).trim
 val AIRFRAME_VERSION    = sys.env.getOrElse("AIRFRAME_VERSION", "24.4.0")
 val AIRSPEC_VERSION     = "24.4.0"
 val SCALAJS_DOM_VERSION = "2.4.0"
-val TRINO_VERSION       = "444"
+val TRINO_VERSION       = "445"
 
 ThisBuild / scalaVersion := SCALA_3
 ThisBuild / resolvers ++= Resolver.sonatypeOssRepos("snapshots")
