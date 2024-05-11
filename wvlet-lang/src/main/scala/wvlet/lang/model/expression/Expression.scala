@@ -28,7 +28,7 @@ object Expression:
     override def toString                      = names.mkString(".")
     override def toExpr(context: PrintContext) = names.mkString(".")
 
-  case class ReturnItem(alias: Option[QName], expr: Expression) extends Expression:
+  case class SelectItem(alias: Option[QName], expr: Expression) extends Expression:
     override def toExpr(context: PrintContext) =
       val exprStr = expr.toExpr(context)
       alias match

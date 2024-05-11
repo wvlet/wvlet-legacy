@@ -33,7 +33,8 @@ enum Token(val tokenType: TokenType, val str: String):
   case FLOAT_LITERAL   extends Token(Literal, "<float literal>")
   case DOUBLE_LITERAL  extends Token(Literal, "<double literal>")
   case STRING_LITERAL  extends Token(Literal, "<string literal>")
-  case STRING_PART     extends Token(Literal, "<string part>")
+  // For interpolated string parts
+  case STRING_PART extends Token(Literal, "<string part>")
 
   // Identifiers
   case IDENTIFIER extends Token(Identifier, "<identifier>")
@@ -51,9 +52,18 @@ enum Token(val tokenType: TokenType, val str: String):
   case OUTDENT   extends Token(Control, "<outdent>")
 
   // Special symbols
-  case COLON extends Token(Op, ":")
-  case COMMA extends Token(Op, ",")
-  case DOT   extends Token(Op, ".")
+  case COLON      extends Token(Op, ":")
+  case COMMA      extends Token(Op, ",")
+  case DOT        extends Token(Op, ".")
+  case UNDERSCORE extends Token(Op, "_")
+  case AT         extends Token(Op, "@")
+  case DOLLAR     extends Token(Op, "$")
+  case STAR       extends Token(Op, "*")
+  case QUESTION   extends Token(Op, "?")
+
+  case L_ARROW        extends Token(Op, "<-")
+  case R_ARROW        extends Token(Op, "->")
+  case R_DOUBLE_ARROW extends Token(Op, "=>")
 
   case SINGLE_QUOTE extends Token(Op, "'")
   case DOUBLE_QUOTE extends Token(Op, "\"")
@@ -66,16 +76,29 @@ enum Token(val tokenType: TokenType, val str: String):
   case LTEQ extends Token(Op, "<=")
   case GTEQ extends Token(Op, ">=")
 
+  case PLUS     extends Token(Op, "+")
+  case MINUS    extends Token(Op, "-")
+  case ASTERISK extends Token(Op, "*")
+  case DIV      extends Token(Op, "/")
+  case MOD      extends Token(Op, "%")
+
+  case AMP  extends Token(Op, "&")
+  case PIPE extends Token(Op, "|")
+
+  case HASH extends Token(Op, "#")
+
   // literal keywords
   case NULL  extends Token(Keyword, "null")
   case TRUE  extends Token(Keyword, "true")
   case FALSE extends Token(Keyword, "false")
 
   // Alphabectic keywords
-  case IN     extends Token(Keyword, "in")
   case DEF    extends Token(Keyword, "def")
   case SCHEMA extends Token(Keyword, "schema")
+  case TYPE   extends Token(Keyword, "type")
   case WITH   extends Token(Keyword, "with")
+
+  case IN extends Token(Keyword, "in")
 
   case SELECT   extends Token(Keyword, "select")
   case FOR      extends Token(Keyword, "for")
@@ -83,8 +106,8 @@ enum Token(val tokenType: TokenType, val str: String):
   case WHERE    extends Token(Keyword, "where")
   case GROUP_BY extends Token(Keyword, "group by")
   case HAVING   extends Token(Keyword, "having")
-  case RETURN   extends Token(Keyword, "return")
   case ORDER_BY extends Token(Keyword, "order by")
+  case JOIN     extends Token(Keyword, "join")
 
   case RUN    extends Token(Keyword, "run")
   case IMPORT extends Token(Keyword, "import")
@@ -93,6 +116,11 @@ enum Token(val tokenType: TokenType, val str: String):
   case IF   extends Token(Keyword, "if")
   case THEN extends Token(Keyword, "then")
   case ELSE extends Token(Keyword, "else")
+  case END  extends Token(Keyword, "end")
+
+  case AND extends Token(Keyword, "and")
+  case OR  extends Token(Keyword, "or")
+  case NOT extends Token(Keyword, "not")
 
 object Tokens:
   import Token.*

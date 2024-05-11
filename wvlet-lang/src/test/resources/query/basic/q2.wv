@@ -1,4 +1,4 @@
 for a in A
 where a.id = 1
-return a
+select a
 
