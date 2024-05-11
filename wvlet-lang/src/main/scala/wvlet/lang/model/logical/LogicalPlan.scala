@@ -63,9 +63,9 @@ object LogicalPlan:
     def input: Relation
 
   case class FLOWRQuery(
-                         forItems: Seq[ForItem],
-                         whereClause: Option[Where] = None,
-                         selectClause: Option[Select] = None
+      forItems: Seq[ForItem],
+      whereClause: Option[Where] = None,
+      selectClause: Option[Select] = None
   )(override val nodeLocation: Option[SourceLocation] = None)
       extends Relation:
 
