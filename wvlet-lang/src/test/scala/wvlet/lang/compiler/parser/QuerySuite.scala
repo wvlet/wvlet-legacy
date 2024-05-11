@@ -26,10 +26,9 @@ trait QuerySuite:
     basic(body)
 
   private def basic(body: TestQuery => Unit) =
-    test("basic"):
-      querySuite("query/basic").map: q =>
-        test(s"query ${q.name}:"):
-          body(q)
+    querySuite("query/basic").map: q =>
+      test(s"query ${q.name}:"):
+        body(q)
 
   private def querySuite(path: String): Seq[TestQuery] =
     Resource

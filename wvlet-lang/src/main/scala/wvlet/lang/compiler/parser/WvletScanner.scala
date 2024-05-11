@@ -235,7 +235,7 @@ class WvletScanner(source: ScannerSource) extends LogSupport:
   private def toToken(): TokenData =
     val currentTokenStr = getAndClearTokenBuffer()
     trace(s"toToken at ${offset}: '${currentTokenStr}'")
-    Tokens.allKeywords.find(x => x.str == currentTokenStr) match
+    Tokens.keywordTable.get(currentTokenStr) match
       case Some(tokenType) =>
         TokenData(tokenType, currentTokenStr, offset - currentTokenStr.length, offset)
       case None =>
