@@ -66,7 +66,7 @@ class WvletScanner(source: ScannerSource) extends LogSupport:
   private var lineStartOffset: Int = 0
   private var indentLevel          = 0
 
-  // THe offset before the last read character
+  // The offset before the last read character
   private var lastOffset: Int = 0
 
   /**
