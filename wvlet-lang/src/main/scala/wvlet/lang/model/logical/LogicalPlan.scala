@@ -15,7 +15,7 @@ package wvlet.lang.model.logical
 
 import wvlet.lang.model.SourceLocation
 import wvlet.lang.model.expression.*
-import wvlet.lang.model.expression.Expression.ReturnItem
+import wvlet.lang.model.expression.Expression.SelectItem
 import wvlet.lang.model.formatter.{FormatOption, PrintContext}
 
 trait LogicalPlan:
@@ -65,7 +65,7 @@ object LogicalPlan:
   case class FLOWRQuery(
       forItems: Seq[ForItem],
       whereClause: Option[Where] = None,
-      returnClause: Option[Return] = None
+      selectClause: Option[Select] = None
   )(override val nodeLocation: Option[SourceLocation] = None)
       extends Relation:
 
@@ -85,7 +85,7 @@ object LogicalPlan:
         s ++= context.newline
         s ++= w.toExpr(context)
       }
-      returnClause.foreach { r =>
+      selectClause.foreach { r =>
         s ++= context.newline
         s ++= r.toExpr(context)
       }
@@ -97,5 +97,5 @@ object LogicalPlan:
   case class Where(filterExpr: Expression)(nodeLocation: Option[SourceLocation]) extends Expression:
     override def toExpr(context: PrintContext): String = s"where ${filterExpr.toExpr(context)}"
 
-  case class Return(exprs: Seq[ReturnItem])(nodeLocation: Option[SourceLocation]) extends Expression:
+  case class Select(exprs: Seq[SelectItem])(nodeLocation: Option[SourceLocation]) extends Expression:
     override def toExpr(context: PrintContext): String = s"return ${exprs.map(_.toExpr(context)).mkString(", ")}"

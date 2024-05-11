@@ -14,9 +14,9 @@
 package wvlet.lang.compiler.parser
 
 import wvlet.lang.model.expression.Expression
-import wvlet.lang.model.expression.Expression.{ConditionalExpression, Identifier, QName, ReturnItem, StringLiteral}
+import wvlet.lang.model.expression.Expression.{ConditionalExpression, Identifier, QName, SelectItem, StringLiteral}
 import wvlet.lang.model.logical.LogicalPlan
-import wvlet.lang.model.logical.LogicalPlan.{FLOWRQuery, ForItem, Return, SchemaDef, SchemaItem, Where}
+import wvlet.lang.model.logical.LogicalPlan.{FLOWRQuery, ForItem, Select, SchemaDef, SchemaItem, Where}
 import WvletParser.EOFToken
 import wvlet.log.LogSupport
 
@@ -63,12 +63,12 @@ class WvletParser(tokenScanner: TokenScanner) extends LogSupport:
     currentToken.token match
       case Token.FOR =>
         parseFLOWRQuery
-      case Token.RETURN =>
-        // return-only plan
-        debug(s"return: ${currentToken}")
+      case Token.SELECT =>
+        // select-only plan
+        debug(s"select: ${currentToken}")
         val sourceLocation = currentToken.getSourceLocation
-        val returnClause   = parseReturn
-        FLOWRQuery(forItems = Seq.empty, returnClause = Some(returnClause))(sourceLocation)
+        val selectClause   = parseSelect
+        FLOWRQuery(forItems = Seq.empty, selectClause = Some(selectClause))(sourceLocation)
       case Token.SCHEMA =>
         parseSchema
       case Token.EOF =>
@@ -87,19 +87,19 @@ class WvletParser(tokenScanner: TokenScanner) extends LogSupport:
 
         // TODO parse group by, join, etc.
         var whereClause: Option[Where]   = None
-        var returnClause: Option[Return] = None
+        var selectClause: Option[Select] = None
         next.token match
           case Token.WHERE =>
             whereClause = Some(parseWhere)
             peekNextToken.token match
-              case Token.RETURN =>
-                returnClause = Some(parseReturn)
+              case Token.SELECT =>
+                selectClause = Some(parseSelect)
               case _ =>
 
-          case Token.RETURN =>
-            returnClause = Some(parseReturn)
+          case Token.SELECT =>
+            selectClause = Some(parseSelect)
           case _ =>
-        FLOWRQuery(forItems = forItems, whereClause, returnClause)(currentToken.getSourceLocation)
+        FLOWRQuery(forItems = forItems, whereClause, selectClause)(currentToken.getSourceLocation)
       case _ =>
         null
 
@@ -129,20 +129,20 @@ class WvletParser(tokenScanner: TokenScanner) extends LogSupport:
       Where(expr)(currentToken.getSourceLocation)
     else parseError(currentToken, Token.WHERE)
 
-  private def parseReturn: Return =
+  private def parseSelect: Select =
     val currentToken = peekNextToken
-    if currentToken.token == Token.RETURN then
+    if currentToken.token == Token.SELECT then
       nextToken
-      val returnItems = parseReturnItems
-      Return(returnItems)(currentToken.getSourceLocation)
-    else parseError(currentToken, Token.RETURN)
+      val selectItems = parseSelectItems
+      Select(selectItems)(currentToken.getSourceLocation)
+    else parseError(currentToken, Token.SELECT)
 
-  private def parseReturnItems: Seq[ReturnItem] =
-    val items = Seq.newBuilder[ReturnItem]
+  private def parseSelectItems: Seq[SelectItem] =
+    val items = Seq.newBuilder[SelectItem]
 
     @tailrec
     def loop: Unit =
-      val ri = parseReturnItem
+      val ri = parseSelectItem
       items += ri
       if peekNextToken.token == Token.COMMA then
         nextToken
@@ -150,7 +150,7 @@ class WvletParser(tokenScanner: TokenScanner) extends LogSupport:
     loop
     items.result()
 
-  private def parseReturnItem: ReturnItem =
+  private def parseSelectItem: SelectItem =
     val currentToken = peekNextToken
     currentToken.token match
       case Token.IDENTIFIER =>
@@ -159,12 +159,12 @@ class WvletParser(tokenScanner: TokenScanner) extends LogSupport:
           case Token.COLON =>
             nextToken
             val expr = parseExpression
-            ReturnItem(Some(qName), expr)
+            SelectItem(Some(qName), expr)
           case _ =>
-            ReturnItem(None, qName)
+            SelectItem(None, qName)
       case _ =>
         val expr = parseExpression
-        ReturnItem(None, expr)
+        SelectItem(None, expr)
 
   private def parseSchema: SchemaDef =
     val schemaLoc = peekNextToken.getSourceLocation
