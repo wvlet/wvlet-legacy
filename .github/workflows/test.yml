@@ -29,7 +29,7 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '17'
+          java-version: '21'
       - name: scalafmt
         run: ./sbt scalafmtCheckAll
   test_scala_3:
@@ -40,7 +40,7 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '17'
+          java-version: '21'
       - name: Scala 3.x test
         run: ./sbt test
       - name: Publish Test Report
@@ -57,7 +57,16 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '17'
+          java-version: '21'
+      - name: Cache ScalablyTyped artifacts
+        id: cache-scalablytyped
+        uses: actions/cache@v4
+        with:
+          key: ${{ runner.os }}-scalablytyped
+          path: |
+            ~/.ivy2/local
+            ~/.sbt
+            ~/.cache
       - uses: actions/setup-node@v4
         with:
           node-version: '18'
