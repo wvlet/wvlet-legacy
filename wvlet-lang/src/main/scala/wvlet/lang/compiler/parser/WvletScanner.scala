@@ -14,6 +14,7 @@
 package wvlet.lang.compiler.parser
 
 import wvlet.airframe.control.IO
+import wvlet.lang.compiler.parser.Token.*
 import wvlet.lang.model.SourceLocation
 import wvlet.log.LogSupport
 
@@ -26,36 +27,6 @@ case class TokenData(token: Token, text: String, start: Int, end: Int):
   // TODO
   def getSourceLocation: Option[SourceLocation] = None
 
-object WvletScanner extends LogSupport:
-  def scan(text: String): Seq[TokenData] =
-    val scanner = new WvletScanner(StringSource(text))
-    val tokens  = Seq.newBuilder[TokenData]
-    scanner.nextChar()
-    var tokenData = scanner.nextToken()
-    while tokenData.token != Token.EOF do
-      debug(s"token: ${tokenData}")
-      tokens += tokenData
-      tokenData = scanner.nextToken()
-    tokens.result()
-
-  inline val LF = '\u000A'
-  inline val FF = '\u000C'
-  inline val CR = '\u000D'
-  inline val SU = '\u001A'
-
-  private def isNumberSeparator(ch: Char): Boolean = ch == '_'
-
-  /**
-    * Convert a character to an integer value using the given base. Returns -1 upon failures
-    */
-  def digit2int(ch: Char, base: Int): Int =
-    val num =
-      if ch <= '9' then ch - '0'
-      else if 'a' <= ch && ch <= 'z' then ch - 'a' + 10
-      else if 'A' <= ch && ch <= 'Z' then ch - 'A' + 10
-      else -1
-    if 0 <= num && num < base then num else -1
-
 class WvletScanner(source: ScannerSource) extends LogSupport:
   import WvletScanner.*
 
@@ -64,7 +35,6 @@ class WvletScanner(source: ScannerSource) extends LogSupport:
   // The 1-character ahead offset of the last read character
   private var offset: Int          = 0
   private var lineStartOffset: Int = 0
-  private var indentLevel          = 0
 
   // The offset before the last read character
   private var lastOffset: Int = 0
@@ -73,6 +43,8 @@ class WvletScanner(source: ScannerSource) extends LogSupport:
     */
   private var lineOffset: Int = -1
   protected val tokenBuffer   = TokenBuffer()
+
+  val currentRegion: Region = topLevelRegion(0)
 
   private def reportError(msg: String, loc: SourceLocation): Unit =
     error(s"${msg} at ${loc}")
@@ -113,12 +85,14 @@ class WvletScanner(source: ScannerSource) extends LogSupport:
     if ch == LF || ch == FF then
       lineOffset = offset
       lineStartOffset = offset
-      indentLevel = 0
 
   private def putChar(ch: Char): Unit =
     tokenBuffer.append(ch)
 
   private def fetchToken(): TokenData =
+    // offset = charOffset - 1
+    // lineOffset = if lastOffset < lineStartOffset then lineStartOffset else -1
+
     trace(s"fetchToken col:${offset - lineStartOffset} (offset:${offset}): '${String.valueOf(ch)}'")
     (ch: @switch) match
       case ' ' | '\t' | CR | LF | FF =>
@@ -131,8 +105,7 @@ class WvletScanner(source: ScannerSource) extends LogSupport:
         putChar(ch)
         nextChar()
         getIdentRest()
-      case '~' | '!' | '@' | '#' | '%' | '^' | '*' | '+' | '-' | /*'<' | */
-          '>' | '?' | ':' | '=' | '&' | '|' | '\\' =>
+      case '~' | '!' | '@' | '#' | '%' | '^' | '*' | '+' | '-' | '>' | '?' | ':' | '=' | '&' | '|' | '\\' =>
         putChar(ch)
         nextChar()
         getOperatorRest()
@@ -302,3 +275,47 @@ class WvletScanner(source: ScannerSource) extends LogSupport:
     // checkNoLetter()
     tokenType
   end getFraction
+
+object WvletScanner extends LogSupport:
+  def scan(text: String): Seq[TokenData] =
+    val scanner = new WvletScanner(StringSource(text))
+    val tokens  = Seq.newBuilder[TokenData]
+    scanner.nextChar()
+    var tokenData = scanner.nextToken()
+    while tokenData.token != Token.EOF do
+      debug(s"token: ${tokenData}")
+      tokens += tokenData
+      tokenData = scanner.nextToken()
+    tokens.result()
+
+  inline val LF = '\u000A'
+  inline val FF = '\u000C'
+  inline val CR = '\u000D'
+  inline val SU = '\u001A'
+
+  private def isNumberSeparator(ch: Char): Boolean = ch == '_'
+
+  /**
+    * Convert a character to an integer value using the given base. Returns -1 upon failures
+    */
+  def digit2int(ch: Char, base: Int): Int =
+    val num =
+      if ch <= '9' then ch - '0'
+      else if 'a' <= ch && ch <= 'z' then ch - 'a' + 10
+      else if 'A' <= ch && ch <= 'Z' then ch - 'A' + 10
+      else -1
+    if 0 <= num && num < base then num else -1
+
+  abstract class Region(val closeBy: Token):
+    // The region enclonsing this region, or null if this is the outermost region
+    def outer: Region | Null
+    def enclosing: Region = outer.asInstanceOf[Region]
+  end Region
+
+  case class Indented(width: Int, outer: Region | Null) extends Region(OUTDENT)
+  // For string-interpolation
+  case class InString(outer: Region) extends Region(R_BRACE)
+  case class InParens(outer: Region) extends Region(R_PAREN)
+  case class InCase(outer: Region)   extends Region(OUTDENT)
+
+  def topLevelRegion(width: Int) = Indented(width, null)
