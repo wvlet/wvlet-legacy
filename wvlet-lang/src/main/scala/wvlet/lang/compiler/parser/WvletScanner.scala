@@ -39,10 +39,17 @@ class WvletScanner(source: ScannerSource) extends LogSupport:
   // The offset before the last read character
   private var lastOffset: Int = 0
 
+  private def isAfterLineEnd: Boolean = lineOffset >= 0
+
   /**
     */
   private var lineOffset: Int = -1
   protected val tokenBuffer   = TokenBuffer()
+
+  // Token history
+  private var prev = TokenData(Token.EMPTY, "", 0, 0)
+  // One-lookahead token
+  private var next = TokenData(Token.EMPTY, "", 0, 0)
 
   val currentRegion: Region = topLevelRegion(0)
 
@@ -62,8 +69,28 @@ class WvletScanner(source: ScannerSource) extends LogSupport:
   def skipToken(): Unit = {}
 
   def nextToken(): TokenData =
-    if offset >= source.length then TokenData(Token.EOF, "", lastOffset, offset)
-    else fetchToken()
+    val token =
+      if offset >= source.length then TokenData(Token.EOF, "", lastOffset, offset)
+      else fetchToken()
+    if isAfterLineEnd then handleNewLine()
+    token
+
+  private def indentWidth(offset: Int): Int =
+    def loop(index: Int, ch: Char): Int =
+      0
+    loop(offset - 1, ' ')
+
+  /**
+    * Handle new lines. If necessary, add INDENT or OUTDENT tokens in front of the current token.
+    *
+    * Insert INDENT if
+    *   - the indentation is significant, and
+    *   - the last token can start an indentation region, and
+    *   - the indentation of the current token is greater than the previous indentation width.
+    */
+  private def handleNewLine(): Unit =
+    val indent = indentWidth(offset)
+    debug(s"handle new line: ${offset}, indentWidth:${indent}")
 
   private def nextChar(): Unit =
     val index = offset
