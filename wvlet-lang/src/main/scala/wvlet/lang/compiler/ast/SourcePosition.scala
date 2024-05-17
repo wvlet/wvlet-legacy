@@ -11,26 +11,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package wvlet.lang.compiler.parser
+package wvlet.lang.compiler.ast
 
-import wvlet.airframe.control.IO
+import wvlet.lang.compiler.core.SourceFile
 import wvlet.lang.model.SourceLocation
 
-trait ScannerSource:
-  def text: String
-  def length: Int
-
-  def sourceLocationOf(offset: Int): SourceLocation =
-    val pos = SourcePosition(this, offset)
-    pos.toSourceLocation
-
-case class SourceFile(path: String) extends ScannerSource:
-  override lazy val text: String = IO.readAsString(new java.io.File(path))
-  override def length: Int       = text.length
-case class StringSource(override val text: String) extends ScannerSource:
-  override val length: Int = text.length
-
-case class SourcePosition(source: ScannerSource, offset: Int):
+case class SourcePosition(source: SourceFile, offset: Int):
   def line: Int =
     var i    = 0
     var line = 1
