@@ -14,10 +14,12 @@
 package wvlet.lang.compiler.ast
 
 import wvlet.lang.compiler.core.Name
-import wvlet.lang.compiler.core.Name.EmptyName
+import wvlet.lang.compiler.core.Name.{EmptyName, TermName, TypeName}
 
 abstract class Tree:
-  private var _span: Span = Span.NoSpan
+  protected var sourcePosition: SourcePosition   = SourcePosition.NoPosition
+  private var _span: Span                        = Span.NoSpan
+  private var tokenDecorator: Set[TreeDecorator] = Set.empty
 
   def withSpan(span: Span): this.type =
     if _span == span then this
@@ -25,31 +27,67 @@ abstract class Tree:
       if !_span.exists then if span.exists then _span = span
       this
 
-object Tree:
+  def isDecoratedWith(decorator: TreeDecorator): Boolean =
+    tokenDecorator.contains(decorator)
 
-  case object empty extends Tree
+  def toJson: String               = ???
+  def fromJson(json: String): Tree = ???
+
+enum TreeDecorator:
+  case SingleQuoted
+  case DoubleQuoted
+  case TripleQuoted
+  case BackQuoted
+  case CommaSeparated
+  case IndentedBlock
+  case ApplyNoParen
+  case RefDot
+  case RefSpace
+
+object Tree:
+  import TreeDecorator.*
+
+  case object EmptyTree extends Tree
 
   // Relational operator
-  case class RelOp(input: Tree, name: Name, args: List[Tree])        extends Tree
+  case class RelOp(input: Tree, name: Name, args: List[Tree]) extends Tree:
+    def isCommaSeparated: Boolean = !isIndentedBlock
+    def isIndentedBlock: Boolean  = isDecoratedWith(IndentedBlock)
+
   // Code block
-  case class Block(statements: Seq[Tree], lastExpr: Tree)            extends Tree
+  case class Block(statements: Seq[Tree], lastExpr: Tree) extends Tree
+
   // Import statement
   case class Import(prefix: Symbol, selectors: List[ImportSelector]) extends Tree
-
-  case class FunctionApply(func: Tree, args: List[Tree]) extends Tree
-  case class Ref(expr: Tree, name: Name) extends Tree
-
-
-  case class Identifier(name: Name) extends Tree
-  class Literal(stringValue: String, dataType: ) extends Tree
-  case class NullLiteral() extends Literal
-  case class IntLiteral(value: Long) extends Literal
-  case class LongLiteral(value: Long) extends Literal
-  case class StringLiteral(value: String) extends Literal
-  case class BooleanLiteral(value: Boolean) extends Literal
-  case class FloatLiteral(value: Float) extends Literal
-  case class DoubleLiteral(value: Double) extends Literal
-
-
   case class ImportSelector(imported: Identifier, renamed: Name = EmptyName) extends Tree:
     def isWildcard: Boolean = imported.name == Name.WILDCARD
+
+  // Function arg application
+  case class Apply(func: Tree, args: List[Tree]) extends Tree:
+    def isCommaSeparatedArgs: Boolean = !isIndentedBlockArgs
+    def isIndentedBlockArgs: Boolean  = isDecoratedWith(IndentedBlock)
+    def hasArgParen: Boolean          = !isDecoratedWith(ApplyNoParen)
+
+  // Follow (expr).name reference
+  case class Ref(expr: Tree, name: Name) extends Tree
+
+  abstract case class Identifier(name: Name) extends Tree:
+    def isBackquoted: Boolean = isDecoratedWith(TreeDecorator.BackQuoted)
+
+  class Literal(stringRepr: String, literalType: LiteralType) extends Tree
+  enum LiteralType:
+    case NullLiteral
+    case UnitLiteral
+    case BooleanLiteral
+    case IntLiteral
+    case LongLiteral
+    case DoubleQuoteStringLiteral
+    case SingleQuoteStringLiteral
+    case TripleQuoteStringLiteral
+    case BinaryLiteral
+    case FloatLiteral
+    case DoubleLiteral
+
+  case class DefDef(name: TermName, args: List[Tree], retType: Tree, body: Tree) extends Tree
+  case class ValDef(name: TermName, tpt: Tree, body: Tree)                       extends Tree
+  case class TypeDef(name: TypeName, body: Tree)                                 extends Tree

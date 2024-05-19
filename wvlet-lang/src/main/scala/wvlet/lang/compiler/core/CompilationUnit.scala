@@ -27,9 +27,9 @@ import java.io.File
   */
 case class CompilationUnit(sourceFile: SourceFile):
   // Untyped plan tree
-  var unresolvedPlan: Tree = Tree.empty
+  var unresolvedPlan: Tree = Tree.EmptyTree
   // Fully-typed plan tree
-  var resolvedPlan: Tree = Tree.empty
+  var resolvedPlan: Tree = Tree.EmptyTree
 
   // Plans generated for subscriptions
   var subscriptionPlans: List[Tree] = List.empty[Tree]
