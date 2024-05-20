@@ -81,9 +81,8 @@ object Tree:
     case BooleanLiteral
     case IntLiteral
     case LongLiteral
-    case DoubleQuoteStringLiteral
-    case SingleQuoteStringLiteral
-    case TripleQuoteStringLiteral
+    case DecimalLiteral
+    case StringLiteral
     case BinaryLiteral
     case FloatLiteral
     case DoubleLiteral
