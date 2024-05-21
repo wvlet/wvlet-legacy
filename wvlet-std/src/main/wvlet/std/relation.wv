@@ -13,6 +13,10 @@
  */
 package wvlet.standard
 
+/**
+ * Note: We will not use this definition as there seems no practical benefit of
+        defining relational operators in wvlet language itself.
+ */
 class Relation[R](name: String, fields: List[Field]) extends List[R]:
   def select[R1*](f: R => R1*): Relation[R1*]
   def groupBy[K*](keys: R => K*): Relation[K* :: List[R]]
@@ -56,9 +60,6 @@ class List[A]:
 
   def maxBy[K](f: A => K)(given Ordering[K]): A
   def minBy[K](f: A => K)(given Ordering[K]): A
-
-
-
 
 
 
