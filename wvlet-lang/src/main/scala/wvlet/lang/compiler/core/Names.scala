@@ -25,13 +25,14 @@ object Name:
     def isTermName = false
     def isTypeName = false
 
-  abstract class TermName extends Name:
+  class TermName(nme: String) extends Name:
     def isTermName = true
     def isTypeName = false
 
   abstract class TypeName extends Name:
     def isTermName = false
     def isTypeName = true
-
+  
+  def termName(name: String): Name = TermName(name)
 
   final val WILDCARD = TermName("*")

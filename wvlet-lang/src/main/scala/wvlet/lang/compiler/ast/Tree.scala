@@ -40,6 +40,9 @@ abstract class Tree:
   def nodeName: String
   def toJson: String = ???
 
+abstract class Plan       extends Tree
+abstract class Expression extends Tree
+
 enum TreeDecorator:
   case SingleQuoted
   case DoubleQuoted
@@ -59,9 +62,30 @@ object Tree:
   case object EmptyTree extends Tree
 
   // Relational operator
-  case class RelOp(input: Tree, name: Name, args: List[Tree]) extends Tree:
+  abstract class Relation(input: Tree, name: Name, args: List[Expression]) extends Plan:
     def isCommaSeparated: Boolean = !isIndentedBlock
     def isIndentedBlock: Boolean  = isDecoratedWith(IndentedBlock)
+
+  case class Join(joinType: JoinType, left: Relation, right: Relation, joinCriteria: JoinCriteria)
+      extends Relation(left, TermName("join"), List(joinType, joinCriteria)):
+
+    override def nodeName: String = "JoinOp"
+
+  enum JoinType(name: String) extends Expression:
+    // Join for reporting only matched rows
+    case InnerJoin extends JoinType("inner_join")
+    // Join for preserving left table
+    case LeftJoin extends JoinType("left_join")
+    // Join for preserving right table
+    case RightJoin extends JoinType("right_join")
+    // Join for preserving both tables
+    case FullJoin extends JoinType("full_join")
+    // Join for cartesian product
+    case CrossJoin extends JoinType("cross_join")
+
+  sealed trait JoinCriteria                       extends Expression
+  case class JoinOn(expr: Expression)             extends JoinCriteria
+  case class JoinUsing(columns: List[Identifier]) extends JoinCriteria
 
   // Code block
   case class Block(statements: Seq[Tree], lastExpr: Tree) extends Tree
@@ -82,7 +106,7 @@ object Tree:
 
   abstract case class Identifier(name: Name) extends Tree:
     def isBackquoted: Boolean = isDecoratedWith(TreeDecorator.BackQuoted)
-  
+
   class Literal(stringRepr: String, literalType: LiteralType) extends Tree
   enum LiteralType:
     case NullLiteral
@@ -98,5 +122,5 @@ object Tree:
   case class DefDef(name: TermName, args: List[Tree], retType: Tree, body: Tree) extends Tree
   case class ValDef(name: TermName, tpe: Tree, body: Tree)                       extends Tree
   case class TypeDef(name: TypeName, body: Tree)                                 extends Tree
-  
-  
+
+  case class PackageDef(name: Name, statements: List[Tree]) extends Tree
