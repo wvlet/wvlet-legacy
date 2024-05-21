@@ -22,6 +22,7 @@ class Type:
   def dealias: Type        = this
 
 object Type:
+  Seq(1).sum
   case object NoPrefix extends Type
   case object Unknown  extends Type
 
