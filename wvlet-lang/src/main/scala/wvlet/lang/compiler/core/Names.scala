@@ -21,7 +21,7 @@ abstract class Name:
   def isTypeName: Boolean
 
 object Name:
-  case object EmptyName extends Name:
+  case object NoName extends Name:
     def isTermName = false
     def isTypeName = false
 
