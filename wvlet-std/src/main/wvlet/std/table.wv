@@ -13,6 +13,11 @@
  */
 
 
-class TableOp:
-  def
+class TableOps:
+  static def createTableAs(tableName: String, query: String): Unit = q"""
+    create table $tableName as $query
+  """
+  static def dropTablel(tableName): Unit = q"""
+    drop table if exists $tableName
+  """
 end
