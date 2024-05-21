@@ -13,18 +13,18 @@
  */
 
 extend String(context trino:Trino):
-  def toInt: Int = q"cast(${this} as bigint)"
-  def toFloat: Float = q"cast(${this} as real)"
-  def toDouble: Double = q"cast(${this} as double)"
-  def toBoolean: Boolean = q"cast(${this} as boolean)"
+  def toInt: Expr[Int] = q"cast(${this} as bigint)"
+  def toFloat: Expr[Float] = q"cast(${this} as real)"
+  def toDouble: Expr[Double] = q"cast(${this} as double)"
+  def toBoolean: Expr[Boolean] = q"cast(${this} as boolean)"
 
-  def trim: String = q"trim(${this])"
-  def split(separator: String): List[String] = q"split(${this}, '${separator}')"
-  def substring(start: Int): String = q"substring(${this}, ${start})"
-  def substring(start: Int, end:Int): String = q"substring(${this}, ${start}, ${end})"
-  def regexpContains(pattern: String): Boolean = q"regexp_like(${this}, '${pattern}')"
+  def trim: Expr[String] = q"trim(${this])"
+  def split(separator: String): Expr[List[String]] = q"split(${this}, '${separator}')"
+  def substring(start: Int): Expr[String] = q"substring(${this}, ${start})"
+  def substring(start: Int, end:Int): Expr[String] = q"substring(${this}, ${start}, ${end})"
+  def regexpContains(pattern: String): Expr[Boolean] = q"regexp_like(${this}, '${pattern}')"
 
   // Trino-specific functions
-  def regexp_count(pattern: String): Int = q"regexp_count(${this}, '${pattern}')"
-  def regexp_extract_alll(pattern: String): List[String] = q"regexp_extract_all(${this}, '${pattern}')"
+  def regexp_count(pattern: String): Expr[Int]n = q"regexp_count(${this}, '${pattern}')"
+  def regexp_extract_alll(pattern: String): Expr[List[String]] = q"regexp_extract_all(${this}, '${pattern}')"
 end

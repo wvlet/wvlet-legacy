@@ -14,20 +14,20 @@
 
 
 extend List[A](context Trino):
-  def count: Long = q"count(1)"
-  def countIf(f: A => Boolean): Long = q"count_if(${this}, ${f})"
-  def countDistinct: Long = q"count(distinct $self)"
-  def countCountDistinct: Long = q"approx_distinct(${this})"
+  def count: Expr[Long] = q"count(1)"
+  def countIf(f: A => Boolean): Expr[Long] = q"count_if(${this}, ${f})"
+  def countDistinct: Expr[Long] = q"count(distinct $self)"
+  def countCountDistinct: Expr[Long] = q"approx_distinct(${this})"
 
-  def any: A = q"arbitrary($this)"
-  def maxBy[K: Comparable](f: A => K): A = q"max_by($this, ${f})"
-  def minBy[K: Comparable](f: A => K): A = q"min_by($this, ${f})"
+  def any: Expr[A] = q"arbitrary($this)"
+  def maxBy[K: Comparable](f: A => K): Expr[A] = q"max_by($this, ${f})"
+  def minBy[K: Comparable](f: A => K): Expr[A] = q"min_by($this, ${f})"
 end
 
 // Numeric operators
 extend List[A](context Numeric[A], Trino):
-  def sum: A = q"sum($this)"
-  def avg: A = q"avg($this)"
-  def max: A = q"max($this)"
-  def min: A = q"min($this)"
+  def sum: Expr[A] = q"sum($this)"
+  def avg: Expr[A] = q"avg($this)"
+  def max: Expr[A] = q"max($this)"
+  def min: Expr[A] = q"min($this)"
 end
