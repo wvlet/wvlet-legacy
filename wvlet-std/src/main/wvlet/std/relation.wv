@@ -38,30 +38,6 @@ class Relation[R](name: String, fields: List[Field]) extends List[R]:
   static def sql[R1](sql: String): Relation[R1]
 
 
-class List[A]:
-  // Extract a field in the list
-  def .[A.F](field: A.F): List[A.F]
-
-  def count: Long
-  def countIf(cond: A => Boolean): Long
-  def countDistinct: Long
-  def approxCountDistinct: Long
-
-  /**
-   * Return an arbitrary element from the list
-   */
-  def any: A
-
-  // Numeric operators
-  def sum(given Numeric[A]): A
-  def max(given Numeric[A]): A
-  def min(given Numeric[A]): A
-  def avg(given Numeric[A]): A
-
-  def maxBy[K](f: A => K)(given Ordering[K]): A
-  def minBy[K](f: A => K)(given Ordering[K]): A
-
-
 
 
 
