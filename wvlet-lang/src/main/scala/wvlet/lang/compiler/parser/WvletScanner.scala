@@ -20,12 +20,29 @@ import wvlet.log.LogSupport
 
 import scala.annotation.{switch, tailrec}
 import scala.collection.mutable
+import Token.*
 
 // TODO Add line, offset
 case class TokenData(token: Token, text: String, start: Int, end: Int):
   override def toString: String = f"[${start}%3d,${end}%3d] ${token}%10s: '${text}'"
   // TODO
   def getSourceLocation: Option[SourceLocation] = None
+
+  class ScanState(startFrom: Int = 0):
+    override def toString: String =
+      s"ScanState(offset: ${offset}, lastOffset: ${lastOffset}, token: ${token}, str: ${str})"
+
+    // Token type
+    var token: Token = Token.EMPTY
+    // The string value of the token
+    var str: String = ""
+
+    // The 1-character ahead offset of the last read character
+    var offset: Int = startFrom
+    // The offset of the character immediately before the current token
+    var lastOffset: Int = startFrom
+    // the offset of the newline immediately before the current token, or -1 if the current token is not the first one after a newline
+    var lineOffset: Int = -1
 
 class WvletScanner(source: ScannerSource) extends LogSupport:
   import WvletScanner.*
@@ -235,7 +252,7 @@ class WvletScanner(source: ScannerSource) extends LogSupport:
   private def toToken(): TokenData =
     val currentTokenStr = getAndClearTokenBuffer()
     trace(s"toToken at ${offset}: '${currentTokenStr}'")
-    Tokens.keywordTable.get(currentTokenStr) match
+    Token.keywordTable.get(currentTokenStr) match
       case Some(tokenType) =>
         TokenData(tokenType, currentTokenStr, offset - currentTokenStr.length, offset)
       case None =>
@@ -314,13 +331,6 @@ object WvletScanner extends LogSupport:
       tokens += tokenData
       tokenData = scanner.nextToken()
     tokens.result()
-
-  inline val LF = '\u000A'
-  inline val FF = '\u000C'
-  inline val CR = '\u000D'
-  inline val SU = '\u001A'
-
-  private def isNumberSeparator(ch: Char): Boolean = ch == '_'
 
   /**
     * Convert a character to an integer value using the given base. Returns -1 upon failures

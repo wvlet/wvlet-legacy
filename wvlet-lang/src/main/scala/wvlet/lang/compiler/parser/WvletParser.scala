@@ -78,7 +78,7 @@ class WvletParser(tokenScanner: TokenScanner) extends LogSupport:
 
   def parseFLOWRQuery: FLOWRQuery =
     val currentToken = peekNextToken
-    currentToken.token match
+    currentToken.token match    
       case Token.FOR =>
         nextToken
         val forItems: Seq[ForItem] = parseForItems

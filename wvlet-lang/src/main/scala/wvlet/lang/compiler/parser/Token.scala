@@ -18,6 +18,8 @@ enum TokenType:
 
 import TokenType.*
 
+import scala.annotation.switch
+
 enum Token(val tokenType: TokenType, val str: String):
   // special tokens
   case EMPTY   extends Token(Control, "<empty>")
@@ -41,6 +43,7 @@ enum Token(val tokenType: TokenType, val str: String):
   // Identifier wrapped in backquotes `....`
   case BACKQUOTED_IDENTIFIER extends Token(Identifier, "<quoted identifier>")
 
+  // Quote characters
   case SINGLE_QUOTE extends Token(Quote, "'")
   case DOUBLE_QUOTE extends Token(Quote, "\"")
   case BACK_QUOTE   extends Token(Quote, "`")
@@ -77,14 +80,18 @@ enum Token(val tokenType: TokenType, val str: String):
   case LTEQ extends Token(Op, "<=")
   case GTEQ extends Token(Op, ">=")
 
+  case LOGICAL_AND extends Token(Op, "&&")
+  case LOGICAL_OR  extends Token(Op, "||")
+  case LOGICAL_NOT extends Token(Op, "!")
+
   case PLUS     extends Token(Op, "+")
   case MINUS    extends Token(Op, "-")
   case ASTERISK extends Token(Op, "*")
   case DIV      extends Token(Op, "/")
   case MOD      extends Token(Op, "%")
 
-  case AMP  extends Token(Op, "&")
-  case PIPE extends Token(Op, "|")
+  case BITWISE_AND extends Token(Op, "&")
+  case BITWISE_OR  extends Token(Op, "|")
 
   case HASH extends Token(Op, "#")
 
@@ -111,6 +118,12 @@ enum Token(val tokenType: TokenType, val str: String):
   case ORDER  extends Token(Keyword, "order")
   case JOIN   extends Token(Keyword, "join")
 
+  // Join type keywords
+  case LEFT  extends Token(Keyword, "left")
+  case RIGHT extends Token(Keyword, "right")
+  case CROSS extends Token(Keyword, "cross")
+  case FULL  extends Token(Keyword, "full")
+
   case RUN    extends Token(Keyword, "run")
   case IMPORT extends Token(Keyword, "import")
   case EXPORT extends Token(Keyword, "export")
@@ -132,3 +145,17 @@ object Token:
   val allKeywordsAndSymbols = keywords ++ specialSymbols
 
   val keywordTable = allKeywordsAndSymbols.map(x => x.str -> x).toMap
+
+  // Line feed (\n)
+  inline val LF = '\u000A'
+  // Form feed (\f)
+  inline val FF = '\u000C'
+  // Carriage return (\r)
+  inline val CR = '\u000D'
+  // Substitute character for representing the end of token stream
+  inline val SU = '\u001A'
+
+  def isNumberSeparator(ch: Char): Boolean = ch == '_'
+  def isLineBreakChar(ch: Char): Boolean = (ch: @switch) match
+    case LF | FF | CR | SU => true
+    case _                 => false
