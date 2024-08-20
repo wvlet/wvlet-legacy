@@ -3,7 +3,7 @@
 ThisBuild / libraryDependencySchemes += "org.scala-lang.modules" %% "scala-xml" % "always"
 
 // ThisBuild / resolvers ++= Resolver.sonatypeOssRepos("snapshots")
-val AIRFRAME_VERSION = sys.env.getOrElse("AIRFRAME_VERSION", "24.7.1")
+val AIRFRAME_VERSION = sys.env.getOrElse("AIRFRAME_VERSION", "24.8.0")
 
 addSbtPlugin("org.xerial.sbt"     % "sbt-sonatype"             % "3.11.3")
 addSbtPlugin("com.github.sbt"     % "sbt-pgp"                  % "2.2.1")
